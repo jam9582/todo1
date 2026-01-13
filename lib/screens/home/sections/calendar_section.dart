@@ -124,6 +124,9 @@ class CalendarSection extends StatelessWidget {
       crossAxisCount: 7,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      childAspectRatio: 0.9, // 세로 여유 공간 확보
+      mainAxisSpacing: 4,
+      crossAxisSpacing: 4,
       children: cells,
     );
   }
