@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/record_provider.dart';
+import '../../../theme/app_theme.dart';
+import '../../../utils/responsive.dart';
 import '../widgets/calendar_day_cell.dart';
 
 class CalendarSection extends StatelessWidget {
@@ -12,17 +14,17 @@ class CalendarSection extends StatelessWidget {
     final selectedDate = recordProvider.selectedDate;
 
     return Container(
-      padding: const EdgeInsets.all(16),
-      color: Colors.white,
+      padding: EdgeInsets.all(AppTheme.spacingMd),
+      color: AppTheme.backgroundColor,
       child: Column(
         children: [
           // 월 네비게이션
           _buildMonthNavigation(context, selectedDate),
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingMd),
 
           // 요일 헤더
-          _buildWeekdayHeader(),
-          const SizedBox(height: 8),
+          _buildWeekdayHeader(context),
+          SizedBox(height: AppTheme.spacingSm),
 
           // 달력 그리드
           _buildCalendarGrid(context, selectedDate),
@@ -44,8 +46,8 @@ class CalendarSection extends StatelessWidget {
         ),
         Text(
           '${date.year}년 ${date.month}월 ${date.day}일',
-          style: const TextStyle(
-            fontSize: 16,
+          style: TextStyle(
+            fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -60,7 +62,7 @@ class CalendarSection extends StatelessWidget {
     );
   }
 
-  Widget _buildWeekdayHeader() {
+  Widget _buildWeekdayHeader(BuildContext context) {
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     return Row(
@@ -72,7 +74,7 @@ class CalendarSection extends StatelessWidget {
             child: Text(
               day,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
                 fontWeight: FontWeight.w600,
                 color: isWeekend ? Colors.red : Colors.black87,
               ),

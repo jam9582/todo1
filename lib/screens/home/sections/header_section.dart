@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../theme/app_theme.dart';
+import '../../../utils/responsive.dart';
 
 class HeaderSection extends StatelessWidget {
   const HeaderSection({super.key});
@@ -6,16 +8,19 @@ class HeaderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: Colors.white,
+      padding: EdgeInsets.symmetric(
+        horizontal: AppTheme.spacingMd,
+        vertical: AppTheme.spacingSm,
+      ),
+      color: AppTheme.backgroundColor,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Spacer(),
-          const Text(
+          Text(
             '오늘의 한마디',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: Responsive.fontSize(context, AppTheme.fontSizeH3),
               fontWeight: FontWeight.bold,
             ),
           ),
