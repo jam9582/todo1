@@ -4,6 +4,7 @@ import 'services/isar_service.dart';
 import 'providers/category_provider.dart';
 import 'providers/record_provider.dart';
 import 'screens/home/home_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,10 +27,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Todo1 App',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
+        theme: AppTheme.theme,
         home: const HomeScreen(),
       ),
     );

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../theme/app_theme.dart';
+import '../../../utils/responsive.dart';
 
 class CategoryButton extends StatelessWidget {
   final String emoji;
@@ -21,33 +23,40 @@ class CategoryButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        margin: EdgeInsets.symmetric(
+          horizontal: Responsive.spacing(context, AppTheme.spacingXs),
+        ),
+        padding: EdgeInsets.symmetric(
+          vertical: Responsive.spacing(context, AppTheme.spacingMd * 0.75),
+          horizontal: Responsive.spacing(context, AppTheme.spacingXs),
+        ),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFF9966) : Colors.grey[100],
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? AppTheme.primaryColor : Colors.grey[100],
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               emoji,
-              style: const TextStyle(fontSize: 24),
+              style: TextStyle(
+                fontSize: Responsive.fontSize(context, 24),
+              ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: Responsive.spacing(context, AppTheme.spacingXs)),
             Text(
               name,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
                 fontWeight: FontWeight.w500,
                 color: isSelected ? Colors.white : Colors.black87,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: Responsive.spacing(context, AppTheme.spacingXs)),
             Text(
               time,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
                 fontWeight: FontWeight.bold,
                 color: isSelected ? Colors.white : Colors.black54,
               ),
