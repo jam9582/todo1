@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'services/isar_service.dart';
 import 'providers/category_provider.dart';
 import 'providers/record_provider.dart';
+import 'screens/home/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const Placeholder(), // HomeScreen으로 교체 예정
+        home: const HomeScreen(),
       ),
     );
   }
