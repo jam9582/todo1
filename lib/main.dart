@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'services/isar_service.dart';
+import 'providers/category_provider.dart';
+import 'providers/record_provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Isar 초기화
+  await IsarService.instance;
+
   runApp(const MyApp());
 }
 
@@ -12,7 +20,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // Provider들을 여기에 추가
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),
+        ChangeNotifierProvider(create: (_) => RecordProvider()),
       ],
       child: MaterialApp(
         title: 'Todo1 App',
@@ -20,7 +29,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const Placeholder(), // 프로토타입 화면으로 교체 예정
+        home: const Placeholder(), // HomeScreen으로 교체 예정
       ),
     );
   }
