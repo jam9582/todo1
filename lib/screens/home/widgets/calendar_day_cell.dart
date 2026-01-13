@@ -28,34 +28,37 @@ class CalendarDayCell extends StatelessWidget {
           color: isToday ? const Color(0xFFFF9966) : Colors.transparent,
           shape: BoxShape.circle,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '$day',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                color: isToday
-                    ? Colors.white
-                    : (isWeekend ? Colors.red : Colors.black87),
-              ),
-            ),
-            if (emoji != null && hours != null) ...[
-              const SizedBox(height: 2),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
               Text(
-                emoji!,
-                style: const TextStyle(fontSize: 12),
-              ),
-              Text(
-                hours!.toStringAsFixed(1),
+                '$day',
                 style: TextStyle(
-                  fontSize: 10,
-                  color: isToday ? Colors.white : Colors.black54,
+                  fontSize: 12,
+                  fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                  color: isToday
+                      ? Colors.white
+                      : (isWeekend ? Colors.red : Colors.black87),
                 ),
               ),
+              if (emoji != null && hours != null) ...[
+                const SizedBox(height: 1),
+                Text(
+                  emoji!,
+                  style: const TextStyle(fontSize: 10),
+                ),
+                Text(
+                  hours!.toStringAsFixed(1),
+                  style: TextStyle(
+                    fontSize: 8,
+                    color: isToday ? Colors.white : Colors.black54,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
