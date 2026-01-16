@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/responsive.dart';
+import '../../../utils/debounced_gesture_detector.dart';
 
 class CategoryButton extends StatelessWidget {
   final String emoji;
@@ -20,7 +21,7 @@ class CategoryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return DebouncedGestureDetector(
       onTap: onTap,
       child: Container(
         margin: EdgeInsets.symmetric(

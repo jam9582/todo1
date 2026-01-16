@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/responsive.dart';
+import '../../../utils/debounced_gesture_detector.dart';
 
 class CalendarDayCell extends StatelessWidget {
   final int day;
@@ -24,7 +25,7 @@ class CalendarDayCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasData = emoji != null && hours != null;
 
-    return GestureDetector(
+    return DebouncedGestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(4),
