@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/responsive.dart';
 import '../../../utils/debounced_gesture_detector.dart';
+import '../../../utils/snackbar_manager.dart';
 
 class HeaderSection extends StatelessWidget {
   const HeaderSection({super.key});
@@ -30,9 +31,7 @@ class HeaderSection extends StatelessWidget {
             icon: const Icon(Icons.menu),
             onPressed: () {
               // TODO: 햄버거 메뉴 기능 (나중에 구현)
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('메뉴 기능은 나중에 구현 예정')),
-              );
+              SnackBarManager.showText(context, '메뉴 기능은 나중에 구현 예정');
             },
           ),
         ],
