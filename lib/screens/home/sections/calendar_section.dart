@@ -112,8 +112,7 @@ class CalendarSection extends StatelessWidget {
           day: day,
           isToday: isToday,
           isWeekend: isWeekend,
-          emoji: isToday ? '☕' : null, // TODO: 실제 데이터에서 가져오기
-          hours: isToday ? 2.5 : null, // TODO: 실제 데이터에서 가져오기
+          // TODO: 실제 데이터에서 카테고리별 시간 가져오기
           onTap: () {
             final newDate = DateTime(selectedDate.year, selectedDate.month, day);
             context.read<RecordProvider>().selectDate(newDate);
