@@ -10,29 +10,34 @@ class HeaderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppTheme.spacingMd,
-        vertical: AppTheme.spacingSm,
+      padding: EdgeInsets.only(
+        left: AppTheme.spacingMd,
+        right: AppTheme.spacingMd,
+        top: AppTheme.spacingLg,
+        bottom: AppTheme.spacingSm,
       ),
       color: AppTheme.backgroundColor,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          const Spacer(),
-          Text(
-            '오늘의 한마디',
-            style: TextStyle(
-              fontSize: Responsive.fontSize(context, AppTheme.fontSizeH3),
-              fontWeight: FontWeight.bold,
+          Center(
+            child: Text(
+              '오늘의 한마디',
+              style: TextStyle(
+                fontSize: Responsive.fontSize(context, AppTheme.fontSizeH3),
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          const Spacer(),
-          DebouncedIconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              // TODO: 햄버거 메뉴 기능 (나중에 구현)
-              SnackBarManager.showText(context, '메뉴 기능은 나중에 구현 예정');
-            },
+          Positioned(
+            right: 0,
+            child: DebouncedIconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () {
+                // TODO: 햄버거 메뉴 기능 (나중에 구현)
+                SnackBarManager.showText(context, '메뉴 기능은 나중에 구현 예정');
+              },
+            ),
           ),
         ],
       ),

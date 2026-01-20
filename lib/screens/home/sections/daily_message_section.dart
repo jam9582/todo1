@@ -4,8 +4,37 @@ import '../../../providers/record_provider.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/responsive.dart';
 
-class DailyMessageSection extends StatelessWidget {
+class DailyMessageSection extends StatefulWidget {
   const DailyMessageSection({super.key});
+
+  @override
+  State<DailyMessageSection> createState() => _DailyMessageSectionState();
+}
+
+class _DailyMessageSectionState extends State<DailyMessageSection> {
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  bool _isEditing = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _startEditing(String currentMessage) {
+    _controller.text = currentMessage;
+    setState(() => _isEditing = true);
+    Future.microtask(() => _focusNode.requestFocus());
+  }
+
+  void _saveMessage(BuildContext context) {
+    final text = _controller.text.trim();
+    context.read<RecordProvider>().updateMessage(text);
+    setState(() => _isEditing = false);
+    _focusNode.unfocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,21 +44,55 @@ class DailyMessageSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
-        horizontal: Responsive.wp(context, 6), // 화면 너비의 6%
+        horizontal: Responsive.wp(context, 6),
         vertical: AppTheme.spacingMd,
       ),
       color: AppTheme.backgroundColor,
+      child: _isEditing ? _buildTextField(context) : _buildDisplayText(message),
+    );
+  }
+
+  Widget _buildDisplayText(String message) {
+    final hasMessage = message.isNotEmpty;
+    return GestureDetector(
+      onTap: () => _startEditing(message),
       child: Text(
-        message.isEmpty ? '오늘은 집중이 잘 되어서\n업무를 많이 해치울 수 있었다!' : message,
+        hasMessage ? message : '언제나 당신을 응원해요',
         textAlign: TextAlign.center,
         overflow: TextOverflow.visible,
         softWrap: true,
         style: TextStyle(
           fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
-          color: Colors.black87,
+          color: hasMessage ? Colors.black87 : Colors.grey,
           height: 1.5,
+          fontStyle: hasMessage ? FontStyle.normal : FontStyle.italic,
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField(BuildContext context) {
+    return TextField(
+      controller: _controller,
+      focusNode: _focusNode,
+      textAlign: TextAlign.center,
+      maxLines: null,
+      style: TextStyle(
+        fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
+        color: Colors.black87,
+        height: 1.5,
+      ),
+      decoration: InputDecoration(
+        hintText: '언제나 당신을 응원해요',
+        hintStyle: TextStyle(
+          color: Colors.grey,
+          fontStyle: FontStyle.italic,
+        ),
+        border: InputBorder.none,
+        contentPadding: EdgeInsets.zero,
+      ),
+      onSubmitted: (_) => _saveMessage(context),
+      onTapOutside: (_) => _saveMessage(context),
     );
   }
 }
