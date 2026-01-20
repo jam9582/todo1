@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/durations.dart';
 
 /// SnackBar 중복 표시 방지를 위한 매니저
 class SnackBarManager {
@@ -20,7 +21,13 @@ class SnackBarManager {
 
   /// 간단한 텍스트 SnackBar 표시
   static void showText(BuildContext context, String message) {
-    show(context, SnackBar(content: Text(message)));
+    show(
+      context,
+      SnackBar(
+        content: Text(message),
+        duration: AppDurations.snackBar,
+      ),
+    );
   }
 
   /// 현재 SnackBar 닫기

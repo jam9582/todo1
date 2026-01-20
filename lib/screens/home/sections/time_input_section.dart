@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../constants/durations.dart';
 import '../../../providers/category_provider.dart';
 import '../../../providers/record_provider.dart';
 import '../../../models/extensions.dart';
@@ -37,7 +38,10 @@ class TimeInputSection extends StatelessWidget {
               onTap: () {
                 // 시간 입력 기능 (나중에 구현)
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${category.name} 시간 입력 (구현 예정)')),
+                  SnackBar(
+                    content: Text('${category.name} 시간 입력 (구현 예정)'),
+                    duration: AppDurations.snackBar,
+                  ),
                 );
               },
             ),

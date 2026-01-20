@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../constants/durations.dart';
 
 /// 중복 터치 방지 기능이 포함된 GestureDetector 래퍼
 /// - 단순 터치: Throttle 방식 (기본 300ms)
@@ -16,7 +17,7 @@ class DebouncedGestureDetector extends StatefulWidget {
     required this.child,
     this.onTap,
     this.onTapAsync,
-    this.throttleDuration = const Duration(milliseconds: 300),
+    this.throttleDuration = AppDurations.throttle,
     this.behavior,
   }) : assert(onTap != null || onTapAsync != null,
             'onTap 또는 onTapAsync 중 하나는 필수입니다');
@@ -88,7 +89,7 @@ class DebouncedIconButton extends StatefulWidget {
     required this.icon,
     this.onPressed,
     this.onPressedAsync,
-    this.throttleDuration = const Duration(milliseconds: 300),
+    this.throttleDuration = AppDurations.throttle,
     this.iconSize,
     this.visualDensity,
     this.padding,
