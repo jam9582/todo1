@@ -85,12 +85,12 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
   }
 
   String _formatTime(int minutes) {
-    if (minutes == 0) return '0분';
+    if (minutes == 0) return '0m';
     final hours = minutes ~/ 60;
     final mins = minutes % 60;
-    if (hours > 0 && mins > 0) return '$hours시간 $mins분';
-    if (hours > 0) return '$hours시간';
-    return '$mins분';
+    if (hours > 0 && mins > 0) return '${hours}h ${mins}m';
+    if (hours > 0) return '${hours}h';
+    return '${mins}m';
   }
 
   void _onNumberPressed(String number) {

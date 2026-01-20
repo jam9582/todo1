@@ -6,9 +6,8 @@ extension MinutesToTime on int {
     final hours = this ~/ 60;
     final minutes = this % 60;
 
-    if (hours == 0) return '${minutes}분';
-    if (minutes == 0) return '${hours}시간';
-
-    return '$hours:${minutes.toString().padLeft(2, '0')}';
+    if (hours > 0 && minutes > 0) return '${hours}h ${minutes}m';
+    if (hours > 0) return '${hours}h';
+    return '${minutes}m';
   }
 }
