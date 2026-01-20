@@ -3,7 +3,7 @@ import '../../../models/category.dart';
 import '../../../theme/app_theme.dart';
 
 /// 시간 입력 다이얼로그
-/// 숫자 키패드 + 퀵버튼 + 계산기 기능으로 분 단위 입력
+/// 시간/분 박스 선택 + 숫자 키패드 + 퀵버튼
 class TimeInputDialog extends StatefulWidget {
   final Category category;
   final int initialMinutes;
@@ -33,157 +33,189 @@ class TimeInputDialog extends StatefulWidget {
   State<TimeInputDialog> createState() => _TimeInputDialogState();
 }
 
+enum _InputField { hours, minutes }
+
+class _TimeEntry {
+  int hours;
+  int minutes;
+  String operator; // '', '+', '-'
+
+  _TimeEntry({this.hours = 0, this.minutes = 0, this.operator = ''});
+
+  int get totalMinutes => hours * 60 + minutes;
+
+  _TimeEntry copy() => _TimeEntry(hours: hours, minutes: minutes, operator: operator);
+}
+
+class _HistoryState {
+  final List<_TimeEntry> entries;
+  final int selectedEntryIndex;
+  final _InputField selectedField;
+  final String? activeOperator;
+
+  _HistoryState({
+    required this.entries,
+    required this.selectedEntryIndex,
+    required this.selectedField,
+    required this.activeOperator,
+  });
+}
+
 class _TimeInputDialogState extends State<TimeInputDialog> {
-  String _expression = '';
-  String? _pendingOperator;
-  int _accumulator = 0;
-  bool _startNewNumber = true;
+  final List<_TimeEntry> _entries = [];
+  int _selectedEntryIndex = 0;
+  _InputField _selectedField = _InputField.hours;
+  String? _activeOperator; // 현재 활성화된 연산자
+  bool _isFirstInput = true; // 필드 선택 후 첫 입력인지
+  final List<_HistoryState> _history = []; // Undo 히스토리
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialMinutes > 0) {
-      _expression = widget.initialMinutes.toString();
-      _accumulator = widget.initialMinutes;
-      _startNewNumber = true;
-    }
+    final initialHours = widget.initialMinutes ~/ 60;
+    final initialMins = widget.initialMinutes % 60;
+    _entries.add(_TimeEntry(hours: initialHours, minutes: initialMins));
   }
 
-  int get _currentResult {
-    if (_pendingOperator != null && _expression.isNotEmpty) {
-      final currentNum = _parseLastNumber();
-      return _calculate(_accumulator, _pendingOperator!, currentNum);
+  int get _totalMinutes {
+    if (_entries.isEmpty) return 0;
+
+    int total = _entries[0].totalMinutes;
+    for (int i = 1; i < _entries.length; i++) {
+      final entry = _entries[i];
+      if (entry.operator == '+') {
+        total += entry.totalMinutes;
+      } else if (entry.operator == '-') {
+        total -= entry.totalMinutes;
+      }
     }
-    return _parseLastNumber();
+    return total.clamp(0, 9999);
   }
 
-  int _parseLastNumber() {
-    if (_expression.isEmpty) return 0;
-
-    // 마지막 연산자 이후의 숫자를 파싱
-    final lastPlusIndex = _expression.lastIndexOf('+');
-    final lastMinusIndex = _expression.lastIndexOf('-');
-    final lastOperatorIndex = lastPlusIndex > lastMinusIndex ? lastPlusIndex : lastMinusIndex;
-
-    if (lastOperatorIndex == -1) {
-      return int.tryParse(_expression) ?? 0;
-    }
-
-    final lastNumberStr = _expression.substring(lastOperatorIndex + 1).trim();
-    return int.tryParse(lastNumberStr) ?? 0;
-  }
-
-  int _calculate(int a, String op, int b) {
-    switch (op) {
-      case '+':
-        return a + b;
-      case '-':
-        return (a - b).clamp(0, 9999);
-      default:
-        return b;
-    }
-  }
-
-  String _formatTime(int minutes) {
-    if (minutes == 0) return '0m';
+  String _formatTimeHM(int minutes) {
     final hours = minutes ~/ 60;
     final mins = minutes % 60;
-    if (hours > 0 && mins > 0) return '${hours}h ${mins}m';
-    if (hours > 0) return '${hours}h';
-    return '${mins}m';
+    return '${hours}h ${mins}m';
   }
 
   void _onNumberPressed(String number) {
+    _saveHistory();
     setState(() {
-      if (_startNewNumber && _pendingOperator == null) {
-        _expression = number;
-        _startNewNumber = false;
+      final entry = _entries[_selectedEntryIndex];
+      if (_selectedField == _InputField.hours) {
+        if (_isFirstInput) {
+          // 첫 입력이면 기존 값 지우고 새로 시작
+          entry.hours = int.parse(number);
+          _isFirstInput = false;
+        } else {
+          final newValue = entry.hours * 10 + int.parse(number);
+          if (newValue <= 99) {
+            entry.hours = newValue;
+          }
+        }
       } else {
-        // 현재 입력 중인 숫자가 4자리 미만일 때만 추가
-        final lastNum = _parseLastNumber().toString();
-        if (lastNum.length < 4 || _startNewNumber) {
-          if (_startNewNumber && _pendingOperator != null) {
-            _expression += number;
-            _startNewNumber = false;
-          } else {
-            _expression += number;
+        if (_isFirstInput) {
+          entry.minutes = int.parse(number);
+          _isFirstInput = false;
+        } else {
+          final newValue = entry.minutes * 10 + int.parse(number);
+          if (newValue <= 59) {
+            entry.minutes = newValue;
           }
         }
       }
-    });
-  }
-
-  void _onOperatorPressed(String op) {
-    setState(() {
-      if (_expression.isEmpty) return;
-
-      // 이전 연산 완료
-      if (_pendingOperator != null && !_startNewNumber) {
-        final currentNum = _parseLastNumber();
-        _accumulator = _calculate(_accumulator, _pendingOperator!, currentNum);
-        _expression = '$_accumulator $op ';
-      } else {
-        _accumulator = _parseLastNumber();
-        _expression = '$_accumulator $op ';
-      }
-
-      _pendingOperator = op;
-      _startNewNumber = true;
     });
   }
 
   void _onDeletePressed() {
+    _saveHistory();
     setState(() {
-      if (_expression.isNotEmpty) {
-        // 마지막 문자가 공백이면 연산자까지 삭제
-        if (_expression.endsWith(' ')) {
-          _expression = _expression.trimRight();
-          if (_expression.endsWith('+') || _expression.endsWith('-')) {
-            _expression = _expression.substring(0, _expression.length - 1).trimRight();
-            _pendingOperator = null;
-            _accumulator = int.tryParse(_expression) ?? 0;
-          }
-        } else {
-          _expression = _expression.substring(0, _expression.length - 1);
-        }
-
-        if (_expression.isEmpty) {
-          _pendingOperator = null;
-          _accumulator = 0;
-          _startNewNumber = true;
-        }
+      final entry = _entries[_selectedEntryIndex];
+      if (_selectedField == _InputField.hours) {
+        entry.hours = entry.hours ~/ 10;
+      } else {
+        entry.minutes = entry.minutes ~/ 10;
       }
     });
   }
 
-  void _onClearPressed() {
+  void _saveHistory() {
+    _history.add(_HistoryState(
+      entries: _entries.map((e) => e.copy()).toList(),
+      selectedEntryIndex: _selectedEntryIndex,
+      selectedField: _selectedField,
+      activeOperator: _activeOperator,
+    ));
+    // 히스토리는 최대 50개까지만 유지
+    if (_history.length > 50) {
+      _history.removeAt(0);
+    }
+  }
+
+  void _onUndoPressed() {
+    if (_history.isEmpty) return;
     setState(() {
-      _expression = '';
-      _pendingOperator = null;
-      _accumulator = 0;
-      _startNewNumber = true;
+      final lastState = _history.removeLast();
+      _entries.clear();
+      _entries.addAll(lastState.entries);
+      _selectedEntryIndex = lastState.selectedEntryIndex;
+      _selectedField = lastState.selectedField;
+      _activeOperator = lastState.activeOperator;
+      _isFirstInput = true;
     });
   }
 
-  void _onQuickButtonPressed(int minutes) {
-    setState(() {
-      // 기존 연산이 진행 중이면 먼저 계산 완료
-      if (_pendingOperator != null && !_startNewNumber) {
-        final currentNum = _parseLastNumber();
-        _accumulator = _calculate(_accumulator, _pendingOperator!, currentNum);
-      } else if (_expression.isNotEmpty) {
-        _accumulator = _currentResult;
-      }
+  void _onOperatorPressed(String op) {
+    // 이미 두 번째 엔트리가 있으면 추가 불가 (연산은 한 번만)
+    if (_entries.length >= 2) return;
 
-      // 수식에 + minutes 추가
-      _expression = '$_accumulator + $minutes';
-      _pendingOperator = '+';
-      _startNewNumber = false;
+    _saveHistory();
+    setState(() {
+      _entries.add(_TimeEntry(operator: op));
+      _selectedEntryIndex = _entries.length - 1;
+      _selectedField = _InputField.hours;
+      _activeOperator = op;
+      _isFirstInput = true; // 새 엔트리는 첫 입력 상태
+    });
+  }
+
+  void _onQuickButtonPressed(int mins) {
+    _saveHistory();
+    setState(() {
+      // 현재 선택된 엔트리에 시간 추가
+      final entry = _entries[_selectedEntryIndex];
+      final addHours = mins ~/ 60;
+      final addMins = mins % 60;
+
+      entry.minutes += addMins;
+      if (entry.minutes >= 60) {
+        entry.hours += entry.minutes ~/ 60;
+        entry.minutes = entry.minutes % 60;
+      }
+      entry.hours += addHours;
+      if (entry.hours > 99) entry.hours = 99;
+    });
+  }
+
+  void _removeEntry(int index) {
+    if (index == 0 || _entries.length <= 1) return;
+    _saveHistory();
+    setState(() {
+      _entries.removeAt(index);
+      if (_selectedEntryIndex >= _entries.length) {
+        _selectedEntryIndex = _entries.length - 1;
+      }
+      // 연산자 활성화 상태 업데이트
+      if (_entries.length == 1) {
+        _activeOperator = null;
+      } else {
+        _activeOperator = _entries.last.operator;
+      }
     });
   }
 
   void _onConfirm() {
-    Navigator.of(context).pop(_currentResult);
+    Navigator.of(context).pop(_totalMinutes);
   }
 
   @override
@@ -233,44 +265,59 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
   }
 
   Widget _buildTimeDisplay() {
-    final hasOperator = _pendingOperator != null && !_startNewNumber;
-    final result = _currentResult;
-
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.grey.shade100,
         borderRadius: BorderRadius.circular(AppTheme.radiusSm),
       ),
       child: Column(
         children: [
-          // 수식 표시
-          Text(
-            _expression.isEmpty ? '0' : _expression,
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          // 계산 결과 (연산자가 있을 때만)
-          if (hasOperator) ...[
-            const SizedBox(height: 4),
-            Text(
-              '= $result',
-              style: TextStyle(
-                fontSize: AppTheme.fontSizeH3,
-                color: AppTheme.primaryColor,
-                fontWeight: FontWeight.w600,
+          // 시간 입력 영역 - 가운데 정렬
+          Row(
+            children: [
+              // 시간 엔트리들 - 가운데 정렬
+              Expanded(
+                child: Center(
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      for (int i = 0; i < _entries.length; i++)
+                        _buildTimeEntryBox(i),
+                    ],
+                  ),
+                ),
               ),
+              // +/- 버튼
+              Column(
+                children: [
+                  _buildOperatorButton('+'),
+                  const SizedBox(height: 4),
+                  _buildOperatorButton('-'),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // 합계 표시 - 강조
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+              border: Border.all(color: Colors.grey.shade300),
             ),
-          ],
-          const SizedBox(height: 4),
-          Text(
-            _formatTime(result),
-            style: TextStyle(
-              fontSize: AppTheme.fontSizeBody,
-              color: Colors.grey.shade600,
+            child: Text(
+              '= ${_formatTimeHM(_totalMinutes)}',
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
             ),
           ),
         ],
@@ -278,12 +325,121 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
     );
   }
 
+  Widget _buildTimeEntryBox(int index) {
+    final entry = _entries[index];
+    final isSelected = _selectedEntryIndex == index;
+    final canDelete = index > 0;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+            border: isSelected ? Border.all(color: AppTheme.primaryColor, width: 2) : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildFieldBox(index, _InputField.hours, entry.hours, 'h'),
+              const SizedBox(width: 4),
+              _buildFieldBox(index, _InputField.minutes, entry.minutes, 'm'),
+            ],
+          ),
+        ),
+        // 삭제 버튼 (첫 번째 엔트리 제외)
+        if (canDelete)
+          Positioned(
+            top: -8,
+            right: -8,
+            child: GestureDetector(
+              onTap: () => _removeEntry(index),
+              child: Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade500,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.close,
+                  size: 14,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildFieldBox(int entryIndex, _InputField field, int value, String unit) {
+    final isSelected = _selectedEntryIndex == entryIndex && _selectedField == field;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedEntryIndex = entryIndex;
+          _selectedField = field;
+          _isFirstInput = true; // 필드 선택 시 첫 입력 상태로
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primaryColor : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          '$value$unit',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: isSelected ? Colors.white : Colors.black87,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOperatorButton(String op) {
+    final isActive = _activeOperator == op;
+    final isDisabled = _entries.length >= 2; // 이미 연산 중이면 비활성화
+
+    return Opacity(
+      opacity: isDisabled && !isActive ? 0.4 : 1.0,
+      child: Material(
+        color: isActive ? AppTheme.primaryColor : Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          onTap: isDisabled ? null : () => _onOperatorPressed(op),
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            child: Text(
+              op,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: isActive ? Colors.white : Colors.grey.shade600,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildQuickButtons() {
     final quickValues = [
-      (15, '+15분'),
-      (30, '+30분'),
-      (60, '+1시간'),
-      (120, '+2시간'),
+      (15, '+15m'),
+      (30, '+30m'),
+      (60, '+1h'),
+      (120, '+2h'),
     ];
 
     return Row(
@@ -323,9 +479,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
         const SizedBox(height: 8),
         _buildKeypadRow(['7', '8', '9']),
         const SizedBox(height: 8),
-        _buildKeypadRow(['C', '0', '⌫']),
-        const SizedBox(height: 8),
-        _buildKeypadRow(['-', '', '+']),
+        _buildKeypadRow(['undo', '0', 'backspace']),
       ],
     );
   }
@@ -336,9 +490,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
         return Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: key.isEmpty
-              ? const SizedBox()
-              : _buildKeypadButton(key),
+            child: _buildKeypadButton(key),
           ),
         );
       }).toList(),
@@ -347,18 +499,11 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
 
   Widget _buildKeypadButton(String key) {
     final isNumber = int.tryParse(key) != null;
-    final isDelete = key == '⌫';
-    final isClear = key == 'C';
-    final isOperator = key == '+' || key == '-';
+    final isDelete = key == 'backspace';
+    final isUndo = key == 'undo';
+    final isIcon = isDelete || isUndo;
 
-    Color bgColor;
-    if (isOperator) {
-      bgColor = AppTheme.primaryColor.withValues(alpha: 0.15);
-    } else if (isNumber) {
-      bgColor = Colors.grey.shade200;
-    } else {
-      bgColor = Colors.grey.shade300;
-    }
+    Color bgColor = isNumber ? Colors.grey.shade200 : Colors.grey.shade300;
 
     return Material(
       color: bgColor,
@@ -369,24 +514,27 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
             _onNumberPressed(key);
           } else if (isDelete) {
             _onDeletePressed();
-          } else if (isClear) {
-            _onClearPressed();
-          } else if (isOperator) {
-            _onOperatorPressed(key);
+          } else if (isUndo) {
+            _onUndoPressed();
           }
         },
         borderRadius: BorderRadius.circular(AppTheme.radiusSm),
         child: Container(
           height: 48,
           alignment: Alignment.center,
-          child: Text(
-            key,
-            style: TextStyle(
-              fontSize: isOperator ? 24 : (isNumber ? 20 : 18),
-              fontWeight: isOperator ? FontWeight.bold : FontWeight.w500,
-              color: isOperator ? AppTheme.primaryColor : Colors.black87,
-            ),
-          ),
+          child: isIcon
+              ? Icon(
+                  isUndo ? Icons.undo : Icons.backspace_outlined,
+                  size: 22,
+                  color: Colors.grey.shade700,
+                )
+              : Text(
+                  key,
+                  style: TextStyle(
+                    fontSize: isNumber ? 20 : 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
         ),
       ),
     );
