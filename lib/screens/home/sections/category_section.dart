@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../constants/durations.dart';
 import '../../../providers/category_provider.dart';
 import '../../../providers/record_provider.dart';
 import '../../../models/extensions.dart';
 import '../widgets/category_button.dart';
+import '../widgets/time_input_dialog.dart';
 
-class TimeInputSection extends StatelessWidget {
-  const TimeInputSection({super.key});
+class CategorySection extends StatelessWidget {
+  const CategorySection({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,14 +35,18 @@ class TimeInputSection extends StatelessWidget {
               name: category.name,
               time: timeString,
               isSelected: minutes > 0,
-              onTap: () {
-                // 시간 입력 기능 (나중에 구현)
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${category.name} 시간 입력 (구현 예정)'),
-                    duration: AppDurations.snackBar,
-                  ),
+              onTap: () async {
+                final result = await TimeInputDialog.show(
+                  context,
+                  category: category,
+                  initialMinutes: minutes,
                 );
+                if (result != null && context.mounted) {
+                  context.read<RecordProvider>().updateTimeRecord(
+                    category.id,
+                    result,
+                  );
+                }
               },
             ),
           );

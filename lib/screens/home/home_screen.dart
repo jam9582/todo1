@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/ad_banner_widget.dart';
 import 'sections/header_section.dart';
 import 'sections/daily_message_section.dart';
-import 'sections/time_input_section.dart';
+import 'sections/category_section.dart';
 import 'sections/calendar_section.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -28,8 +28,8 @@ class HomeScreen extends StatelessWidget {
                     // 한마디 입력
                     DailyMessageSection(),
 
-                    // 시간 입력 섹션 (4개 카테고리)
-                    TimeInputSection(),
+                    // 카테고리 섹션 (4개 카테고리)
+                    CategorySection(),
 
                     // 달력
                     CalendarSection(),
