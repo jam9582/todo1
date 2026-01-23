@@ -77,6 +77,7 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
       focusNode: _focusNode,
       textAlign: TextAlign.center,
       maxLines: null,
+      textInputAction: TextInputAction.done,
       style: TextStyle(
         fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
         color: Colors.black87,
