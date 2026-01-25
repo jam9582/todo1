@@ -17,23 +17,18 @@ const CategorySchema = CollectionSchema(
   name: r'Category',
   id: 5751694338128944171,
   properties: {
-    r'color': PropertySchema(
-      id: 0,
-      name: r'color',
-      type: IsarType.string,
-    ),
     r'emoji': PropertySchema(
-      id: 1,
+      id: 0,
       name: r'emoji',
       type: IsarType.string,
     ),
     r'name': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'name',
       type: IsarType.string,
     ),
     r'order': PropertySchema(
-      id: 3,
+      id: 2,
       name: r'order',
       type: IsarType.long,
     )
@@ -58,7 +53,6 @@ int _categoryEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  bytesCount += 3 + object.color.length * 3;
   bytesCount += 3 + object.emoji.length * 3;
   bytesCount += 3 + object.name.length * 3;
   return bytesCount;
@@ -70,10 +64,9 @@ void _categorySerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.color);
-  writer.writeString(offsets[1], object.emoji);
-  writer.writeString(offsets[2], object.name);
-  writer.writeLong(offsets[3], object.order);
+  writer.writeString(offsets[0], object.emoji);
+  writer.writeString(offsets[1], object.name);
+  writer.writeLong(offsets[2], object.order);
 }
 
 Category _categoryDeserialize(
@@ -83,10 +76,9 @@ Category _categoryDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Category(
-    color: reader.readStringOrNull(offsets[0]) ?? '#FF5733',
-    emoji: reader.readStringOrNull(offsets[1]) ?? '',
-    name: reader.readStringOrNull(offsets[2]) ?? '',
-    order: reader.readLongOrNull(offsets[3]) ?? 0,
+    emoji: reader.readStringOrNull(offsets[0]) ?? '',
+    name: reader.readStringOrNull(offsets[1]) ?? '',
+    order: reader.readLongOrNull(offsets[2]) ?? 0,
   );
   object.id = id;
   return object;
@@ -100,12 +92,10 @@ P _categoryDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readStringOrNull(offset) ?? '#FF5733') as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 1:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 2:
-      return (reader.readStringOrNull(offset) ?? '') as P;
-    case 3:
       return (reader.readLongOrNull(offset) ?? 0) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -201,136 +191,6 @@ extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
 
 extension CategoryQueryFilter
     on QueryBuilder<Category, Category, QFilterCondition> {
-  QueryBuilder<Category, Category, QAfterFilterCondition> colorEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> colorGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> colorLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> colorBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'color',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> colorStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> colorEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> colorContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> colorMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'color',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> colorIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'color',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterFilterCondition> colorIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'color',
-        value: '',
-      ));
-    });
-  }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> emojiEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -704,18 +564,6 @@ extension CategoryQueryLinks
     on QueryBuilder<Category, Category, QFilterCondition> {}
 
 extension CategoryQuerySortBy on QueryBuilder<Category, Category, QSortBy> {
-  QueryBuilder<Category, Category, QAfterSortBy> sortByColor() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'color', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterSortBy> sortByColorDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'color', Sort.desc);
-    });
-  }
-
   QueryBuilder<Category, Category, QAfterSortBy> sortByEmoji() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'emoji', Sort.asc);
@@ -755,18 +603,6 @@ extension CategoryQuerySortBy on QueryBuilder<Category, Category, QSortBy> {
 
 extension CategoryQuerySortThenBy
     on QueryBuilder<Category, Category, QSortThenBy> {
-  QueryBuilder<Category, Category, QAfterSortBy> thenByColor() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'color', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Category, Category, QAfterSortBy> thenByColorDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'color', Sort.desc);
-    });
-  }
-
   QueryBuilder<Category, Category, QAfterSortBy> thenByEmoji() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'emoji', Sort.asc);
@@ -818,13 +654,6 @@ extension CategoryQuerySortThenBy
 
 extension CategoryQueryWhereDistinct
     on QueryBuilder<Category, Category, QDistinct> {
-  QueryBuilder<Category, Category, QDistinct> distinctByColor(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'color', caseSensitive: caseSensitive);
-    });
-  }
-
   QueryBuilder<Category, Category, QDistinct> distinctByEmoji(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -851,12 +680,6 @@ extension CategoryQueryProperty
   QueryBuilder<Category, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
-    });
-  }
-
-  QueryBuilder<Category, String, QQueryOperations> colorProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'color');
     });
   }
 

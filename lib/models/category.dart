@@ -10,14 +10,11 @@ class Category {
 
   late String name;
 
-  late String color;
-
   late int order;
 
   Category({
     this.emoji = '',
     this.name = '',
-    this.color = '#FF5733',
     this.order = 0,
   });
 }

@@ -32,10 +32,10 @@ class IsarService {
 
     // 기본 4개 카테고리 생성
     final defaultCategories = [
-      Category(emoji: '☕', name: '공부', color: '#FF9966', order: 0),
-      Category(emoji: '🌙', name: '운동', color: '#66B2FF', order: 1),
-      Category(emoji: '💼', name: '업무', color: '#FFB266', order: 2),
-      Category(emoji: '🎧', name: '청소', color: '#FF6B9D', order: 3),
+      Category(emoji: '☕', name: '공부', order: 0),
+      Category(emoji: '🌙', name: '운동', order: 1),
+      Category(emoji: '💼', name: '업무', order: 2),
+      Category(emoji: '🎧', name: '청소', order: 3),
     ];
 
     await isar.writeTxn(() async {
