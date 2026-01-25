@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../constants/colors.dart';
 import '../../../providers/record_provider.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/responsive.dart';
@@ -76,7 +77,7 @@ class CalendarSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
                 fontWeight: FontWeight.w600,
-                color: isWeekend ? Colors.red : Colors.black87,
+                color: isWeekend ? AppColors.error : AppColors.textPrimary,
               ),
             ),
           ),

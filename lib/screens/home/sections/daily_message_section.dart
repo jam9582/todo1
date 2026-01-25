@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../constants/colors.dart';
 import '../../../providers/record_provider.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/responsive.dart';
@@ -63,7 +64,7 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
         softWrap: true,
         style: TextStyle(
           fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
-          color: hasMessage ? Colors.black87 : Colors.grey,
+          color: hasMessage ? AppColors.textPrimary : AppColors.grey500,
           height: 1.5,
           fontStyle: hasMessage ? FontStyle.normal : FontStyle.italic,
         ),
@@ -80,13 +81,13 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
       textInputAction: TextInputAction.done,
       style: TextStyle(
         fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
-        color: Colors.black87,
+        color: AppColors.textPrimary,
         height: 1.5,
       ),
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         hintText: '언제나 당신을 응원해요',
         hintStyle: TextStyle(
-          color: Colors.grey,
+          color: AppColors.grey500,
           fontStyle: FontStyle.italic,
         ),
         border: InputBorder.none,

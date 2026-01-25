@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../constants/colors.dart';
 import '../../../providers/category_provider.dart';
 import '../../../providers/record_provider.dart';
 import '../../../models/extensions.dart';
@@ -22,7 +23,7 @@ class CategorySection extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      color: Colors.white,
+      color: AppColors.background,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: categories.map((category) {

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import '../constants/colors.dart';
 
 class AppTheme {
-  // 색상
-  static const primaryColor = Color(0xFFFF9966);
-  static const backgroundColor = Colors.white;
-  static const adBannerColor = Color(0xFFE8DDD3);
+  // 색상 - AppColors 참조
+  static const primaryColor = AppColors.primary;
+  static const backgroundColor = AppColors.background;
+  static const adBannerColor = AppColors.adBanner;
 
   // Spacing
   static const double spacingXs = 4.0;

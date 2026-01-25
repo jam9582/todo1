@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../constants/colors.dart';
 import '../../../theme/app_theme.dart';
 import '../../../utils/responsive.dart';
 import '../../../utils/debounced_gesture_detector.dart';
@@ -32,7 +33,7 @@ class CategoryButton extends StatelessWidget {
           horizontal: Responsive.spacing(context, AppTheme.spacingXs),
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryColor : Colors.grey[100],
+          color: isSelected ? AppColors.primary : AppColors.grey100,
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         ),
         child: Column(
@@ -50,7 +51,7 @@ class CategoryButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
                 fontWeight: FontWeight.w500,
-                color: isSelected ? Colors.white : Colors.black87,
+                color: isSelected ? AppColors.textOnPrimary : AppColors.textPrimary,
               ),
             ),
             SizedBox(height: Responsive.spacing(context, AppTheme.spacingXs)),
@@ -59,7 +60,7 @@ class CategoryButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
                 fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : Colors.black54,
+                color: isSelected ? AppColors.textOnPrimary : AppColors.textSecondary,
               ),
             ),
           ],

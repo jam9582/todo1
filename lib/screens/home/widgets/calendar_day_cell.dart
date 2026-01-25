@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../theme/app_theme.dart';
+import '../../../constants/colors.dart';
 import '../../../utils/responsive.dart';
 import '../../../utils/debounced_gesture_detector.dart';
 
@@ -30,7 +30,7 @@ class CalendarDayCell extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: isToday ? AppTheme.primaryColor : Colors.transparent,
+          color: isToday ? AppColors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(8), // 둥근 사각형
         ),
         child: Column(
@@ -46,8 +46,8 @@ class CalendarDayCell extends StatelessWidget {
                     fontSize: Responsive.fontSize(context, 14),
                     fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                     color: isToday
-                        ? Colors.white
-                        : (isWeekend ? Colors.red : Colors.black87),
+                        ? AppColors.textOnPrimary
+                        : (isWeekend ? AppColors.error : AppColors.textPrimary),
                   ),
                 ),
               ),
@@ -73,7 +73,7 @@ class CalendarDayCell extends StatelessWidget {
                     hours!.toStringAsFixed(1),
                     style: TextStyle(
                       fontSize: Responsive.fontSize(context, 10),
-                      color: isToday ? Colors.white : Colors.black54,
+                      color: isToday ? AppColors.textOnPrimary : AppColors.textSecondary,
                     ),
                   ),
                 ),

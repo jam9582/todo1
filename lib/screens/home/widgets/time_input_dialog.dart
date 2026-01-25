@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../constants/colors.dart';
 import '../../../models/category.dart';
 import '../../../theme/app_theme.dart';
 
@@ -269,7 +270,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: AppColors.grey100,
         borderRadius: BorderRadius.circular(AppTheme.radiusSm),
       ),
       child: Column(
@@ -307,16 +308,16 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: AppColors.border),
             ),
             child: Text(
               '= ${_formatTimeHM(_totalMinutes)}',
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: AppColors.textPrimary,
               ),
             ),
           ),
@@ -336,9 +337,9 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
+            color: isSelected ? AppColors.surface : Colors.transparent,
             borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-            border: isSelected ? Border.all(color: AppTheme.primaryColor, width: 2) : null,
+            border: isSelected ? Border.all(color: AppColors.primary, width: 2) : null,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -359,14 +360,14 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
               child: Container(
                 width: 20,
                 height: 20,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade500,
+                decoration: const BoxDecoration(
+                  color: AppColors.grey500,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.close,
                   size: 14,
-                  color: Colors.white,
+                  color: AppColors.textOnPrimary,
                 ),
               ),
             ),
@@ -389,7 +390,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryColor : Colors.grey.shade200,
+          color: isSelected ? AppColors.primary : AppColors.grey200,
           borderRadius: BorderRadius.circular(4),
         ),
         child: Text(
@@ -397,7 +398,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: isSelected ? Colors.white : Colors.black87,
+            color: isSelected ? AppColors.textOnPrimary : AppColors.textPrimary,
           ),
         ),
       ),
@@ -411,7 +412,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
     return Opacity(
       opacity: isDisabled && !isActive ? 0.4 : 1.0,
       child: Material(
-        color: isActive ? AppTheme.primaryColor : Colors.grey.shade300,
+        color: isActive ? AppColors.primary : AppColors.grey300,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           onTap: isDisabled ? null : () => _onOperatorPressed(op),
@@ -425,7 +426,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: isActive ? Colors.white : Colors.grey.shade600,
+                color: isActive ? AppColors.textOnPrimary : AppColors.grey600,
               ),
             ),
           ),
@@ -451,16 +452,16 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
               onPressed: () => _onQuickButtonPressed(item.$1),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 8),
-                side: BorderSide(color: AppTheme.primaryColor),
+                side: const BorderSide(color: AppColors.primary),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                 ),
               ),
               child: Text(
                 item.$2,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: AppTheme.fontSizeCaption,
-                  color: AppTheme.primaryColor,
+                  color: AppColors.primary,
                 ),
               ),
             ),
@@ -503,7 +504,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
     final isUndo = key == 'undo';
     final isIcon = isDelete || isUndo;
 
-    Color bgColor = isNumber ? Colors.grey.shade200 : Colors.grey.shade300;
+    Color bgColor = isNumber ? AppColors.grey200 : AppColors.grey300;
 
     return Material(
       color: bgColor,
@@ -526,7 +527,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
               ? Icon(
                   isUndo ? Icons.undo : Icons.backspace_outlined,
                   size: 22,
-                  color: Colors.grey.shade700,
+                  color: AppColors.grey700,
                 )
               : Text(
                   key,
@@ -560,8 +561,8 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
           child: ElevatedButton(
             onPressed: _onConfirm,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryColor,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.textOnPrimary,
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.radiusSm),
