@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../constants/colors.dart';
 import '../../../models/category.dart';
-import '../../../theme/app_theme.dart';
 
 /// 시간 입력 다이얼로그
 /// 시간/분 박스 선택 + 숫자 키패드 + 퀵버튼
@@ -66,9 +65,9 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
   final List<_TimeEntry> _entries = [];
   int _selectedEntryIndex = 0;
   _InputField _selectedField = _InputField.hours;
-  String? _activeOperator; // 현재 활성화된 연산자
-  bool _isFirstInput = true; // 필드 선택 후 첫 입력인지
-  final List<_HistoryState> _history = []; // Undo 히스토리
+  String? _activeOperator;
+  bool _isFirstInput = true;
+  final List<_HistoryState> _history = [];
 
   @override
   void initState() {
@@ -93,10 +92,13 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
     return total.clamp(0, 9999);
   }
 
-  String _formatTimeHM(int minutes) {
+  String _formatTime(int minutes) {
     final hours = minutes ~/ 60;
     final mins = minutes % 60;
-    return '${hours}h ${mins}m';
+    if (hours > 0 && mins > 0) return '${hours}h ${mins}m';
+    if (hours > 0) return '${hours}h';
+    if (mins > 0) return '${mins}m';
+    return '0m';
   }
 
   void _onNumberPressed(String number) {
@@ -105,7 +107,6 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
       final entry = _entries[_selectedEntryIndex];
       if (_selectedField == _InputField.hours) {
         if (_isFirstInput) {
-          // 첫 입력이면 기존 값 지우고 새로 시작
           entry.hours = int.parse(number);
           _isFirstInput = false;
         } else {
@@ -147,7 +148,6 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
       selectedField: _selectedField,
       activeOperator: _activeOperator,
     ));
-    // 히스토리는 최대 50개까지만 유지
     if (_history.length > 50) {
       _history.removeAt(0);
     }
@@ -167,7 +167,6 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
   }
 
   void _onOperatorPressed(String op) {
-    // 이미 두 번째 엔트리가 있으면 추가 불가 (연산은 한 번만)
     if (_entries.length >= 2) return;
 
     _saveHistory();
@@ -176,14 +175,13 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
       _selectedEntryIndex = _entries.length - 1;
       _selectedField = _InputField.hours;
       _activeOperator = op;
-      _isFirstInput = true; // 새 엔트리는 첫 입력 상태
+      _isFirstInput = true;
     });
   }
 
   void _onQuickButtonPressed(int mins) {
     _saveHistory();
     setState(() {
-      // 현재 선택된 엔트리에 시간 추가
       final entry = _entries[_selectedEntryIndex];
       final addHours = mins ~/ 60;
       final addMins = mins % 60;
@@ -206,7 +204,6 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
       if (_selectedEntryIndex >= _entries.length) {
         _selectedEntryIndex = _entries.length - 1;
       }
-      // 연산자 활성화 상태 업데이트
       if (_entries.length == 1) {
         _activeOperator = null;
       } else {
@@ -222,22 +219,23 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: AppColors.background,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             _buildTimeDisplay(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             _buildQuickButtons(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             _buildKeypad(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             _buildActionButtons(),
           ],
         ),
@@ -246,19 +244,20 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
   }
 
   Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
       children: [
         Text(
           widget.category.emoji,
-          style: const TextStyle(fontSize: 28),
+          style: const TextStyle(fontSize: 32),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(height: 8),
         Text(
           widget.category.name,
           style: const TextStyle(
-            fontSize: AppTheme.fontSizeH3,
-            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+            letterSpacing: 0.5,
           ),
         ),
       ],
@@ -266,63 +265,51 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
   }
 
   Widget _buildTimeDisplay() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.grey100,
-        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-      ),
-      child: Column(
-        children: [
-          // 시간 입력 영역 - 가운데 정렬
-          Row(
-            children: [
-              // 시간 엔트리들 - 가운데 정렬
-              Expanded(
-                child: Center(
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      for (int i = 0; i < _entries.length; i++)
-                        _buildTimeEntryBox(i),
-                    ],
+    return Column(
+      children: [
+        // 시간 입력 영역
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (int i = 0; i < _entries.length; i++) ...[
+              if (i > 0) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    _entries[i].operator,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w300,
+                      color: AppColors.grey500,
+                    ),
                   ),
                 ),
-              ),
-              // +/- 버튼
-              Column(
-                children: [
-                  _buildOperatorButton('+'),
-                  const SizedBox(height: 4),
-                  _buildOperatorButton('-'),
-                ],
-              ),
+              ],
+              _buildTimeEntryBox(i),
             ],
-          ),
-          const SizedBox(height: 16),
-          // 합계 표시 - 강조
+            const SizedBox(width: 12),
+            _buildOperatorButtons(),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // 합계
+        if (_entries.length > 1)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-              border: Border.all(color: AppColors.border),
+              color: AppColors.grey100,
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '= ${_formatTimeHM(_totalMinutes)}',
+              '= ${_formatTime(_totalMinutes)}',
               style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -335,11 +322,10 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
       clipBehavior: Clip.none,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.surface : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-            border: isSelected ? Border.all(color: AppColors.primary, width: 2) : null,
+            color: isSelected ? AppColors.grey100 : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -350,23 +336,22 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
             ],
           ),
         ),
-        // 삭제 버튼 (첫 번째 엔트리 제외)
         if (canDelete)
           Positioned(
-            top: -8,
-            right: -8,
+            top: -6,
+            right: -6,
             child: GestureDetector(
               onTap: () => _removeEntry(index),
               child: Container(
-                width: 20,
-                height: 20,
-                decoration: const BoxDecoration(
-                  color: AppColors.grey500,
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: AppColors.grey400,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.close,
-                  size: 14,
+                  size: 12,
                   color: AppColors.textOnPrimary,
                 ),
               ),
@@ -384,50 +369,78 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
         setState(() {
           _selectedEntryIndex = entryIndex;
           _selectedField = field;
-          _isFirstInput = true; // 필드 선택 시 첫 입력 상태로
+          _isFirstInput = true;
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.grey200,
-          borderRadius: BorderRadius.circular(4),
+          color: isSelected ? AppColors.textPrimary : AppColors.grey200,
+          borderRadius: BorderRadius.circular(8),
         ),
-        child: Text(
-          '$value$unit',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: isSelected ? AppColors.textOnPrimary : AppColors.textPrimary,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              value.toString().padLeft(2, '0'),
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? AppColors.textOnPrimary : AppColors.textPrimary,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+            const SizedBox(width: 2),
+            Text(
+              unit,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: isSelected ? AppColors.grey300 : AppColors.grey500,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildOperatorButton(String op) {
-    final isActive = _activeOperator == op;
-    final isDisabled = _entries.length >= 2; // 이미 연산 중이면 비활성화
+  Widget _buildOperatorButtons() {
+    final isDisabled = _entries.length >= 2;
 
-    return Opacity(
-      opacity: isDisabled && !isActive ? 0.4 : 1.0,
-      child: Material(
-        color: isActive ? AppColors.primary : AppColors.grey300,
-        borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          onTap: isDisabled ? null : () => _onOperatorPressed(op),
+    return Column(
+      children: [
+        _buildOperatorButton('+', isDisabled),
+        const SizedBox(height: 4),
+        _buildOperatorButton('-', isDisabled),
+      ],
+    );
+  }
+
+  Widget _buildOperatorButton(String op, bool isDisabled) {
+    final isActive = _activeOperator == op;
+
+    return GestureDetector(
+      onTap: isDisabled && !isActive ? null : () => _onOperatorPressed(op),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.textPrimary : AppColors.grey200,
           borderRadius: BorderRadius.circular(8),
-          child: Container(
-            width: 40,
-            height: 40,
-            alignment: Alignment.center,
-            child: Text(
-              op,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: isActive ? AppColors.textOnPrimary : AppColors.grey600,
-              ),
+        ),
+        child: Center(
+          child: Text(
+            op,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: isActive
+                  ? AppColors.textOnPrimary
+                  : (isDisabled ? AppColors.grey400 : AppColors.grey600),
             ),
           ),
         ),
@@ -447,21 +460,24 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
       children: quickValues.map((item) {
         return Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: OutlinedButton(
-              onPressed: () => _onQuickButtonPressed(item.$1),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                side: const BorderSide(color: AppColors.primary),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: GestureDetector(
+              onTap: () => _onQuickButtonPressed(item.$1),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.grey100,
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              ),
-              child: Text(
-                item.$2,
-                style: const TextStyle(
-                  fontSize: AppTheme.fontSizeCaption,
-                  color: AppColors.primary,
+                child: Center(
+                  child: Text(
+                    item.$2,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -475,11 +491,11 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
     return Column(
       children: [
         _buildKeypadRow(['1', '2', '3']),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         _buildKeypadRow(['4', '5', '6']),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         _buildKeypadRow(['7', '8', '9']),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         _buildKeypadRow(['undo', '0', 'backspace']),
       ],
     );
@@ -487,12 +503,11 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
 
   Widget _buildKeypadRow(List<String> keys) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: keys.map((key) {
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: _buildKeypadButton(key),
-          ),
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: _buildKeypadButton(key),
         );
       }).toList(),
     );
@@ -502,39 +517,38 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
     final isNumber = int.tryParse(key) != null;
     final isDelete = key == 'backspace';
     final isUndo = key == 'undo';
-    final isIcon = isDelete || isUndo;
 
-    Color bgColor = isNumber ? AppColors.grey200 : AppColors.grey300;
-
-    return Material(
-      color: bgColor,
-      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-      child: InkWell(
-        onTap: () {
-          if (isNumber) {
-            _onNumberPressed(key);
-          } else if (isDelete) {
-            _onDeletePressed();
-          } else if (isUndo) {
-            _onUndoPressed();
-          }
-        },
-        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-        child: Container(
-          height: 48,
-          alignment: Alignment.center,
-          child: isIcon
-              ? Icon(
-                  isUndo ? Icons.undo : Icons.backspace_outlined,
-                  size: 22,
-                  color: AppColors.grey700,
-                )
-              : Text(
+    return GestureDetector(
+      onTap: () {
+        if (isNumber) {
+          _onNumberPressed(key);
+        } else if (isDelete) {
+          _onDeletePressed();
+        } else if (isUndo) {
+          _onUndoPressed();
+        }
+      },
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          color: isNumber ? AppColors.grey100 : Colors.transparent,
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: isNumber
+              ? Text(
                   key,
-                  style: TextStyle(
-                    fontSize: isNumber ? 20 : 18,
+                  style: const TextStyle(
+                    fontSize: 24,
                     fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
                   ),
+                )
+              : Icon(
+                  isUndo ? Icons.undo_rounded : Icons.backspace_outlined,
+                  size: 24,
+                  color: AppColors.grey500,
                 ),
         ),
       ),
@@ -545,30 +559,43 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
     return Row(
       children: [
         Expanded(
-          child: OutlinedButton(
+          child: TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('취소'),
+            child: const Text(
+              '취소',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: AppColors.grey500,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: ElevatedButton(
+          child: TextButton(
             onPressed: _onConfirm,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.textOnPrimary,
-              padding: const EdgeInsets.symmetric(vertical: 12),
+            style: TextButton.styleFrom(
+              backgroundColor: AppColors.textPrimary,
+              padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('확인'),
+            child: const Text(
+              '확인',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textOnPrimary,
+              ),
+            ),
           ),
         ),
       ],
