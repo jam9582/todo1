@@ -210,7 +210,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.textPrimary : AppColors.grey200,
+          color: isSelected ? AppColors.accent : AppColors.grey200,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -223,7 +223,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
               style: TextStyle(
                 fontSize: 36,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? AppColors.textOnPrimary : AppColors.textPrimary,
+                color: isSelected ? AppColors.textOnAccent : AppColors.textPrimary,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
@@ -233,7 +233,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: isSelected ? AppColors.grey300 : AppColors.grey500,
+                color: isSelected ? AppColors.textOnAccent : AppColors.grey500,
               ),
             ),
           ],
@@ -376,7 +376,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
           child: TextButton(
             onPressed: _onConfirm,
             style: TextButton.styleFrom(
-              backgroundColor: AppColors.textPrimary,
+              backgroundColor: AppColors.accent,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -387,7 +387,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textOnPrimary,
+                color: AppColors.textOnAccent,
               ),
             ),
           ),

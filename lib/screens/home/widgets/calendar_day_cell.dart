@@ -30,7 +30,7 @@ class CalendarDayCell extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: isToday ? AppColors.primary : Colors.transparent,
+          color: isToday ? AppColors.accent : Colors.transparent,
           borderRadius: BorderRadius.circular(8), // 둥근 사각형
         ),
         child: Column(
@@ -46,7 +46,7 @@ class CalendarDayCell extends StatelessWidget {
                     fontSize: Responsive.fontSize(context, 14),
                     fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                     color: isToday
-                        ? AppColors.textOnPrimary
+                        ? AppColors.textOnAccent
                         : (isWeekend ? AppColors.error : AppColors.textPrimary),
                   ),
                 ),
@@ -73,7 +73,7 @@ class CalendarDayCell extends StatelessWidget {
                     hours!.toStringAsFixed(1),
                     style: TextStyle(
                       fontSize: Responsive.fontSize(context, 10),
-                      color: isToday ? AppColors.textOnPrimary : AppColors.textSecondary,
+                      color: isToday ? AppColors.textOnAccent : AppColors.textSecondary,
                     ),
                   ),
                 ),

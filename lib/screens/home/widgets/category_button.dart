@@ -33,7 +33,7 @@ class CategoryButton extends StatelessWidget {
           horizontal: Responsive.spacing(context, AppTheme.spacingXs),
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.grey100,
+          color: isSelected ? AppColors.accent : AppColors.grey100,
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
         ),
         child: Column(
@@ -51,7 +51,7 @@ class CategoryButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
                 fontWeight: FontWeight.w500,
-                color: isSelected ? AppColors.textOnPrimary : AppColors.textPrimary,
+                color: isSelected ? AppColors.textOnAccent : AppColors.textPrimary,
               ),
             ),
             SizedBox(height: Responsive.spacing(context, AppTheme.spacingXs)),
@@ -60,7 +60,7 @@ class CategoryButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
                 fontWeight: FontWeight.bold,
-                color: isSelected ? AppColors.textOnPrimary : AppColors.textSecondary,
+                color: isSelected ? AppColors.textOnAccent : AppColors.textSecondary,
               ),
             ),
           ],

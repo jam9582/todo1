@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/colors.dart';
 import '../constants/durations.dart';
 
 /// SnackBar 중복 표시 방지를 위한 매니저
@@ -24,7 +25,11 @@ class SnackBarManager {
     show(
       context,
       SnackBar(
-        content: Text(message),
+        content: Text(
+          message,
+          style: const TextStyle(color: AppColors.textOnSnackbar),
+        ),
+        backgroundColor: AppColors.snackbar,
         duration: AppDurations.snackBar,
       ),
     );
