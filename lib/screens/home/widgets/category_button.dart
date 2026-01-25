@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../constants/colors.dart';
-import '../../../theme/app_theme.dart';
+import '../../../constants/app_theme.dart';
 import '../../../utils/responsive.dart';
 import '../../../utils/debounced_gesture_detector.dart';
 

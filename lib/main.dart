@@ -4,7 +4,7 @@ import 'services/isar_service.dart';
 import 'providers/category_provider.dart';
 import 'providers/record_provider.dart';
 import 'screens/home/home_screen.dart';
-import 'theme/app_theme.dart';
+import 'constants/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
