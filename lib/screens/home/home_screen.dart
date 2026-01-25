@@ -8,6 +8,7 @@ import 'sections/header_section.dart';
 import 'sections/daily_message_section.dart';
 import 'sections/category_section.dart';
 import 'sections/calendar_section.dart';
+import 'widgets/category_edit_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -70,7 +71,12 @@ class _HomeScreenState extends State<HomeScreen>
 
   void _onMenuItemTap(String label) {
     _closeMenu();
-    SnackBarManager.showText(context, '$label 기능은 준비 중입니다');
+
+    if (label == '카테고리 편집') {
+      CategoryEditDialog.show(context);
+    } else {
+      SnackBarManager.showText(context, '$label 기능은 준비 중입니다');
+    }
   }
 
   @override
