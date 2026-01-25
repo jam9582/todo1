@@ -3,7 +3,6 @@ import '../../../constants/colors.dart';
 import '../../../models/category.dart';
 
 /// 시간 입력 다이얼로그
-/// 시간/분 박스 선택 + 숫자 키패드 + 퀵버튼
 class TimeInputDialog extends StatefulWidget {
   final Category category;
   final int initialMinutes;
@@ -14,7 +13,6 @@ class TimeInputDialog extends StatefulWidget {
     this.initialMinutes = 0,
   });
 
-  /// 다이얼로그를 표시하고 입력된 분(minutes)을 반환
   static Future<int?> show(
     BuildContext context, {
     required Category category,
@@ -35,94 +33,66 @@ class TimeInputDialog extends StatefulWidget {
 
 enum _InputField { hours, minutes }
 
-class _TimeEntry {
-  int hours;
-  int minutes;
-  String operator; // '', '+', '-'
-
-  _TimeEntry({this.hours = 0, this.minutes = 0, this.operator = ''});
-
-  int get totalMinutes => hours * 60 + minutes;
-
-  _TimeEntry copy() => _TimeEntry(hours: hours, minutes: minutes, operator: operator);
-}
-
 class _HistoryState {
-  final List<_TimeEntry> entries;
-  final int selectedEntryIndex;
+  final int hours;
+  final int minutes;
   final _InputField selectedField;
-  final String? activeOperator;
 
   _HistoryState({
-    required this.entries,
-    required this.selectedEntryIndex,
+    required this.hours,
+    required this.minutes,
     required this.selectedField,
-    required this.activeOperator,
   });
 }
 
 class _TimeInputDialogState extends State<TimeInputDialog> {
-  final List<_TimeEntry> _entries = [];
-  int _selectedEntryIndex = 0;
+  int _hours = 0;
+  int _minutes = 0;
   _InputField _selectedField = _InputField.hours;
-  String? _activeOperator;
   bool _isFirstInput = true;
   final List<_HistoryState> _history = [];
 
   @override
   void initState() {
     super.initState();
-    final initialHours = widget.initialMinutes ~/ 60;
-    final initialMins = widget.initialMinutes % 60;
-    _entries.add(_TimeEntry(hours: initialHours, minutes: initialMins));
+    _hours = widget.initialMinutes ~/ 60;
+    _minutes = widget.initialMinutes % 60;
   }
 
-  int get _totalMinutes {
-    if (_entries.isEmpty) return 0;
+  int get _totalMinutes => _hours * 60 + _minutes;
 
-    int total = _entries[0].totalMinutes;
-    for (int i = 1; i < _entries.length; i++) {
-      final entry = _entries[i];
-      if (entry.operator == '+') {
-        total += entry.totalMinutes;
-      } else if (entry.operator == '-') {
-        total -= entry.totalMinutes;
-      }
+  void _saveHistory() {
+    _history.add(_HistoryState(
+      hours: _hours,
+      minutes: _minutes,
+      selectedField: _selectedField,
+    ));
+    if (_history.length > 50) {
+      _history.removeAt(0);
     }
-    return total.clamp(0, 9999);
-  }
-
-  String _formatTime(int minutes) {
-    final hours = minutes ~/ 60;
-    final mins = minutes % 60;
-    if (hours > 0 && mins > 0) return '${hours}h ${mins}m';
-    if (hours > 0) return '${hours}h';
-    if (mins > 0) return '${mins}m';
-    return '0m';
   }
 
   void _onNumberPressed(String number) {
     _saveHistory();
     setState(() {
-      final entry = _entries[_selectedEntryIndex];
       if (_selectedField == _InputField.hours) {
         if (_isFirstInput) {
-          entry.hours = int.parse(number);
+          _hours = int.parse(number);
           _isFirstInput = false;
         } else {
-          final newValue = entry.hours * 10 + int.parse(number);
+          final newValue = _hours * 10 + int.parse(number);
           if (newValue <= 99) {
-            entry.hours = newValue;
+            _hours = newValue;
           }
         }
       } else {
         if (_isFirstInput) {
-          entry.minutes = int.parse(number);
+          _minutes = int.parse(number);
           _isFirstInput = false;
         } else {
-          final newValue = entry.minutes * 10 + int.parse(number);
+          final newValue = _minutes * 10 + int.parse(number);
           if (newValue <= 59) {
-            entry.minutes = newValue;
+            _minutes = newValue;
           }
         }
       }
@@ -132,49 +102,21 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
   void _onDeletePressed() {
     _saveHistory();
     setState(() {
-      final entry = _entries[_selectedEntryIndex];
       if (_selectedField == _InputField.hours) {
-        entry.hours = entry.hours ~/ 10;
+        _hours = _hours ~/ 10;
       } else {
-        entry.minutes = entry.minutes ~/ 10;
+        _minutes = _minutes ~/ 10;
       }
     });
-  }
-
-  void _saveHistory() {
-    _history.add(_HistoryState(
-      entries: _entries.map((e) => e.copy()).toList(),
-      selectedEntryIndex: _selectedEntryIndex,
-      selectedField: _selectedField,
-      activeOperator: _activeOperator,
-    ));
-    if (_history.length > 50) {
-      _history.removeAt(0);
-    }
   }
 
   void _onUndoPressed() {
     if (_history.isEmpty) return;
     setState(() {
       final lastState = _history.removeLast();
-      _entries.clear();
-      _entries.addAll(lastState.entries);
-      _selectedEntryIndex = lastState.selectedEntryIndex;
+      _hours = lastState.hours;
+      _minutes = lastState.minutes;
       _selectedField = lastState.selectedField;
-      _activeOperator = lastState.activeOperator;
-      _isFirstInput = true;
-    });
-  }
-
-  void _onOperatorPressed(String op) {
-    if (_entries.length >= 2) return;
-
-    _saveHistory();
-    setState(() {
-      _entries.add(_TimeEntry(operator: op));
-      _selectedEntryIndex = _entries.length - 1;
-      _selectedField = _InputField.hours;
-      _activeOperator = op;
       _isFirstInput = true;
     });
   }
@@ -182,33 +124,13 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
   void _onQuickButtonPressed(int mins) {
     _saveHistory();
     setState(() {
-      final entry = _entries[_selectedEntryIndex];
-      final addHours = mins ~/ 60;
-      final addMins = mins % 60;
-
-      entry.minutes += addMins;
-      if (entry.minutes >= 60) {
-        entry.hours += entry.minutes ~/ 60;
-        entry.minutes = entry.minutes % 60;
+      _minutes += mins % 60;
+      if (_minutes >= 60) {
+        _hours += _minutes ~/ 60;
+        _minutes = _minutes % 60;
       }
-      entry.hours += addHours;
-      if (entry.hours > 99) entry.hours = 99;
-    });
-  }
-
-  void _removeEntry(int index) {
-    if (index == 0 || _entries.length <= 1) return;
-    _saveHistory();
-    setState(() {
-      _entries.removeAt(index);
-      if (_selectedEntryIndex >= _entries.length) {
-        _selectedEntryIndex = _entries.length - 1;
-      }
-      if (_entries.length == 1) {
-        _activeOperator = null;
-      } else {
-        _activeOperator = _entries.last.operator;
-      }
+      _hours += mins ~/ 60;
+      if (_hours > 99) _hours = 99;
     });
   }
 
@@ -229,9 +151,9 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
             _buildTimeDisplay(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             _buildQuickButtons(),
             const SizedBox(height: 20),
             _buildKeypad(),
@@ -265,118 +187,31 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
   }
 
   Widget _buildTimeDisplay() {
-    return Column(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // 시간 입력 영역
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            for (int i = 0; i < _entries.length; i++) ...[
-              if (i > 0) ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(
-                    _entries[i].operator,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w300,
-                      color: AppColors.grey500,
-                    ),
-                  ),
-                ),
-              ],
-              _buildTimeEntryBox(i),
-            ],
-            const SizedBox(width: 12),
-            _buildOperatorButtons(),
-          ],
-        ),
-        const SizedBox(height: 16),
-        // 합계
-        if (_entries.length > 1)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.grey100,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              '= ${_formatTime(_totalMinutes)}',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
+        _buildFieldBox(_InputField.hours, _hours, 'h'),
+        const SizedBox(width: 8),
+        _buildFieldBox(_InputField.minutes, _minutes, 'm'),
       ],
     );
   }
 
-  Widget _buildTimeEntryBox(int index) {
-    final entry = _entries[index];
-    final isSelected = _selectedEntryIndex == index;
-    final canDelete = index > 0;
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.grey100 : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildFieldBox(index, _InputField.hours, entry.hours, 'h'),
-              const SizedBox(width: 4),
-              _buildFieldBox(index, _InputField.minutes, entry.minutes, 'm'),
-            ],
-          ),
-        ),
-        if (canDelete)
-          Positioned(
-            top: -6,
-            right: -6,
-            child: GestureDetector(
-              onTap: () => _removeEntry(index),
-              child: Container(
-                width: 18,
-                height: 18,
-                decoration: BoxDecoration(
-                  color: AppColors.grey400,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.close,
-                  size: 12,
-                  color: AppColors.textOnPrimary,
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildFieldBox(int entryIndex, _InputField field, int value, String unit) {
-    final isSelected = _selectedEntryIndex == entryIndex && _selectedField == field;
+  Widget _buildFieldBox(_InputField field, int value, String unit) {
+    final isSelected = _selectedField == field;
 
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedEntryIndex = entryIndex;
           _selectedField = field;
           _isFirstInput = true;
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.textPrimary : AppColors.grey200,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -386,63 +221,22 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
             Text(
               value.toString().padLeft(2, '0'),
               style: TextStyle(
-                fontSize: 28,
+                fontSize: 36,
                 fontWeight: FontWeight.w600,
                 color: isSelected ? AppColors.textOnPrimary : AppColors.textPrimary,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
-            const SizedBox(width: 2),
+            const SizedBox(width: 4),
             Text(
               unit,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: isSelected ? AppColors.grey300 : AppColors.grey500,
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOperatorButtons() {
-    final isDisabled = _entries.length >= 2;
-
-    return Column(
-      children: [
-        _buildOperatorButton('+', isDisabled),
-        const SizedBox(height: 4),
-        _buildOperatorButton('-', isDisabled),
-      ],
-    );
-  }
-
-  Widget _buildOperatorButton(String op, bool isDisabled) {
-    final isActive = _activeOperator == op;
-
-    return GestureDetector(
-      onTap: isDisabled && !isActive ? null : () => _onOperatorPressed(op),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.textPrimary : AppColors.grey200,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Text(
-            op,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w500,
-              color: isActive
-                  ? AppColors.textOnPrimary
-                  : (isDisabled ? AppColors.grey400 : AppColors.grey600),
-            ),
-          ),
         ),
       ),
     );
