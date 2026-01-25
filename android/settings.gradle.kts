@@ -24,3 +24,14 @@ plugins {
 }
 
 include(":app")
+
+// isar_flutter_libs namespace 설정 (AGP 8.x 호환)
+gradle.beforeProject {
+    if (name == "isar_flutter_libs") {
+        afterEvaluate {
+            extensions.findByType<com.android.build.gradle.LibraryExtension>()?.apply {
+                namespace = "dev.isar.isar_flutter_libs"
+            }
+        }
+    }
+}
