@@ -3,7 +3,6 @@ import '../constants/colors.dart';
 
 class AppTheme {
   // 색상 - AppColors 참조
-  static const primaryColor = AppColors.primary;
   static const backgroundColor = AppColors.background;
   static const adBannerColor = AppColors.adBanner;
 
@@ -31,10 +30,6 @@ class AppTheme {
   static ThemeData get theme {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryColor,
-        primary: primaryColor,
-      ),
       scaffoldBackgroundColor: backgroundColor,
       textTheme: const TextTheme(
         headlineLarge: TextStyle(fontSize: fontSizeH1, fontWeight: FontWeight.bold),

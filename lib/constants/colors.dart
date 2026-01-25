@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Primary (주황색 - 기존 유지)
-  static const primary = Color(0xFFFF9966);
-  static const primaryLight = Color(0xFFFFB088);
-
   // Accent (따뜻한 베이지 - 포인트 컬러)
   static const accent = Color(0xFFE8DDD3); // 따뜻한 베이지
   static const textOnAccent = Color(0xFF5C5652); // 액센트 위 텍스트 (다크 그레이)
@@ -23,7 +19,6 @@ class AppColors {
   static const textPrimary = Color(0xFF2D2926); // 웜 블랙
   static const textSecondary = Color(0xFF5C5652); // 웜 다크 그레이
   static const textHint = Color(0xFF8A8580); // 웜 미디엄 그레이
-  static const textOnPrimary = Color(0xFFFFFBF5); // 크림 화이트
 
   // Warm grey scale
   static const grey100 = Color(0xFFF7F5F2); // 가장 밝은 웜 그레이
