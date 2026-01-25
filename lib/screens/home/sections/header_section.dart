@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import '../../../constants/app_theme.dart';
 import '../../../utils/responsive.dart';
 import '../../../utils/debounced_gesture_detector.dart';
-import '../../../utils/snackbar_manager.dart';
 
 class HeaderSection extends StatelessWidget {
-  const HeaderSection({super.key});
+  final VoidCallback onMenuPressed;
+  final bool isMenuOpen;
+
+  const HeaderSection({
+    super.key,
+    required this.onMenuPressed,
+    required this.isMenuOpen,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +38,12 @@ class HeaderSection extends StatelessWidget {
           Positioned(
             right: 0,
             child: DebouncedIconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {
-                // TODO: 햄버거 메뉴 기능 (나중에 구현)
-                SnackBarManager.showText(context, '메뉴 기능은 나중에 구현 예정');
-              },
+              icon: AnimatedRotation(
+                turns: isMenuOpen ? 0.25 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: const Icon(Icons.menu),
+              ),
+              onPressed: onMenuPressed,
             ),
           ),
         ],
