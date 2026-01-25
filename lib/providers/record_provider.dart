@@ -67,21 +67,30 @@ class RecordProvider extends ChangeNotifier {
     if (_currentRecord == null) return;
 
     // 기존 timeRecords가 null이면 빈 리스트 생성
-    _currentRecord!.timeRecords ??= [];
+    final currentRecords = _currentRecord!.timeRecords ?? [];
 
     // 해당 카테고리의 기록 찾기
-    final index = _currentRecord!.timeRecords!
-        .indexWhere((entry) => entry.categoryId == categoryId);
+    final index = currentRecords.indexWhere((entry) => entry.categoryId == categoryId);
 
+    // 새 리스트 생성 (Isar embedded 객체 변경 감지를 위해)
+    List<TimeEntry> newRecords;
     if (index != -1) {
       // 기존 기록 업데이트
-      _currentRecord!.timeRecords![index].minutes = minutes;
+      newRecords = currentRecords.map((entry) {
+        if (entry.categoryId == categoryId) {
+          return TimeEntry(categoryId: categoryId, minutes: minutes);
+        }
+        return entry;
+      }).toList();
     } else {
       // 새 기록 추가
-      _currentRecord!.timeRecords!.add(
+      newRecords = [
+        ...currentRecords,
         TimeEntry(categoryId: categoryId, minutes: minutes),
-      );
+      ];
     }
+
+    _currentRecord!.timeRecords = newRecords;
 
     final isar = await IsarService.instance;
     await isar.writeTxn(() async {
