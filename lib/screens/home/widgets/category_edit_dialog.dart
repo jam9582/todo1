@@ -202,12 +202,16 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
                   style: const TextStyle(fontSize: 20),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  category.name,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary,
+                Flexible(
+                  child: Text(
+                    category.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
               ],
