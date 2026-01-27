@@ -398,13 +398,16 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
                         : null,
                   ),
                   child: Center(
-                    child: Text(
-                      _selectedEmoji.isEmpty ? '😊' : _selectedEmoji,
-                      style: TextStyle(
-                        fontSize: 32,
-                        color: _selectedEmoji.isEmpty ? AppColors.grey300 : null,
-                      ),
-                    ),
+                    child: _selectedEmoji.isEmpty
+                        ? Icon(
+                            Icons.add_rounded,
+                            size: 32,
+                            color: _emojiError ? Colors.red : AppColors.grey400,
+                          )
+                        : Text(
+                            _selectedEmoji,
+                            style: const TextStyle(fontSize: 32),
+                          ),
                   ),
                 ),
               ),
