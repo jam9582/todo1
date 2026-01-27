@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart' as emoji_picker;
 import '../../../constants/colors.dart';
 import '../../../models/category.dart';
 import '../../../providers/category_provider.dart';
@@ -310,32 +311,38 @@ class _CategoryItemEditDialog extends StatefulWidget {
 }
 
 class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
-  late TextEditingController _emojiController;
   late TextEditingController _nameController;
+  String _selectedEmoji = '';
+  bool _showEmojiPicker = false;
 
   bool get _isEditing => widget.category != null;
 
   @override
   void initState() {
     super.initState();
-    _emojiController = TextEditingController(text: widget.category?.emoji ?? '');
+    _selectedEmoji = widget.category?.emoji ?? '';
     _nameController = TextEditingController(text: widget.category?.name ?? '');
   }
 
   @override
   void dispose() {
-    _emojiController.dispose();
     _nameController.dispose();
     super.dispose();
   }
 
+  void _onEmojiSelected(emoji_picker.Category? category, emoji_picker.Emoji emoji) {
+    setState(() {
+      _selectedEmoji = emoji.emoji;
+      _showEmojiPicker = false;
+    });
+  }
+
   void _onConfirm() {
-    final emoji = _emojiController.text.trim();
     final name = _nameController.text.trim();
 
-    if (emoji.isEmpty || name.isEmpty) return;
+    if (_selectedEmoji.isEmpty || name.isEmpty) return;
 
-    Navigator.pop(context, (emoji: emoji, name: name));
+    Navigator.pop(context, (emoji: _selectedEmoji, name: name));
   }
 
   @override
@@ -347,39 +354,69 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
       ),
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              _isEditing ? '카테고리 수정' : '새 카테고리',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 24),
-            // 이모지 입력
-            TextField(
-              controller: _emojiController,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 32),
-              decoration: InputDecoration(
-                hintText: '😊',
-                hintStyle: TextStyle(
-                  fontSize: 32,
-                  color: AppColors.grey300,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _isEditing ? '카테고리 수정' : '새 카테고리',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
-                filled: true,
-                fillColor: AppColors.grey100,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 16),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 24),
+              // 이모지 선택 영역
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _showEmojiPicker = !_showEmojiPicker;
+                  });
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: AppColors.grey100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      _selectedEmoji.isEmpty ? '😊' : _selectedEmoji,
+                      style: TextStyle(
+                        fontSize: 32,
+                        color: _selectedEmoji.isEmpty ? AppColors.grey300 : null,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // 이모지 피커
+              if (_showEmojiPicker)
+                Container(
+                  height: 250,
+                  margin: const EdgeInsets.only(top: 8),
+                  clipBehavior: Clip.hardEdge,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: emoji_picker.EmojiPicker(
+                    onEmojiSelected: _onEmojiSelected,
+                    config: const emoji_picker.Config(
+                      emojiViewConfig: emoji_picker.EmojiViewConfig(
+                        columns: 7,
+                      ),
+                      categoryViewConfig: emoji_picker.CategoryViewConfig(
+                        initCategory: emoji_picker.Category.SMILEYS,
+                      ),
+                      bottomActionBarConfig: emoji_picker.BottomActionBarConfig(
+                        enabled: false,
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 16),
             // 이름 입력
             TextField(
               controller: _nameController,
@@ -455,6 +492,7 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
               ],
             ),
           ],
+        ),
         ),
       ),
     );
