@@ -21,6 +21,22 @@ class CategorySection extends StatelessWidget {
 
     final categories = categoryProvider.categories;
 
+    if (categories.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        color: AppColors.background,
+        child: Center(
+          child: Text(
+            '카테고리를 만들어보세요!',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.grey400,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       color: AppColors.background,
