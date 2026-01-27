@@ -48,6 +48,8 @@ class CategoryButton extends StatelessWidget {
             SizedBox(height: Responsive.spacing(context, AppTheme.spacingXs)),
             Text(
               name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
                 fontWeight: FontWeight.w500,

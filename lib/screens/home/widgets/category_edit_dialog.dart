@@ -384,6 +384,7 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
             TextField(
               controller: _nameController,
               textAlign: TextAlign.center,
+              maxLength: 8,
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -394,6 +395,7 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
                   fontSize: 16,
                   color: AppColors.grey400,
                 ),
+                counterText: '',
                 filled: true,
                 fillColor: AppColors.grey100,
                 border: OutlineInputBorder(
