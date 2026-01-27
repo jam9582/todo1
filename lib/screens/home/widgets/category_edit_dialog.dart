@@ -95,7 +95,11 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
     }
   }
 
+  static const int _maxCategories = 4;
+
   Future<void> _onAddCategory() async {
+    if (_categories.length >= _maxCategories) return;
+
     final result = await _CategoryItemEditDialog.show(context);
     if (result != null && mounted) {
       final provider = context.read<CategoryProvider>();
@@ -123,7 +127,7 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
           children: [
             _buildHeader(),
             const SizedBox(height: 20),
-            _buildCategoryList(),
+            Flexible(child: _buildCategoryList()),
             const SizedBox(height: 16),
             _buildAddButton(),
             const SizedBox(height: 16),
@@ -233,33 +237,38 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
   }
 
   Widget _buildAddButton() {
+    final isMaxReached = _categories.length >= _maxCategories;
+
     return GestureDetector(
-      onTap: _onAddCategory,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.grey300),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.add_rounded,
-              size: 20,
-              color: AppColors.grey500,
-            ),
-            SizedBox(width: 8),
-            Text(
-              '카테고리 추가',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+      onTap: isMaxReached ? null : _onAddCategory,
+      child: Opacity(
+        opacity: isMaxReached ? 0.4 : 1.0,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.grey300),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.add_rounded,
+                size: 20,
                 color: AppColors.grey500,
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Text(
+                isMaxReached ? '최대 $_maxCategories개' : '카테고리 추가',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.grey500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
