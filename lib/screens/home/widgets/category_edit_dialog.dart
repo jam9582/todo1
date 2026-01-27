@@ -314,6 +314,8 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
   late TextEditingController _nameController;
   String _selectedEmoji = '';
   bool _showEmojiPicker = false;
+  bool _emojiError = false;
+  bool _nameError = false;
 
   bool get _isEditing => widget.category != null;
 
@@ -322,6 +324,11 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
     super.initState();
     _selectedEmoji = widget.category?.emoji ?? '';
     _nameController = TextEditingController(text: widget.category?.name ?? '');
+    _nameController.addListener(() {
+      if (_nameError && _nameController.text.trim().isNotEmpty) {
+        setState(() => _nameError = false);
+      }
+    });
   }
 
   @override
@@ -334,13 +341,19 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
     setState(() {
       _selectedEmoji = emoji.emoji;
       _showEmojiPicker = false;
+      _emojiError = false;
     });
   }
 
   void _onConfirm() {
     final name = _nameController.text.trim();
 
-    if (_selectedEmoji.isEmpty || name.isEmpty) return;
+    setState(() {
+      _emojiError = _selectedEmoji.isEmpty;
+      _nameError = name.isEmpty;
+    });
+
+    if (_emojiError || _nameError) return;
 
     Navigator.pop(context, (emoji: _selectedEmoji, name: name));
   }
@@ -380,6 +393,9 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
                   decoration: BoxDecoration(
                     color: AppColors.grey100,
                     borderRadius: BorderRadius.circular(12),
+                    border: _emojiError
+                        ? Border.all(color: Colors.red, width: 1.5)
+                        : null,
                   ),
                   child: Center(
                     child: Text(
@@ -438,6 +454,18 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: _nameError
+                      ? const BorderSide(color: Colors.red, width: 1.5)
+                      : BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: _nameError
+                      ? const BorderSide(color: Colors.red, width: 1.5)
+                      : BorderSide.none,
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   vertical: 14,
