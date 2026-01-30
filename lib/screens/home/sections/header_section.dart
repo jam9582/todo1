@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../constants/app_theme.dart';
-import '../../../utils/responsive.dart';
 import '../../../utils/debounced_gesture_detector.dart';
 
 class HeaderSection extends StatelessWidget {
@@ -19,32 +18,20 @@ class HeaderSection extends StatelessWidget {
       padding: EdgeInsets.only(
         left: AppTheme.spacingMd,
         right: AppTheme.spacingMd,
-        top: AppTheme.spacingLg,
-        bottom: AppTheme.spacingSm,
+        top: AppTheme.spacingMd,
+        bottom: 2,
       ),
       color: AppTheme.backgroundColor,
-      child: Stack(
-        alignment: Alignment.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Center(
-            child: Text(
-              '오늘의 한마디',
-              style: TextStyle(
-                fontSize: Responsive.fontSize(context, AppTheme.fontSizeH3),
-                fontWeight: FontWeight.bold,
-              ),
+          DebouncedIconButton(
+            icon: AnimatedRotation(
+              turns: isMenuOpen ? 0.25 : 0,
+              duration: const Duration(milliseconds: 200),
+              child: const Icon(Icons.menu),
             ),
-          ),
-          Positioned(
-            right: 0,
-            child: DebouncedIconButton(
-              icon: AnimatedRotation(
-                turns: isMenuOpen ? 0.25 : 0,
-                duration: const Duration(milliseconds: 200),
-                child: const Icon(Icons.menu),
-              ),
-              onPressed: onMenuPressed,
-            ),
+            onPressed: onMenuPressed,
           ),
         ],
       ),

@@ -4,7 +4,6 @@ import '../../constants/colors.dart';
 import '../../constants/app_theme.dart';
 import '../../utils/debounced_gesture_detector.dart';
 import '../../utils/snackbar_manager.dart';
-import 'sections/header_section.dart';
 import 'sections/daily_message_section.dart';
 import 'sections/category_section.dart';
 import 'sections/calendar_section.dart';
@@ -93,13 +92,7 @@ class _HomeScreenState extends State<HomeScreen>
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        // 헤더 (오늘의 한마디 제목 + 햄버거 메뉴)
-                        HeaderSection(
-                          onMenuPressed: _toggleMenu,
-                          isMenuOpen: _isMenuOpen,
-                        ),
-
-                        // 한마디 입력
+                        // 한마디 입력 (오늘의 한마디 라벨 포함)
                         const DailyMessageSection(),
 
                         // 카테고리 섹션 (4개 카테고리)
@@ -117,6 +110,20 @@ class _HomeScreenState extends State<HomeScreen>
               ],
             ),
 
+            // 햄버거 메뉴 버튼
+            Positioned(
+              top: AppTheme.spacingMd,
+              right: AppTheme.spacingMd,
+              child: DebouncedIconButton(
+                icon: AnimatedRotation(
+                  turns: _isMenuOpen ? 0.25 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: const Icon(Icons.menu),
+                ),
+                onPressed: _toggleMenu,
+              ),
+            ),
+
             // 오버레이 메뉴
             if (_isMenuOpen) ...[
               // 배경 탭하면 메뉴 닫기
@@ -128,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               // 메뉴 아이콘들
               Positioned(
-                top: 56 + AppTheme.spacingLg + AppTheme.spacingSm, // Header 높이
+                top: AppTheme.spacingMd + 40, // 햄버거 버튼 아래
                 right: AppTheme.spacingMd,
                 child: FadeTransition(
                   opacity: _fadeAnimation,

@@ -44,12 +44,28 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: Responsive.wp(context, 6),
-        vertical: AppTheme.spacingMd,
+      padding: EdgeInsets.only(
+        left: AppTheme.spacingMd,
+        right: AppTheme.spacingMd,
+        top: AppTheme.spacingMd,
+        bottom: AppTheme.spacingSm,
       ),
       color: AppTheme.backgroundColor,
-      child: _isEditing ? _buildTextField(context) : _buildDisplayText(message),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '오늘의 한마디',
+            style: TextStyle(
+              fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          _isEditing ? _buildTextField(context) : _buildDisplayText(message),
+        ],
+      ),
     );
   }
 
@@ -59,7 +75,7 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
       onTap: () => _startEditing(message),
       child: Text(
         hasMessage ? message : '언제나 당신을 응원해요',
-        textAlign: TextAlign.center,
+        textAlign: TextAlign.left,
         overflow: TextOverflow.visible,
         softWrap: true,
         style: TextStyle(
@@ -76,7 +92,7 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
     return TextField(
       controller: _controller,
       focusNode: _focusNode,
-      textAlign: TextAlign.center,
+      textAlign: TextAlign.left,
       maxLines: null,
       textInputAction: TextInputAction.done,
       style: TextStyle(
