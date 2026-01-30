@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../widgets/ad_banner_widget.dart';
 import '../../constants/colors.dart';
 import '../../constants/app_theme.dart';
@@ -81,9 +82,16 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: AppColors.background,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: AppColors.background,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        body: SafeArea(
+          child: Stack(
           children: [
             // 메인 콘텐츠
             Column(
@@ -192,7 +200,8 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
             ],
-          ],
+            ],
+          ),
         ),
       ),
     );

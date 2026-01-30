@@ -12,11 +12,15 @@ import 'constants/colors.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 상태바 스타일 설정 (Android)
+  // 상태바 & 네비게이션바 스타일 설정 (Android)
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
+      // 상태바 (상단)
       statusBarColor: AppColors.background,
-      statusBarIconBrightness: Brightness.dark, // 어두운 아이콘 (밝은 배경용)
+      statusBarIconBrightness: Brightness.dark,
+      // 네비게이션바 (하단)
+      systemNavigationBarColor: AppColors.background,
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
 

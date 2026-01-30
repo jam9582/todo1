@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../constants/colors.dart';
 
 class AppTheme {
@@ -31,6 +32,16 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: backgroundColor,
+      // 앱바 테마
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.background,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: AppColors.background,
+          statusBarIconBrightness: Brightness.dark,
+          systemNavigationBarColor: AppColors.background,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ),
+      ),
       textTheme: const TextTheme(
         headlineLarge: TextStyle(fontSize: fontSizeH1, fontWeight: FontWeight.bold),
         headlineMedium: TextStyle(fontSize: fontSizeH2, fontWeight: FontWeight.bold),
