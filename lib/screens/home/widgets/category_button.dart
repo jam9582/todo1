@@ -29,7 +29,7 @@ class CategoryButton extends StatelessWidget {
           horizontal: Responsive.spacing(context, AppTheme.spacingXs),
         ),
         padding: EdgeInsets.symmetric(
-          vertical: Responsive.spacing(context, AppTheme.spacingMd * 0.75),
+          vertical: Responsive.spacing(context, AppTheme.spacingSm),
           horizontal: Responsive.spacing(context, AppTheme.spacingXs),
         ),
         decoration: BoxDecoration(
@@ -42,10 +42,10 @@ class CategoryButton extends StatelessWidget {
             Text(
               emoji,
               style: TextStyle(
-                fontSize: Responsive.fontSize(context, 24),
+                fontSize: Responsive.fontSize(context, 18),
               ),
             ),
-            SizedBox(height: Responsive.spacing(context, AppTheme.spacingXs)),
+            SizedBox(height: Responsive.spacing(context, 2)),
             Text(
               name,
               maxLines: 1,
@@ -56,7 +56,7 @@ class CategoryButton extends StatelessWidget {
                 color: isSelected ? AppColors.textOnAccent : AppColors.textPrimary,
               ),
             ),
-            SizedBox(height: Responsive.spacing(context, AppTheme.spacingXs)),
+            SizedBox(height: Responsive.spacing(context, 2)),
             Text(
               time,
               style: TextStyle(

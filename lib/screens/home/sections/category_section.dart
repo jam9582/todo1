@@ -23,7 +23,7 @@ class CategorySection extends StatelessWidget {
 
     if (categories.isEmpty) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         color: AppColors.background,
         child: Center(
           child: Text(
@@ -38,7 +38,7 @@ class CategorySection extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: AppColors.background,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
