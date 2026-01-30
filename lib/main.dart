@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'services/isar_service.dart';
 import 'providers/category_provider.dart';
+import 'providers/check_box_provider.dart';
 import 'providers/record_provider.dart';
 import 'screens/home/home_screen.dart';
 import 'constants/app_theme.dart';
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
+        ChangeNotifierProvider(create: (_) => CheckBoxProvider()),
         ChangeNotifierProvider(create: (_) => RecordProvider()),
       ],
       child: MaterialApp(

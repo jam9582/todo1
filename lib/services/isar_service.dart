@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/category.dart';
+import '../models/check_box.dart';
 import '../models/daily_record.dart';
 
 class IsarService {
@@ -12,7 +13,7 @@ class IsarService {
 
     final dir = await getApplicationDocumentsDirectory();
     _isar = await Isar.open(
-      [CategorySchema, DailyRecordSchema],
+      [CategorySchema, CheckBoxSchema, DailyRecordSchema],
       directory: dir.path,
     );
 

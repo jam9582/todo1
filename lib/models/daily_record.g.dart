@@ -17,18 +17,24 @@ const DailyRecordSchema = CollectionSchema(
   name: r'DailyRecord',
   id: -1016922496390167466,
   properties: {
-    r'date': PropertySchema(
+    r'checkRecords': PropertySchema(
       id: 0,
+      name: r'checkRecords',
+      type: IsarType.objectList,
+      target: r'CheckEntry',
+    ),
+    r'date': PropertySchema(
+      id: 1,
       name: r'date',
       type: IsarType.string,
     ),
     r'message': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'message',
       type: IsarType.string,
     ),
     r'timeRecords': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'timeRecords',
       type: IsarType.objectList,
       target: r'TimeEntry',
@@ -55,7 +61,10 @@ const DailyRecordSchema = CollectionSchema(
     )
   },
   links: {},
-  embeddedSchemas: {r'TimeEntry': TimeEntrySchema},
+  embeddedSchemas: {
+    r'TimeEntry': TimeEntrySchema,
+    r'CheckEntry': CheckEntrySchema
+  },
   getId: _dailyRecordGetId,
   getLinks: _dailyRecordGetLinks,
   attach: _dailyRecordAttach,
@@ -68,6 +77,20 @@ int _dailyRecordEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final list = object.checkRecords;
+    if (list != null) {
+      bytesCount += 3 + list.length * 3;
+      {
+        final offsets = allOffsets[CheckEntry]!;
+        for (var i = 0; i < list.length; i++) {
+          final value = list[i];
+          bytesCount +=
+              CheckEntrySchema.estimateSize(value, offsets, allOffsets);
+        }
+      }
+    }
+  }
   bytesCount += 3 + object.date.length * 3;
   {
     final value = object.message;
@@ -98,10 +121,16 @@ void _dailyRecordSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.date);
-  writer.writeString(offsets[1], object.message);
+  writer.writeObjectList<CheckEntry>(
+    offsets[0],
+    allOffsets,
+    CheckEntrySchema.serialize,
+    object.checkRecords,
+  );
+  writer.writeString(offsets[1], object.date);
+  writer.writeString(offsets[2], object.message);
   writer.writeObjectList<TimeEntry>(
-    offsets[2],
+    offsets[3],
     allOffsets,
     TimeEntrySchema.serialize,
     object.timeRecords,
@@ -115,10 +144,16 @@ DailyRecord _dailyRecordDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = DailyRecord(
-    date: reader.readStringOrNull(offsets[0]) ?? '',
-    message: reader.readStringOrNull(offsets[1]),
+    checkRecords: reader.readObjectList<CheckEntry>(
+      offsets[0],
+      CheckEntrySchema.deserialize,
+      allOffsets,
+      CheckEntry(),
+    ),
+    date: reader.readStringOrNull(offsets[1]) ?? '',
+    message: reader.readStringOrNull(offsets[2]),
     timeRecords: reader.readObjectList<TimeEntry>(
-      offsets[2],
+      offsets[3],
       TimeEntrySchema.deserialize,
       allOffsets,
       TimeEntry(),
@@ -136,10 +171,17 @@ P _dailyRecordDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readObjectList<CheckEntry>(
+        offset,
+        CheckEntrySchema.deserialize,
+        allOffsets,
+        CheckEntry(),
+      )) as P;
     case 1:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 2:
+      return (reader.readStringOrNull(offset)) as P;
+    case 3:
       return (reader.readObjectList<TimeEntry>(
         offset,
         TimeEntrySchema.deserialize,
@@ -289,6 +331,113 @@ extension DailyRecordQueryWhere
 
 extension DailyRecordQueryFilter
     on QueryBuilder<DailyRecord, DailyRecord, QFilterCondition> {
+  QueryBuilder<DailyRecord, DailyRecord, QAfterFilterCondition>
+      checkRecordsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'checkRecords',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyRecord, DailyRecord, QAfterFilterCondition>
+      checkRecordsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'checkRecords',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyRecord, DailyRecord, QAfterFilterCondition>
+      checkRecordsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'checkRecords',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<DailyRecord, DailyRecord, QAfterFilterCondition>
+      checkRecordsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'checkRecords',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<DailyRecord, DailyRecord, QAfterFilterCondition>
+      checkRecordsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'checkRecords',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<DailyRecord, DailyRecord, QAfterFilterCondition>
+      checkRecordsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'checkRecords',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<DailyRecord, DailyRecord, QAfterFilterCondition>
+      checkRecordsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'checkRecords',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<DailyRecord, DailyRecord, QAfterFilterCondition>
+      checkRecordsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'checkRecords',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
   QueryBuilder<DailyRecord, DailyRecord, QAfterFilterCondition> dateEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -736,6 +885,13 @@ extension DailyRecordQueryFilter
 extension DailyRecordQueryObject
     on QueryBuilder<DailyRecord, DailyRecord, QFilterCondition> {
   QueryBuilder<DailyRecord, DailyRecord, QAfterFilterCondition>
+      checkRecordsElement(FilterQuery<CheckEntry> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'checkRecords');
+    });
+  }
+
+  QueryBuilder<DailyRecord, DailyRecord, QAfterFilterCondition>
       timeRecordsElement(FilterQuery<TimeEntry> q) {
     return QueryBuilder.apply(this, (query) {
       return query.object(q, r'timeRecords');
@@ -834,6 +990,13 @@ extension DailyRecordQueryProperty
   QueryBuilder<DailyRecord, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<DailyRecord, List<CheckEntry>?, QQueryOperations>
+      checkRecordsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'checkRecords');
     });
   }
 
@@ -1045,3 +1208,146 @@ extension TimeEntryQueryFilter
 
 extension TimeEntryQueryObject
     on QueryBuilder<TimeEntry, TimeEntry, QFilterCondition> {}
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+const CheckEntrySchema = Schema(
+  name: r'CheckEntry',
+  id: 4982355825040364664,
+  properties: {
+    r'checkBoxId': PropertySchema(
+      id: 0,
+      name: r'checkBoxId',
+      type: IsarType.long,
+    ),
+    r'isCompleted': PropertySchema(
+      id: 1,
+      name: r'isCompleted',
+      type: IsarType.bool,
+    )
+  },
+  estimateSize: _checkEntryEstimateSize,
+  serialize: _checkEntrySerialize,
+  deserialize: _checkEntryDeserialize,
+  deserializeProp: _checkEntryDeserializeProp,
+);
+
+int _checkEntryEstimateSize(
+  CheckEntry object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  return bytesCount;
+}
+
+void _checkEntrySerialize(
+  CheckEntry object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeLong(offsets[0], object.checkBoxId);
+  writer.writeBool(offsets[1], object.isCompleted);
+}
+
+CheckEntry _checkEntryDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = CheckEntry(
+    checkBoxId: reader.readLongOrNull(offsets[0]) ?? 0,
+    isCompleted: reader.readBoolOrNull(offsets[1]) ?? false,
+  );
+  return object;
+}
+
+P _checkEntryDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 1:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+extension CheckEntryQueryFilter
+    on QueryBuilder<CheckEntry, CheckEntry, QFilterCondition> {
+  QueryBuilder<CheckEntry, CheckEntry, QAfterFilterCondition> checkBoxIdEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'checkBoxId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CheckEntry, CheckEntry, QAfterFilterCondition>
+      checkBoxIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'checkBoxId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CheckEntry, CheckEntry, QAfterFilterCondition>
+      checkBoxIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'checkBoxId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CheckEntry, CheckEntry, QAfterFilterCondition> checkBoxIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'checkBoxId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<CheckEntry, CheckEntry, QAfterFilterCondition>
+      isCompletedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isCompleted',
+        value: value,
+      ));
+    });
+  }
+}
+
+extension CheckEntryQueryObject
+    on QueryBuilder<CheckEntry, CheckEntry, QFilterCondition> {}

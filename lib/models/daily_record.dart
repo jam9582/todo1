@@ -13,10 +13,13 @@ class DailyRecord {
 
   List<TimeEntry>? timeRecords;
 
+  List<CheckEntry>? checkRecords;
+
   DailyRecord({
     this.date = '',
     this.message,
     this.timeRecords,
+    this.checkRecords,
   });
 }
 
@@ -29,5 +32,17 @@ class TimeEntry {
   TimeEntry({
     this.categoryId = 0,
     this.minutes = 0,
+  });
+}
+
+@embedded
+class CheckEntry {
+  late int checkBoxId;
+
+  late bool isCompleted;
+
+  CheckEntry({
+    this.checkBoxId = 0,
+    this.isCompleted = false,
   });
 }
