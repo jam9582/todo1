@@ -88,9 +88,6 @@ class _HomeScreenState extends State<HomeScreen>
             // 메인 콘텐츠
             Column(
               children: [
-                // 광고 영역
-                const AdBannerWidget(),
-
                 // 스크롤 가능한 컨텐츠
                 Expanded(
                   child: SingleChildScrollView(
@@ -114,6 +111,9 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                 ),
+
+                // 광고 영역
+                const AdBannerWidget(),
               ],
             ),
 
@@ -128,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               // 메뉴 아이콘들
               Positioned(
-                top: 50 + 56 + AppTheme.spacingLg + AppTheme.spacingSm, // AdBanner + Header 높이
+                top: 56 + AppTheme.spacingLg + AppTheme.spacingSm, // Header 높이
                 right: AppTheme.spacingMd,
                 child: FadeTransition(
                   opacity: _fadeAnimation,
