@@ -113,6 +113,54 @@ class RecordProvider extends ChangeNotifier {
     return entry.minutes;
   }
 
+  // 체크박스 완료 여부 확인
+  bool isCheckBoxCompleted(int checkBoxId) {
+    if (_currentRecord?.checkRecords == null) return false;
+
+    final entry = _currentRecord!.checkRecords!
+        .where((entry) => entry.checkBoxId == checkBoxId)
+        .firstOrNull;
+
+    return entry?.isCompleted ?? false;
+  }
+
+  // 체크박스 토글
+  Future<void> toggleCheckBox(int checkBoxId) async {
+    if (_currentRecord == null) return;
+
+    final currentRecords = _currentRecord!.checkRecords ?? [];
+    final currentStatus = isCheckBoxCompleted(checkBoxId);
+
+    // 해당 체크박스의 기록 찾기
+    final index = currentRecords.indexWhere((entry) => entry.checkBoxId == checkBoxId);
+
+    List<CheckEntry> newRecords;
+    if (index != -1) {
+      // 기존 기록 토글
+      newRecords = currentRecords.map((entry) {
+        if (entry.checkBoxId == checkBoxId) {
+          return CheckEntry(checkBoxId: checkBoxId, isCompleted: !currentStatus);
+        }
+        return entry;
+      }).toList();
+    } else {
+      // 새 기록 추가 (체크됨으로)
+      newRecords = [
+        ...currentRecords,
+        CheckEntry(checkBoxId: checkBoxId, isCompleted: true),
+      ];
+    }
+
+    _currentRecord!.checkRecords = newRecords;
+
+    final isar = await IsarService.instance;
+    await isar.writeTxn(() async {
+      await isar.dailyRecords.put(_currentRecord!);
+    });
+
+    notifyListeners();
+  }
+
   // 날짜 포맷팅 (YYYY-MM-DD)
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';

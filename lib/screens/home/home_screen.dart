@@ -6,6 +6,7 @@ import '../../utils/debounced_gesture_detector.dart';
 import '../../utils/snackbar_manager.dart';
 import 'sections/daily_message_section.dart';
 import 'sections/category_section.dart';
+import 'sections/checkbox_section.dart';
 import 'sections/calendar_section.dart';
 import 'widgets/category_edit_dialog.dart';
 
@@ -97,6 +98,9 @@ class _HomeScreenState extends State<HomeScreen>
 
                         // 카테고리 섹션 (4개 카테고리)
                         const CategorySection(),
+
+                        // 체크박스 섹션
+                        const CheckboxSection(),
 
                         // 달력
                         const CalendarSection(),

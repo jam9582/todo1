@@ -108,7 +108,7 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
   }
 
   static const int _maxCategories = 4;
-  static const int _maxCheckBoxes = 10;
+  static const int _maxCheckBoxes = 4;
 
   // 체크박스 관련 메서드
   Future<void> _onCheckBoxReorder(int oldIndex, int newIndex) async {
