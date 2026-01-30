@@ -22,6 +22,7 @@ class CategoryEditDialog extends StatefulWidget {
 
 class _CategoryEditDialogState extends State<CategoryEditDialog> {
   List<Category> _categories = [];
+  int _selectedTabIndex = 0; // 0: 카테고리, 1: 체크박스
 
   @override
   void initState() {
@@ -127,9 +128,13 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
           children: [
             _buildHeader(),
             const SizedBox(height: 20),
-            Flexible(child: _buildCategoryList()),
-            const SizedBox(height: 16),
-            _buildAddButton(),
+            if (_selectedTabIndex == 0) ...[
+              Flexible(child: _buildCategoryList()),
+              const SizedBox(height: 16),
+              _buildAddButton(),
+            ] else ...[
+              _buildCheckboxContent(),
+            ],
             const SizedBox(height: 16),
             _buildCloseButton(),
           ],
@@ -139,12 +144,57 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
   }
 
   Widget _buildHeader() {
-    return const Text(
-      '카테고리 편집',
-      style: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.grey100,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedTabIndex = 0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: _selectedTabIndex == 0 ? AppColors.background : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '카테고리',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: _selectedTabIndex == 0 ? AppColors.textPrimary : AppColors.grey500,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedTabIndex = 1),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: _selectedTabIndex == 1 ? AppColors.background : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '체크박스',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: _selectedTabIndex == 1 ? AppColors.textPrimary : AppColors.grey500,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -236,6 +286,32 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCheckboxContent() {
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 300),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.check_box_outlined,
+              size: 48,
+              color: AppColors.grey300,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '체크박스 기능 준비 중',
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.grey400,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
