@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart' as emoji_picker;
 import '../../../constants/colors.dart';
 import '../../../models/category.dart';
+import '../../../models/check_box.dart';
 import '../../../providers/category_provider.dart';
+import '../../../providers/check_box_provider.dart';
 
 /// 카테고리 편집 다이얼로그
 class CategoryEditDialog extends StatefulWidget {
@@ -22,18 +24,27 @@ class CategoryEditDialog extends StatefulWidget {
 
 class _CategoryEditDialogState extends State<CategoryEditDialog> {
   List<Category> _categories = [];
+  List<CheckBox> _checkBoxes = [];
   int _selectedTabIndex = 0; // 0: 카테고리, 1: 체크박스
 
   @override
   void initState() {
     super.initState();
     _loadCategories();
+    _loadCheckBoxes();
   }
 
   void _loadCategories() {
     final provider = context.read<CategoryProvider>();
     setState(() {
       _categories = List.from(provider.categories);
+    });
+  }
+
+  void _loadCheckBoxes() {
+    final provider = context.read<CheckBoxProvider>();
+    setState(() {
+      _checkBoxes = List.from(provider.checkBoxes);
     });
   }
 
@@ -97,6 +108,80 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
   }
 
   static const int _maxCategories = 4;
+  static const int _maxCheckBoxes = 10;
+
+  // 체크박스 관련 메서드
+  Future<void> _onCheckBoxReorder(int oldIndex, int newIndex) async {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+
+    setState(() {
+      final item = _checkBoxes.removeAt(oldIndex);
+      _checkBoxes.insert(newIndex, item);
+    });
+
+    final provider = context.read<CheckBoxProvider>();
+    for (int i = 0; i < _checkBoxes.length; i++) {
+      _checkBoxes[i].order = i;
+      await provider.updateCheckBox(_checkBoxes[i]);
+    }
+  }
+
+  Future<void> _onEditCheckBox(CheckBox checkBox) async {
+    final result = await _CheckBoxItemEditDialog.show(context, checkBox: checkBox);
+    if (result != null && mounted) {
+      final provider = context.read<CheckBoxProvider>();
+      checkBox.name = result;
+      await provider.updateCheckBox(checkBox);
+      _loadCheckBoxes();
+    }
+  }
+
+  Future<void> _onDeleteCheckBox(CheckBox checkBox) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.background,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text('체크박스 삭제'),
+        content: Text('\'${checkBox.name}\' 항목을 삭제하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('취소', style: TextStyle(color: AppColors.grey500)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('삭제', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      final provider = context.read<CheckBoxProvider>();
+      await provider.deleteCheckBox(checkBox.id);
+      _loadCheckBoxes();
+    }
+  }
+
+  Future<void> _onAddCheckBox() async {
+    if (_checkBoxes.length >= _maxCheckBoxes) return;
+
+    final result = await _CheckBoxItemEditDialog.show(context);
+    if (result != null && mounted) {
+      final provider = context.read<CheckBoxProvider>();
+      final newCheckBox = CheckBox(
+        name: result,
+        order: _checkBoxes.length,
+      );
+      await provider.addCheckBox(newCheckBox);
+      _loadCheckBoxes();
+    }
+  }
 
   Future<void> _onAddCategory() async {
     if (_categories.length >= _maxCategories) return;
@@ -133,7 +218,9 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
               const SizedBox(height: 16),
               _buildAddButton(),
             ] else ...[
-              _buildCheckboxContent(),
+              Flexible(child: _buildCheckBoxList()),
+              const SizedBox(height: 16),
+              _buildCheckBoxAddButton(),
             ],
             const SizedBox(height: 16),
             _buildCloseButton(),
@@ -290,27 +377,157 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
     );
   }
 
-  Widget _buildCheckboxContent() {
+  Widget _buildCheckBoxList() {
+    if (_checkBoxes.isEmpty) {
+      return Container(
+        constraints: const BoxConstraints(maxHeight: 300),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.check_box_outline_blank_rounded,
+                size: 48,
+                color: AppColors.grey300,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '체크박스를 추가해보세요',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.grey400,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Container(
       constraints: const BoxConstraints(maxHeight: 300),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.check_box_outlined,
-              size: 48,
-              color: AppColors.grey300,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '체크박스 기능 준비 중',
-              style: TextStyle(
-                fontSize: 14,
+      child: ReorderableListView.builder(
+        shrinkWrap: true,
+        itemCount: _checkBoxes.length,
+        onReorder: _onCheckBoxReorder,
+        proxyDecorator: (child, index, animation) {
+          return Material(
+            elevation: 4,
+            borderRadius: BorderRadius.circular(12),
+            child: child,
+          );
+        },
+        itemBuilder: (context, index) {
+          final checkBox = _checkBoxes[index];
+          return _buildCheckBoxItem(checkBox, index);
+        },
+      ),
+    );
+  }
+
+  Widget _buildCheckBoxItem(CheckBox checkBox, int index) {
+    return Container(
+      key: ValueKey(checkBox.id),
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: AppColors.grey100,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          // 드래그 핸들
+          ReorderableDragStartListener(
+            index: index,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              child: const Icon(
+                Icons.drag_handle_rounded,
                 color: AppColors.grey400,
+                size: 20,
               ),
             ),
-          ],
+          ),
+          // 체크박스 아이콘 & 이름
+          Expanded(
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.check_box_outline_blank_rounded,
+                  size: 20,
+                  color: AppColors.grey400,
+                ),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    checkBox.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // 편집 버튼
+          IconButton(
+            onPressed: () => _onEditCheckBox(checkBox),
+            icon: const Icon(
+              Icons.edit_outlined,
+              size: 18,
+              color: AppColors.grey500,
+            ),
+          ),
+          // 삭제 버튼
+          IconButton(
+            onPressed: () => _onDeleteCheckBox(checkBox),
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              size: 18,
+              color: AppColors.grey500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCheckBoxAddButton() {
+    final isMaxReached = _checkBoxes.length >= _maxCheckBoxes;
+
+    return GestureDetector(
+      onTap: isMaxReached ? null : _onAddCheckBox,
+      child: Opacity(
+        opacity: isMaxReached ? 0.4 : 1.0,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.grey300),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.add_rounded,
+                size: 20,
+                color: AppColors.grey500,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                isMaxReached ? '최대 $_maxCheckBoxes개' : '체크박스 추가',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.grey500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -613,6 +830,175 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
             ),
           ],
         ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 체크박스 이름 수정 다이얼로그
+class _CheckBoxItemEditDialog extends StatefulWidget {
+  final CheckBox? checkBox;
+
+  const _CheckBoxItemEditDialog({this.checkBox});
+
+  static Future<String?> show(
+    BuildContext context, {
+    CheckBox? checkBox,
+  }) {
+    return showDialog<String>(
+      context: context,
+      builder: (context) => _CheckBoxItemEditDialog(checkBox: checkBox),
+    );
+  }
+
+  @override
+  State<_CheckBoxItemEditDialog> createState() => _CheckBoxItemEditDialogState();
+}
+
+class _CheckBoxItemEditDialogState extends State<_CheckBoxItemEditDialog> {
+  late TextEditingController _nameController;
+  bool _nameError = false;
+
+  bool get _isEditing => widget.checkBox != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.checkBox?.name ?? '');
+    _nameController.addListener(() {
+      if (_nameError && _nameController.text.trim().isNotEmpty) {
+        setState(() => _nameError = false);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  void _onConfirm() {
+    final name = _nameController.text.trim();
+
+    if (name.isEmpty) {
+      setState(() => _nameError = true);
+      return;
+    }
+
+    Navigator.pop(context, name);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: AppColors.background,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _isEditing ? '체크박스 수정' : '새 체크박스',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 24),
+            // 이름 입력
+            TextField(
+              controller: _nameController,
+              autofocus: true,
+              maxLength: 20,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+              decoration: InputDecoration(
+                hintText: '할 일 이름',
+                hintStyle: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.grey400,
+                ),
+                counterText: '',
+                filled: true,
+                fillColor: AppColors.grey100,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: _nameError
+                      ? const BorderSide(color: Colors.red, width: 1.5)
+                      : BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: _nameError
+                      ? const BorderSide(color: Colors.red, width: 1.5)
+                      : BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 16,
+                ),
+              ),
+              onSubmitted: (_) => _onConfirm(),
+            ),
+            const SizedBox(height: 24),
+            // 버튼
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      '취소',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.grey500,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextButton(
+                    onPressed: _onConfirm,
+                    style: TextButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      '확인',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textOnAccent,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
