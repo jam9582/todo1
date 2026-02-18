@@ -314,6 +314,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
           child: LineChart(
+            duration: Duration.zero,
             LineChartData(
               minY: 0,
               maxY: chartMaxY, // interval 배수로 올림하여 모든 데이터가 그리드 내부에
@@ -403,14 +404,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 },
               ),
               borderData: FlBorderData(show: false),
-              extraLinesData: (_selectedDateIndex != null && _selectedCategoryIndex == null)
+              extraLinesData: (_selectedDateIndex != null || _selectedSpot != null)
                   ? ExtraLinesData(
+                      extraLinesOnTop: false,
                       verticalLines: [
                         VerticalLine(
-                          x: _selectedDateIndex!.toDouble(),
-                          color: AppColors.grey500,
+                          x: (_selectedDateIndex ?? _selectedSpot!.spotIndex).toDouble(),
+                          color: AppColors.grey300,
                           strokeWidth: 1,
-                          dashArray: [4, 4],
                         ),
                       ],
                     )
