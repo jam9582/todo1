@@ -46,6 +46,9 @@ dependencies:
   # Emoji picker
   emoji_picker_flutter: ^4.4.0
 
+  # Charts
+  fl_chart: ^0.69.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

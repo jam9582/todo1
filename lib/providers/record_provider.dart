@@ -237,4 +237,98 @@ class RecordProvider extends ChangeNotifier {
 
     return (categoryId: topEntry.categoryId, minutes: topEntry.minutes);
   }
+
+  // ========== 통계 관련 메서드 ==========
+
+  // 기간별 기록 조회 (통계용)
+  Future<List<DailyRecord>> getRecordsForDateRange(DateTime start, DateTime end) async {
+    final isar = await IsarService.instance;
+    final startDate = _formatDate(start);
+    final endDate = _formatDate(end);
+
+    return await isar.dailyRecords
+        .filter()
+        .dateGreaterThan(startDate, include: true)
+        .dateLessThan(endDate, include: true)
+        .findAll();
+  }
+
+  // 주간 통계 데이터 (최근 7일)
+  Future<Map<String, List<({DateTime date, int minutes})>>> getWeeklyStats() async {
+    final now = DateTime.now();
+    final weekStart = now.subtract(Duration(days: 6)); // 7일 전부터
+
+    final records = await getRecordsForDateRange(weekStart, now);
+
+    // 카테고리별 일일 데이터 맵
+    final Map<String, List<({DateTime date, int minutes})>> categoryData = {};
+
+    // 7일간의 날짜 리스트 생성
+    for (int i = 0; i < 7; i++) {
+      final date = weekStart.add(Duration(days: i));
+      final dateString = _formatDate(date);
+      final record = records.where((r) => r.date == dateString).firstOrNull;
+
+      if (record?.timeRecords != null) {
+        for (final entry in record!.timeRecords!) {
+          if (entry.minutes > 0) {
+            final key = entry.categoryId.toString();
+            categoryData.putIfAbsent(key, () => []);
+            categoryData[key]!.add((date: date, minutes: entry.minutes));
+          }
+        }
+      }
+    }
+
+    return categoryData;
+  }
+
+  // 월간 통계 데이터 (이번 달)
+  Future<Map<String, List<({DateTime date, int minutes})>>> getMonthlyStats() async {
+    final now = DateTime.now();
+    final monthStart = DateTime(now.year, now.month, 1);
+    final monthEnd = DateTime(now.year, now.month + 1, 0);
+
+    final records = await getRecordsForDateRange(monthStart, monthEnd);
+
+    final Map<String, List<({DateTime date, int minutes})>> categoryData = {};
+
+    // 해당 월의 모든 날짜
+    for (int day = 1; day <= monthEnd.day; day++) {
+      final date = DateTime(now.year, now.month, day);
+      if (date.isAfter(now)) break; // 오늘 이후는 스킵
+
+      final dateString = _formatDate(date);
+      final record = records.where((r) => r.date == dateString).firstOrNull;
+
+      if (record?.timeRecords != null) {
+        for (final entry in record!.timeRecords!) {
+          if (entry.minutes > 0) {
+            final key = entry.categoryId.toString();
+            categoryData.putIfAbsent(key, () => []);
+            categoryData[key]!.add((date: date, minutes: entry.minutes));
+          }
+        }
+      }
+    }
+
+    return categoryData;
+  }
+
+  // 기간별 카테고리 총합 (프로그레스 바용)
+  Future<Map<int, int>> getCategoryTotals(DateTime start, DateTime end) async {
+    final records = await getRecordsForDateRange(start, end);
+
+    final Map<int, int> totals = {};
+
+    for (final record in records) {
+      if (record.timeRecords != null) {
+        for (final entry in record.timeRecords!) {
+          totals[entry.categoryId] = (totals[entry.categoryId] ?? 0) + entry.minutes;
+        }
+      }
+    }
+
+    return totals;
+  }
 }

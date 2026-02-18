@@ -10,6 +10,7 @@ import 'sections/category_section.dart';
 import 'sections/checkbox_section.dart';
 import 'sections/calendar_section.dart';
 import 'widgets/category_edit_dialog.dart';
+import '../statistics/statistics_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -73,7 +74,12 @@ class _HomeScreenState extends State<HomeScreen>
   void _onMenuItemTap(String label) {
     _closeMenu();
 
-    if (label == '카테고리 편집') {
+    if (label == '통계') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const StatisticsScreen()),
+      );
+    } else if (label == '카테고리 편집') {
       CategoryEditDialog.show(context);
     } else {
       SnackBarManager.showText(context, '$label 기능은 준비 중입니다');
