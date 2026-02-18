@@ -8,18 +8,28 @@ class RecordProvider extends ChangeNotifier {
   DailyRecord? _currentRecord;
   bool _isLoading = false;
 
+  // 월별 기록 캐시
+  Map<String, DailyRecord> _monthRecords = {};
+  String _loadedMonth = '';
+
   DateTime get selectedDate => _selectedDate;
   DailyRecord? get currentRecord => _currentRecord;
   bool get isLoading => _isLoading;
+  Map<String, DailyRecord> get monthRecords => _monthRecords;
 
   RecordProvider() {
     loadRecord(_selectedDate);
+    loadMonthRecords(_selectedDate);
   }
 
   // 날짜 선택
   void selectDate(DateTime date) {
+    final monthChanged = _selectedDate.year != date.year || _selectedDate.month != date.month;
     _selectedDate = date;
     loadRecord(date);
+    if (monthChanged) {
+      loadMonthRecords(date);
+    }
   }
 
   // 특정 날짜의 기록 불러오기
@@ -97,6 +107,10 @@ class RecordProvider extends ChangeNotifier {
       await isar.dailyRecords.put(_currentRecord!);
     });
 
+    // 월별 캐시도 업데이트
+    final dateString = _formatDate(_selectedDate);
+    _monthRecords[dateString] = _currentRecord!;
+
     notifyListeners();
   }
 
@@ -164,5 +178,63 @@ class RecordProvider extends ChangeNotifier {
   // 날짜 포맷팅 (YYYY-MM-DD)
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  // 월 포맷팅 (YYYY-MM)
+  String _formatMonth(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}';
+  }
+
+  // 월별 기록 로드
+  Future<void> loadMonthRecords(DateTime month) async {
+    final monthKey = _formatMonth(month);
+
+    // 이미 로드된 월이면 스킵
+    if (_loadedMonth == monthKey) return;
+
+    final isar = await IsarService.instance;
+
+    // 해당 월의 시작일과 종료일
+    final startDate = _formatDate(DateTime(month.year, month.month, 1));
+    final endDate = _formatDate(DateTime(month.year, month.month + 1, 0));
+
+    // 해당 월의 모든 기록 조회
+    final records = await isar.dailyRecords
+        .filter()
+        .dateGreaterThan(startDate, include: true)
+        .dateLessThan(endDate, include: true)
+        .findAll();
+
+    // Map으로 변환
+    _monthRecords = {
+      for (var record in records) record.date: record
+    };
+    _loadedMonth = monthKey;
+
+    notifyListeners();
+  }
+
+  // 특정 날짜의 최다 시간 카테고리 정보 가져오기
+  ({int categoryId, int minutes})? getTopCategoryForDate(DateTime date) {
+    final dateString = _formatDate(date);
+    final record = _monthRecords[dateString];
+
+    if (record == null || record.timeRecords == null || record.timeRecords!.isEmpty) {
+      return null;
+    }
+
+    // 가장 시간이 많은 카테고리 찾기
+    TimeEntry? topEntry;
+    for (final entry in record.timeRecords!) {
+      if (entry.minutes > 0) {
+        if (topEntry == null || entry.minutes > topEntry.minutes) {
+          topEntry = entry;
+        }
+      }
+    }
+
+    if (topEntry == null) return null;
+
+    return (categoryId: topEntry.categoryId, minutes: topEntry.minutes);
   }
 }

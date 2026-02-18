@@ -5,80 +5,93 @@ import '../../../utils/debounced_gesture_detector.dart';
 
 class CalendarDayCell extends StatelessWidget {
   final int day;
-  final bool isToday;
+  final bool isSelected;
   final bool isWeekend;
   final String? emoji;
-  final double? hours;
+  final int? minutes; // 분 단위로 받음
   final VoidCallback onTap;
 
   const CalendarDayCell({
     super.key,
     required this.day,
-    required this.isToday,
+    required this.isSelected,
     required this.isWeekend,
     this.emoji,
-    this.hours,
+    this.minutes,
     required this.onTap,
   });
 
+  // 분을 H:MM 형식으로 변환
+  String _formatTime(int minutes) {
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+    return '$hours:${mins.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final hasData = emoji != null && hours != null;
+    final hasData = emoji != null && minutes != null && minutes! > 0;
 
     return DebouncedGestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: isToday ? AppColors.accent : Colors.transparent,
-          borderRadius: BorderRadius.circular(8), // 둥근 사각형
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 2),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Flexible(
-              flex: hasData ? 2 : 1,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  '$day',
-                  style: TextStyle(
-                    fontSize: Responsive.fontSize(context, 14),
-                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                    color: isToday
-                        ? AppColors.textOnAccent
-                        : (isWeekend ? AppColors.error : AppColors.textPrimary),
-                  ),
+            // 날짜 숫자 (선택 시 컴팩트한 박스)
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.accent : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                '$day',
+                style: TextStyle(
+                  fontSize: Responsive.fontSize(context, 14),
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected
+                      ? AppColors.textOnAccent
+                      : (isWeekend ? AppColors.error : AppColors.textPrimary),
                 ),
               ),
             ),
-            if (hasData) ...[
-              Flexible(
-                flex: 1,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    emoji!,
-                    style: TextStyle(
-                      fontSize: Responsive.fontSize(context, 12),
-                    ),
-                  ),
-                ),
-              ),
-              Flexible(
-                flex: 1,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    hours!.toStringAsFixed(1),
-                    style: TextStyle(
-                      fontSize: Responsive.fontSize(context, 10),
-                      color: isToday ? AppColors.textOnAccent : AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            const SizedBox(height: 2),
+            // 카테고리 정보 영역 (항상 공간 유지)
+            SizedBox(
+              height: 18,
+              child: hasData
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            emoji!,
+                            style: TextStyle(
+                              fontSize: Responsive.fontSize(context, 9),
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            _formatTime(minutes!),
+                            style: TextStyle(
+                              fontSize: Responsive.fontSize(context, 8),
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : null,
+            ),
           ],
         ),
       ),
