@@ -406,6 +406,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 },
               ),
               borderData: FlBorderData(show: false),
+              extraLinesData: (_selectedDateIndex != null && _selectedCategoryIndex == null)
+                  ? ExtraLinesData(
+                      verticalLines: [
+                        VerticalLine(
+                          x: _selectedDateIndex!.toDouble(),
+                          color: AppColors.grey500,
+                          strokeWidth: 1,
+                          dashArray: [4, 4],
+                        ),
+                      ],
+                    )
+                  : null,
               showingTooltipIndicators: _selectedDateIndex != null
                   ? [
                       ShowingTooltipIndicators(
@@ -474,6 +486,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 touchTooltipData: LineTouchTooltipData(
                   getTooltipColor: (_) => AppColors.textPrimary,
                   tooltipRoundedRadius: 8,
+                  fitInsideHorizontally: true,
                   tooltipPadding: _selectedCategoryIndex == null
                       ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8)
                       : const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
