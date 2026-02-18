@@ -21,8 +21,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Map<String, List<({DateTime date, int minutes})>> _chartData = {};
   Map<int, int> _categoryTotals = {};
 
-  // 툴팁 토글용 상태 (lineIndex, spotIndex)
-  ({int lineIndex, int spotIndex})? _selectedSpot;
+  // 범례 버튼 선택 상태 (categories 배열 인덱스)
+  int? _selectedCategoryIndex;
+  // 선택된 점 (툴팁 토글)
+  ({int barIndex, int spotIndex})? _selectedSpot;
 
   // 카테고리별 색상 (최대 4개)
   final List<Color> _categoryColors = [
@@ -41,7 +43,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
-      _selectedSpot = null; // 데이터 로드 시 선택 초기화
+      _selectedCategoryIndex = null;
+      _selectedSpot = null;
     });
 
     final recordProvider = context.read<RecordProvider>();
@@ -200,10 +203,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
 
     // 차트 데이터 준비
+    // barToCategoryIndex[barIndex] = categoryIndex (데이터 없는 카테고리는 lineBars에서 제외)
     final List<LineChartBarData> lineBars = [];
-    int colorIndex = 0;
+    final List<int> barToCategoryIndex = [];
 
-    for (final category in categories) {
+    for (int i = 0; i < categories.length; i++) {
+      final category = categories[i];
       final key = category.id.toString();
       final data = _chartData[key];
 
@@ -213,14 +218,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         if (_isWeekly) {
           // 주간: 7일
           final weekStart = DateTime.now().subtract(const Duration(days: 6));
-          for (int i = 0; i < 7; i++) {
-            final date = weekStart.add(Duration(days: i));
+          for (int j = 0; j < 7; j++) {
+            final date = weekStart.add(Duration(days: j));
             final dayData = data.where((d) =>
               d.date.year == date.year &&
               d.date.month == date.month &&
               d.date.day == date.day
             ).firstOrNull;
-            spots.add(FlSpot(i.toDouble(), (dayData?.minutes ?? 0) / 60.0));
+            spots.add(FlSpot(j.toDouble(), (dayData?.minutes ?? 0) / 60.0));
           }
         } else {
           // 월간
@@ -232,17 +237,20 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           }
         }
 
+        final color = _categoryColors[i % _categoryColors.length];
+        final bool isActive = _selectedCategoryIndex == null || _selectedCategoryIndex == i;
+
         lineBars.add(
           LineChartBarData(
             spots: spots,
-            isCurved: false, // 직선으로 연결
-            color: _categoryColors[colorIndex % _categoryColors.length],
-            barWidth: 2,
+            isCurved: false,
+            color: isActive ? color : color.withValues(alpha: 0.15),
+            barWidth: isActive ? 2 : 1,
             dotData: FlDotData(
               show: true,
               getDotPainter: (spot, percent, barData, index) {
                 return FlDotCirclePainter(
-                  radius: 3,
+                  radius: isActive ? 3 : 2,
                   color: barData.color ?? Colors.blue,
                   strokeWidth: 0,
                 );
@@ -251,8 +259,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             belowBarData: BarAreaData(show: false),
           ),
         );
+        barToCategoryIndex.add(i);
       }
-      colorIndex++;
     }
 
     if (lineBars.isEmpty) {
@@ -399,56 +407,46 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   ? [
                       ShowingTooltipIndicators([
                         LineBarSpot(
-                          lineBars[_selectedSpot!.lineIndex],
-                          _selectedSpot!.lineIndex,
-                          lineBars[_selectedSpot!.lineIndex].spots[_selectedSpot!.spotIndex],
+                          lineBars[_selectedSpot!.barIndex],
+                          _selectedSpot!.barIndex,
+                          lineBars[_selectedSpot!.barIndex].spots[_selectedSpot!.spotIndex],
                         ),
                       ]),
                     ]
                   : [],
               lineTouchData: LineTouchData(
-                enabled: true,
-                touchSpotThreshold: 20, // 터치 감지 범위 (픽셀)
-                handleBuiltInTouches: false, // 수동 제어
+                enabled: _selectedCategoryIndex != null,
+                handleBuiltInTouches: false,
+                touchSpotThreshold: 20,
                 touchCallback: (event, response) {
-                  if (event is FlTapUpEvent && response?.lineBarSpots != null && response!.lineBarSpots!.isNotEmpty) {
-                    final spots = response.lineBarSpots!;
+                  if (_selectedCategoryIndex == null) return;
+                  if (event is! FlTapUpEvent) return;
+                  if (response?.lineBarSpots == null || response!.lineBarSpots!.isEmpty) return;
 
-                    // 디버그: 감지된 점들 확인
-                    debugPrint('=== 터치 감지된 점들 (${spots.length}개) ===');
-                    for (final spot in spots) {
-                      debugPrint('barIndex: ${spot.barIndex}, spotIndex: ${spot.spotIndex}, y: ${spot.y}, distance: ${spot.distance}');
+                  // 선택된 카테고리의 barIndex 찾기
+                  final selectedBarIndex = barToCategoryIndex.indexOf(_selectedCategoryIndex!);
+                  if (selectedBarIndex == -1) return;
+
+                  // 선택된 카테고리의 점만 필터
+                  final spots = response.lineBarSpots!
+                      .where((s) => s.barIndex == selectedBarIndex)
+                      .toList();
+                  if (spots.isEmpty) return;
+
+                  final spot = spots.first;
+                  final newSelection = (barIndex: spot.barIndex, spotIndex: spot.spotIndex);
+
+                  setState(() {
+                    if (_selectedSpot?.barIndex == newSelection.barIndex &&
+                        _selectedSpot?.spotIndex == newSelection.spotIndex) {
+                      _selectedSpot = null;
+                    } else {
+                      _selectedSpot = newSelection;
                     }
-
-                    // distance 속성으로 가장 가까운 점 찾기
-                    // distance가 같으면 y값이 큰 점(실제 데이터가 있는 점) 우선
-                    TouchLineBarSpot closestSpot = spots.first;
-                    for (final spot in spots) {
-                      if (spot.distance < closestSpot.distance) {
-                        closestSpot = spot;
-                      } else if (spot.distance == closestSpot.distance && spot.y > closestSpot.y) {
-                        // 거리가 같으면 y값이 큰 점 선택
-                        closestSpot = spot;
-                      }
-                    }
-
-                    debugPrint('선택된 점: barIndex=${closestSpot.barIndex}, spotIndex=${closestSpot.spotIndex}');
-
-                    final newSelection = (lineIndex: closestSpot.barIndex, spotIndex: closestSpot.spotIndex);
-
-                    setState(() {
-                      // 같은 점 클릭 시 토글 (끄기)
-                      if (_selectedSpot?.lineIndex == newSelection.lineIndex &&
-                          _selectedSpot?.spotIndex == newSelection.spotIndex) {
-                        _selectedSpot = null;
-                      } else {
-                        _selectedSpot = newSelection;
-                      }
-                    });
-                  }
+                  });
                 },
                 touchTooltipData: LineTouchTooltipData(
-                  getTooltipColor: (touchedSpot) => AppColors.textPrimary,
+                  getTooltipColor: (_) => AppColors.textPrimary,
                   tooltipRoundedRadius: 8,
                   getTooltipItems: (touchedSpots) {
                     return touchedSpots.map((spot) {
@@ -475,30 +473,57 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildChartLegend(List categories) {
     return Wrap(
-      spacing: 16,
+      spacing: 8,
       runSpacing: 8,
       children: List.generate(categories.length, (index) {
         final category = categories[index];
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: _categoryColors[index % _categoryColors.length],
-                borderRadius: BorderRadius.circular(2),
+        final color = _categoryColors[index % _categoryColors.length];
+        final isSelected = _selectedCategoryIndex == index;
+
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              if (_selectedCategoryIndex == index) {
+                _selectedCategoryIndex = null;
+              } else {
+                _selectedCategoryIndex = index;
+              }
+              _selectedSpot = null;
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: isSelected ? color.withValues(alpha: 0.15) : Colors.transparent,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isSelected ? color : AppColors.grey300,
+                width: 1,
               ),
             ),
-            const SizedBox(width: 4),
-            Text(
-              '${category.emoji} ${category.name}',
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${category.emoji} ${category.name}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       }),
     );
