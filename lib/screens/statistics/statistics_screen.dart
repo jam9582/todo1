@@ -244,7 +244,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           LineChartBarData(
             spots: spots,
             isCurved: false,
-            color: isActive ? color : color.withValues(alpha: 0.15),
+            color: isActive ? color : color.withValues(alpha: 0.3),
             barWidth: isActive ? 2 : 1,
             dotData: FlDotData(
               show: true,
@@ -417,23 +417,26 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               lineTouchData: LineTouchData(
                 enabled: _selectedCategoryIndex != null,
                 handleBuiltInTouches: false,
-                touchSpotThreshold: 20,
+                touchSpotThreshold: 25,
                 touchCallback: (event, response) {
                   if (_selectedCategoryIndex == null) return;
                   if (event is! FlTapUpEvent) return;
-                  if (response?.lineBarSpots == null || response!.lineBarSpots!.isEmpty) return;
 
-                  // 선택된 카테고리의 barIndex 찾기
                   final selectedBarIndex = barToCategoryIndex.indexOf(_selectedCategoryIndex!);
                   if (selectedBarIndex == -1) return;
 
                   // 선택된 카테고리의 점만 필터
-                  final spots = response.lineBarSpots!
-                      .where((s) => s.barIndex == selectedBarIndex)
-                      .toList();
-                  if (spots.isEmpty) return;
+                  final matchedSpots = response?.lineBarSpots
+                      ?.where((s) => s.barIndex == selectedBarIndex)
+                      .toList() ?? [];
 
-                  final spot = spots.first;
+                  // 점 근처가 아닌 곳 클릭 시 툴팁 닫기
+                  if (matchedSpots.isEmpty) {
+                    setState(() => _selectedSpot = null);
+                    return;
+                  }
+
+                  final spot = matchedSpots.first;
                   final newSelection = (barIndex: spot.barIndex, spotIndex: spot.spotIndex);
 
                   setState(() {
@@ -448,6 +451,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 touchTooltipData: LineTouchTooltipData(
                   getTooltipColor: (_) => AppColors.textPrimary,
                   tooltipRoundedRadius: 8,
+                  tooltipPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                   getTooltipItems: (touchedSpots) {
                     return touchedSpots.map((spot) {
                       final hours = spot.y.floor();
