@@ -23,8 +23,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   // 범례 버튼 선택 상태 (categories 배열 인덱스)
   int? _selectedCategoryIndex;
-  // 선택된 점 (툴팁 토글)
+  // 선택된 점 - 카테고리 모드 (툴팁 토글)
   ({int barIndex, int spotIndex})? _selectedSpot;
+  // 선택된 날짜 - 전체 모드 (spotIndex = x좌표 인덱스)
+  int? _selectedDateIndex;
 
   // 카테고리별 색상 (최대 4개)
   final List<Color> _categoryColors = [
@@ -45,6 +47,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       _isLoading = true;
       _selectedCategoryIndex = null;
       _selectedSpot = null;
+      _selectedDateIndex = null;
     });
 
     final recordProvider = context.read<RecordProvider>();
@@ -403,68 +406,109 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 },
               ),
               borderData: FlBorderData(show: false),
-              showingTooltipIndicators: _selectedSpot != null
+              showingTooltipIndicators: _selectedDateIndex != null
                   ? [
-                      ShowingTooltipIndicators([
-                        LineBarSpot(
-                          lineBars[_selectedSpot!.barIndex],
-                          _selectedSpot!.barIndex,
-                          lineBars[_selectedSpot!.barIndex].spots[_selectedSpot!.spotIndex],
-                        ),
-                      ]),
+                      ShowingTooltipIndicators(
+                        lineBars.asMap().entries
+                            .where((e) => e.value.spots.length > _selectedDateIndex!)
+                            .map((e) => LineBarSpot(e.value, e.key, e.value.spots[_selectedDateIndex!]))
+                            .toList(),
+                      ),
                     ]
-                  : [],
+                  : _selectedSpot != null
+                      ? [
+                          ShowingTooltipIndicators([
+                            LineBarSpot(
+                              lineBars[_selectedSpot!.barIndex],
+                              _selectedSpot!.barIndex,
+                              lineBars[_selectedSpot!.barIndex].spots[_selectedSpot!.spotIndex],
+                            ),
+                          ]),
+                        ]
+                      : [],
               lineTouchData: LineTouchData(
-                enabled: _selectedCategoryIndex != null,
+                enabled: true,
                 handleBuiltInTouches: false,
-                touchSpotThreshold: 25,
+                // 날짜 모드: 어디든 탭해도 가장 가까운 날짜 감지, 카테고리 모드: 점 근처만
+                touchSpotThreshold: _selectedCategoryIndex == null ? 200 : 25,
                 touchCallback: (event, response) {
-                  if (_selectedCategoryIndex == null) return;
                   if (event is! FlTapUpEvent) return;
 
-                  final selectedBarIndex = barToCategoryIndex.indexOf(_selectedCategoryIndex!);
-                  if (selectedBarIndex == -1) return;
-
-                  // 선택된 카테고리의 점만 필터
-                  final matchedSpots = response?.lineBarSpots
-                      ?.where((s) => s.barIndex == selectedBarIndex)
-                      .toList() ?? [];
-
-                  // 점 근처가 아닌 곳 클릭 시 툴팁 닫기
-                  if (matchedSpots.isEmpty) {
-                    setState(() => _selectedSpot = null);
-                    return;
-                  }
-
-                  final spot = matchedSpots.first;
-                  final newSelection = (barIndex: spot.barIndex, spotIndex: spot.spotIndex);
-
-                  setState(() {
-                    if (_selectedSpot?.barIndex == newSelection.barIndex &&
-                        _selectedSpot?.spotIndex == newSelection.spotIndex) {
-                      _selectedSpot = null;
-                    } else {
-                      _selectedSpot = newSelection;
+                  if (_selectedCategoryIndex == null) {
+                    // 날짜 모드: 탭한 x좌표의 날짜 선택 (토글)
+                    final spots = response?.lineBarSpots;
+                    if (spots == null || spots.isEmpty) {
+                      setState(() => _selectedDateIndex = null);
+                      return;
                     }
-                  });
+                    final tappedSpotIndex = spots.first.spotIndex;
+                    setState(() {
+                      _selectedDateIndex = _selectedDateIndex == tappedSpotIndex ? null : tappedSpotIndex;
+                    });
+                  } else {
+                    // 카테고리 모드: 선택된 카테고리 점 토글
+                    final selectedBarIndex = barToCategoryIndex.indexOf(_selectedCategoryIndex!);
+                    if (selectedBarIndex == -1) return;
+
+                    final matchedSpots = response?.lineBarSpots
+                        ?.where((s) => s.barIndex == selectedBarIndex)
+                        .toList() ?? [];
+
+                    if (matchedSpots.isEmpty) {
+                      setState(() => _selectedSpot = null);
+                      return;
+                    }
+
+                    final spot = matchedSpots.first;
+                    final newSelection = (barIndex: spot.barIndex, spotIndex: spot.spotIndex);
+                    setState(() {
+                      if (_selectedSpot?.barIndex == newSelection.barIndex &&
+                          _selectedSpot?.spotIndex == newSelection.spotIndex) {
+                        _selectedSpot = null;
+                      } else {
+                        _selectedSpot = newSelection;
+                      }
+                    });
+                  }
                 },
                 touchTooltipData: LineTouchTooltipData(
                   getTooltipColor: (_) => AppColors.textPrimary,
                   tooltipRoundedRadius: 8,
-                  tooltipPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  tooltipPadding: _selectedCategoryIndex == null
+                      ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8)
+                      : const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                   getTooltipItems: (touchedSpots) {
-                    return touchedSpots.map((spot) {
-                      final hours = spot.y.floor();
-                      final minutes = ((spot.y - hours) * 60).round();
-                      return LineTooltipItem(
-                        '${hours}h ${minutes}m',
-                        const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      );
-                    }).toList();
+                    if (_selectedCategoryIndex == null) {
+                      // 날짜 모드: 카테고리명 + 시간
+                      return touchedSpots.map((spot) {
+                        final categoryIdx = barToCategoryIndex[spot.barIndex];
+                        final category = categories[categoryIdx];
+                        final hours = spot.y.floor();
+                        final mins = ((spot.y - hours) * 60).round();
+                        return LineTooltipItem(
+                          '${category.emoji} ${category.name}  ${hours}h ${mins}m',
+                          const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        );
+                      }).toList();
+                    } else {
+                      // 카테고리 모드: 시간만
+                      return touchedSpots.map((spot) {
+                        final hours = spot.y.floor();
+                        final mins = ((spot.y - hours) * 60).round();
+                        return LineTooltipItem(
+                          '${hours}h ${mins}m',
+                          const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        );
+                      }).toList();
+                    }
                   },
                 ),
               ),
@@ -493,6 +537,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 _selectedCategoryIndex = index;
               }
               _selectedSpot = null;
+              _selectedDateIndex = null;
             });
           },
           child: Container(
