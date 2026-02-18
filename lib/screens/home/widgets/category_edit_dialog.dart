@@ -109,6 +109,7 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
 
   static const int _maxCategories = 4;
   static const int _maxCheckBoxes = 4;
+  static const double _itemHeight = 56.0; // IconButton(48) + margin(8)
 
   // 체크박스 관련 메서드
   Future<void> _onCheckBoxReorder(int oldIndex, int newIndex) async {
@@ -287,8 +288,8 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
   }
 
   Widget _buildCategoryList() {
-    return Container(
-      constraints: const BoxConstraints(maxHeight: 300),
+    return SizedBox(
+      height: _itemHeight * _maxCategories,
       child: ReorderableListView.builder(
         shrinkWrap: true,
         itemCount: _categories.length,
@@ -379,8 +380,8 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
 
   Widget _buildCheckBoxList() {
     if (_checkBoxes.isEmpty) {
-      return Container(
-        constraints: const BoxConstraints(maxHeight: 300),
+      return SizedBox(
+        height: _itemHeight * _maxCheckBoxes,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -404,8 +405,8 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
       );
     }
 
-    return Container(
-      constraints: const BoxConstraints(maxHeight: 300),
+    return SizedBox(
+      height: _itemHeight * _maxCheckBoxes,
       child: ReorderableListView.builder(
         shrinkWrap: true,
         itemCount: _checkBoxes.length,
