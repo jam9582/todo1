@@ -206,67 +206,64 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
 
     // 차트 데이터 준비
-    // barToCategoryIndex[barIndex] = categoryIndex (데이터 없는 카테고리는 lineBars에서 제외)
+    // lineBars[i] = categories[i] 로 barIndex = categoryIndex 1:1 대응
     final List<LineChartBarData> lineBars = [];
-    final List<int> barToCategoryIndex = [];
 
     for (int i = 0; i < categories.length; i++) {
-      final category = categories[i];
-      final key = category.id.toString();
+      final key = categories[i].id.toString();
       final data = _chartData[key];
+      final hasData = data != null && data.isNotEmpty;
 
-      if (data != null && data.isNotEmpty) {
-        final spots = <FlSpot>[];
+      final spots = <FlSpot>[];
 
-        if (_isWeekly) {
-          // 주간: 7일
-          final weekStart = DateTime.now().subtract(const Duration(days: 6));
-          for (int j = 0; j < 7; j++) {
-            final date = weekStart.add(Duration(days: j));
-            final dayData = data.where((d) =>
-              d.date.year == date.year &&
-              d.date.month == date.month &&
-              d.date.day == date.day
-            ).firstOrNull;
-            spots.add(FlSpot(j.toDouble(), (dayData?.minutes ?? 0) / 60.0));
-          }
-        } else {
-          // 월간
-          final now = DateTime.now();
-          final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-          for (int day = 1; day <= daysInMonth && day <= now.day; day++) {
-            final dayData = data.where((d) => d.date.day == day).firstOrNull;
-            spots.add(FlSpot((day - 1).toDouble(), (dayData?.minutes ?? 0) / 60.0));
-          }
+      if (_isWeekly) {
+        // 주간: 7일 (데이터 없으면 모두 0으로 채움)
+        final weekStart = DateTime.now().subtract(const Duration(days: 6));
+        for (int j = 0; j < 7; j++) {
+          final date = weekStart.add(Duration(days: j));
+          final dayData = hasData ? data.where((d) =>
+            d.date.year == date.year &&
+            d.date.month == date.month &&
+            d.date.day == date.day
+          ).firstOrNull : null;
+          spots.add(FlSpot(j.toDouble(), (dayData?.minutes ?? 0) / 60.0));
         }
-
-        final color = _categoryColors[i % _categoryColors.length];
-        final bool isActive = _selectedCategoryIndex == null || _selectedCategoryIndex == i;
-
-        lineBars.add(
-          LineChartBarData(
-            spots: spots,
-            isCurved: false,
-            color: isActive ? color : color.withValues(alpha: 0.3),
-            barWidth: isActive ? 2 : 1,
-            dotData: FlDotData(
-              show: true,
-              getDotPainter: (spot, percent, barData, index) {
-                return FlDotCirclePainter(
-                  radius: isActive ? 3 : 2,
-                  color: barData.color ?? Colors.blue,
-                  strokeWidth: 0,
-                );
-              },
-            ),
-            belowBarData: BarAreaData(show: false),
-          ),
-        );
-        barToCategoryIndex.add(i);
+      } else {
+        // 월간 (데이터 없으면 모두 0으로 채움)
+        final now = DateTime.now();
+        final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+        for (int day = 1; day <= daysInMonth && day <= now.day; day++) {
+          final dayData = hasData ? data.where((d) => d.date.day == day).firstOrNull : null;
+          spots.add(FlSpot((day - 1).toDouble(), (dayData?.minutes ?? 0) / 60.0));
+        }
       }
+
+      final color = _categoryColors[i % _categoryColors.length];
+      final bool isActive = _selectedCategoryIndex == null || _selectedCategoryIndex == i;
+
+      lineBars.add(
+        LineChartBarData(
+          spots: spots,
+          isCurved: false,
+          // 데이터 없는 카테고리는 투명 처리 (선/점 안 보임)
+          color: !hasData ? Colors.transparent : isActive ? color : color.withValues(alpha: 0.3),
+          barWidth: isActive ? 2 : 1,
+          dotData: FlDotData(
+            show: hasData,
+            getDotPainter: (spot, percent, barData, index) {
+              return FlDotCirclePainter(
+                radius: isActive ? 3 : 2,
+                color: barData.color ?? Colors.blue,
+                strokeWidth: 0,
+              );
+            },
+          ),
+          belowBarData: BarAreaData(show: false),
+        ),
+      );
     }
 
-    if (lineBars.isEmpty) {
+    if (!lineBars.any((bar) => bar.color != Colors.transparent)) {
       return Container(
         height: 200,
         decoration: BoxDecoration(
@@ -459,8 +456,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     });
                   } else {
                     // 카테고리 모드: 선택된 카테고리 점 토글
-                    final selectedBarIndex = barToCategoryIndex.indexOf(_selectedCategoryIndex!);
-                    if (selectedBarIndex == -1) return;
+                    // barIndex == categoryIndex 로 직접 대응
+                    final selectedBarIndex = _selectedCategoryIndex!;
+                    if (selectedBarIndex >= lineBars.length) return;
 
                     final matchedSpots = response?.lineBarSpots
                         ?.where((s) => s.barIndex == selectedBarIndex)
@@ -492,10 +490,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       : const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                   getTooltipItems: (touchedSpots) {
                     if (_selectedCategoryIndex == null) {
-                      // 날짜 모드: 카테고리명 + 시간
+                      // 날짜 모드: 카테고리명 + 시간 (0h는 제외)
                       return touchedSpots.map((spot) {
-                        final categoryIdx = barToCategoryIndex[spot.barIndex];
-                        final category = categories[categoryIdx];
+                        if (spot.y == 0) return null; // 활동 없는 카테고리 숨김
+                        final category = categories[spot.barIndex];
                         final hours = spot.y.floor();
                         final mins = ((spot.y - hours) * 60).round();
                         return LineTooltipItem(
