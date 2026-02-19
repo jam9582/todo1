@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../constants/colors.dart';
 import '../../../providers/record_provider.dart';
 import '../../../providers/category_provider.dart';
+import '../../../providers/settings_provider.dart';
 import '../../../constants/app_theme.dart';
 import '../../../utils/responsive.dart';
 import '../widgets/calendar_day_cell.dart';
@@ -14,6 +15,7 @@ class CalendarSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final recordProvider = context.watch<RecordProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
+    final settings = context.watch<SettingsProvider>();
     final selectedDate = recordProvider.selectedDate;
 
     return Container(
@@ -31,11 +33,11 @@ class CalendarSection extends StatelessWidget {
           SizedBox(height: AppTheme.spacingMd),
 
           // 요일 헤더
-          _buildWeekdayHeader(context),
+          _buildWeekdayHeader(context, settings.startDay),
           SizedBox(height: AppTheme.spacingSm),
 
           // 달력 그리드
-          _buildCalendarGrid(context, selectedDate, recordProvider, categoryProvider),
+          _buildCalendarGrid(context, selectedDate, recordProvider, categoryProvider, settings),
         ],
       ),
     );
@@ -70,8 +72,10 @@ class CalendarSection extends StatelessWidget {
     );
   }
 
-  Widget _buildWeekdayHeader(BuildContext context) {
-    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  Widget _buildWeekdayHeader(BuildContext context, CalendarStartDay startDay) {
+    final weekdays = startDay == CalendarStartDay.sunday
+        ? const ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        : const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -98,11 +102,19 @@ class CalendarSection extends StatelessWidget {
     DateTime selectedDate,
     RecordProvider recordProvider,
     CategoryProvider categoryProvider,
+    SettingsProvider settings,
   ) {
     final firstDayOfMonth = DateTime(selectedDate.year, selectedDate.month, 1);
     final lastDayOfMonth = DateTime(selectedDate.year, selectedDate.month + 1, 0);
     final daysInMonth = lastDayOfMonth.day;
-    final startWeekday = firstDayOfMonth.weekday % 7; // 0 = Sun, 1 = Mon, ...
+
+    final int startWeekday;
+    if (settings.startDay == CalendarStartDay.sunday) {
+      startWeekday = firstDayOfMonth.weekday % 7; // Sun=0
+    } else {
+      startWeekday = (firstDayOfMonth.weekday - 1) % 7; // Mon=0
+    }
+
     final today = DateTime.now();
 
     // categoryId -> emoji 매핑
@@ -126,14 +138,22 @@ class CalendarSection extends StatelessWidget {
       final isWeekend = date.weekday == DateTime.saturday ||
           date.weekday == DateTime.sunday;
 
-      // 해당 날짜의 최다 카테고리 정보 가져오기
-      final topCategory = recordProvider.getTopCategoryForDate(date);
+      // 카테고리 데이터 선택 (최다 활동 or 고정 카테고리)
+      ({int categoryId, int minutes})? categoryData;
+      if (settings.displayMode == CalendarDisplayMode.topCategory) {
+        categoryData = recordProvider.getTopCategoryForDate(date);
+      } else {
+        final fixedId = settings.fixedCategoryId;
+        if (fixedId != null) {
+          categoryData = recordProvider.getCategoryForDate(date, fixedId);
+        }
+      }
+
       String? emoji;
       int? minutes;
-
-      if (topCategory != null) {
-        emoji = categoryMap[topCategory.categoryId];
-        minutes = topCategory.minutes;
+      if (categoryData != null) {
+        emoji = categoryMap[categoryData.categoryId];
+        minutes = categoryData.minutes;
       }
 
       final completedChecks = recordProvider.getCompletedCheckCountForDate(date);
@@ -149,7 +169,8 @@ class CalendarSection extends StatelessWidget {
           isToday: isToday,
           emoji: emoji,
           minutes: minutes,
-          completedChecks: completedChecks,
+          showTime: settings.showActivityTime,
+          completedChecks: settings.showCheckCount ? completedChecks : 0,
           onTap: () {
             final newDate = DateTime(selectedDate.year, selectedDate.month, day);
             context.read<RecordProvider>().selectDate(newDate);
@@ -162,7 +183,7 @@ class CalendarSection extends StatelessWidget {
       crossAxisCount: 7,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 0.62, // 세로 여유 공간 확보 (카테고리 정보 + 체크박스 표시용)
+      childAspectRatio: 0.62,
       mainAxisSpacing: 4,
       crossAxisSpacing: 4,
       children: cells,

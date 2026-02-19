@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'services/isar_service.dart';
+import 'services/notification_service.dart';
 import 'providers/category_provider.dart';
 import 'providers/check_box_provider.dart';
 import 'providers/record_provider.dart';
+import 'providers/settings_provider.dart';
 import 'screens/home/home_screen.dart';
 import 'constants/app_theme.dart';
 import 'constants/colors.dart';
@@ -27,6 +29,9 @@ void main() async {
   // Isar 초기화
   await IsarService.instance;
 
+  // 알림 초기화
+  await NotificationService.initialize();
+
   runApp(const MyApp());
 }
 
@@ -40,6 +45,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => CheckBoxProvider()),
         ChangeNotifierProvider(create: (_) => RecordProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
       ],
       child: MaterialApp(
         title: 'Todo1 App',

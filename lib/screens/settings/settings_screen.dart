@@ -1,0 +1,452 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import '../../constants/colors.dart';
+import '../../constants/app_theme.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/category_provider.dart';
+
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+    final categories = context.watch<CategoryProvider>().categories;
+
+    // 고정 카테고리 ID가 더 이상 존재하지 않으면 초기화
+    if (settings.displayMode == CalendarDisplayMode.fixedCategory &&
+        settings.fixedCategoryId != null &&
+        !categories.any((c) => c.id == settings.fixedCategoryId)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<SettingsProvider>().setFixedCategoryId(null);
+      });
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('설정'),
+        centerTitle: false,
+        elevation: 0,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.spacingMd,
+          vertical: AppTheme.spacingMd,
+        ),
+        children: [
+          // ─── 달력 설정 ───────────────────────────────────────────
+          _SectionHeader(title: '달력 설정'),
+          _SettingsCard(
+            children: [
+              _SegmentedRow<CalendarStartDay>(
+                label: '주 시작 요일',
+                value: settings.startDay,
+                segments: const [
+                  ButtonSegment(value: CalendarStartDay.sunday, label: Text('일요일')),
+                  ButtonSegment(value: CalendarStartDay.monday, label: Text('월요일')),
+                ],
+                onChanged: (v) => context.read<SettingsProvider>().setStartDay(v),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingMd),
+
+          // ─── 달력 표시 설정 ──────────────────────────────────────
+          _SectionHeader(title: '달력 표시 설정'),
+          _SettingsCard(
+            children: [
+              _SegmentedRow<CalendarDisplayMode>(
+                label: '카테고리 표시 방식',
+                value: settings.displayMode,
+                segments: const [
+                  ButtonSegment(
+                    value: CalendarDisplayMode.topCategory,
+                    label: Text('최다 활동'),
+                  ),
+                  ButtonSegment(
+                    value: CalendarDisplayMode.fixedCategory,
+                    label: Text('특정 카테고리'),
+                  ),
+                ],
+                onChanged: (v) => context.read<SettingsProvider>().setDisplayMode(v),
+              ),
+              if (settings.displayMode == CalendarDisplayMode.fixedCategory) ...[
+                _Divider(),
+                _DropdownRow(
+                  label: '표시할 카테고리',
+                  value: settings.fixedCategoryId,
+                  items: categories
+                      .map((c) => DropdownMenuItem(
+                            value: c.id,
+                            child: Text('${c.emoji}  ${c.name}'),
+                          ))
+                      .toList(),
+                  onChanged: (v) =>
+                      context.read<SettingsProvider>().setFixedCategoryId(v),
+                ),
+              ],
+              _Divider(),
+              _SwitchRow(
+                label: '카테고리 활동시간 표시',
+                value: settings.showActivityTime,
+                onChanged: (v) =>
+                    context.read<SettingsProvider>().setShowActivityTime(v),
+              ),
+              _Divider(),
+              _SwitchRow(
+                label: '체크박스 완료 개수 표시',
+                value: settings.showCheckCount,
+                onChanged: (v) =>
+                    context.read<SettingsProvider>().setShowCheckCount(v),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingMd),
+
+          // ─── 알림 ────────────────────────────────────────────────
+          _SectionHeader(title: '알림'),
+          _SettingsCard(
+            children: [
+              _SwitchRow(
+                label: '매일 알림',
+                value: settings.notifEnabled,
+                onChanged: (v) =>
+                    context.read<SettingsProvider>().setNotifEnabled(v),
+              ),
+              if (settings.notifEnabled) ...[
+                _Divider(),
+                _TimeRow(
+                  label: '알림 시간',
+                  hour: settings.notifHour,
+                  minute: settings.notifMinute,
+                  onTap: () => _pickTime(context, settings),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingMd),
+
+          // ─── 앱 정보 ─────────────────────────────────────────────
+          _SectionHeader(title: '앱 정보'),
+          _SettingsCard(
+            children: [
+              FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  final version = snapshot.hasData
+                      ? snapshot.data!.version
+                      : '-';
+                  return _InfoRow(label: '버전', value: version);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingLg),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickTime(BuildContext context, SettingsProvider settings) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(
+        hour: settings.notifHour,
+        minute: settings.notifMinute,
+      ),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+        child: child!,
+      ),
+    );
+    if (picked != null && context.mounted) {
+      await context.read<SettingsProvider>().setNotifTime(picked.hour, picked.minute);
+    }
+  }
+}
+
+// ─── 섹션 헤더 ───────────────────────────────────────────────────────────────
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  const _SectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: 4,
+        bottom: AppTheme.spacingSm,
+      ),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: AppTheme.fontSizeCaption,
+          fontWeight: FontWeight.w600,
+          color: AppColors.grey500,
+        ),
+      ),
+    );
+  }
+}
+
+// ─── 설정 카드 컨테이너 ───────────────────────────────────────────────────────
+
+class _SettingsCard extends StatelessWidget {
+  final List<Widget> children;
+  const _SettingsCard({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      ),
+      child: Column(
+        children: children,
+      ),
+    );
+  }
+}
+
+// ─── 구분선 ──────────────────────────────────────────────────────────────────
+
+class _Divider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Divider(
+      height: 1,
+      thickness: 1,
+      color: AppColors.borderLight,
+      indent: 16,
+      endIndent: 16,
+    );
+  }
+}
+
+// ─── 스위치 행 ────────────────────────────────────────────────────────────────
+
+class _SwitchRow extends StatelessWidget {
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _SwitchRow({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spacingMd,
+        vertical: 4,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: AppTheme.fontSizeBody),
+          ),
+          Switch(
+            value: value,
+            activeColor: AppColors.textOnAccent,
+            activeTrackColor: AppColors.grey500,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── 세그먼트 행 ──────────────────────────────────────────────────────────────
+
+class _SegmentedRow<T> extends StatelessWidget {
+  final String label;
+  final T value;
+  final List<ButtonSegment<T>> segments;
+  final ValueChanged<T> onChanged;
+
+  const _SegmentedRow({
+    required this.label,
+    required this.value,
+    required this.segments,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spacingMd,
+        vertical: AppTheme.spacingMd,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: AppTheme.fontSizeBody),
+          ),
+          const SizedBox(height: AppTheme.spacingSm),
+          SegmentedButton<T>(
+            segments: segments,
+            selected: {value},
+            onSelectionChanged: (s) => onChanged(s.first),
+            style: SegmentedButton.styleFrom(
+              backgroundColor: AppColors.surface,
+              selectedBackgroundColor: AppColors.accent,
+              selectedForegroundColor: AppColors.textOnAccent,
+              foregroundColor: AppColors.textPrimary,
+              textStyle: const TextStyle(fontSize: AppTheme.fontSizeCaption),
+              side: const BorderSide(color: AppColors.border),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── 드롭다운 행 ──────────────────────────────────────────────────────────────
+
+class _DropdownRow extends StatelessWidget {
+  final String label;
+  final int? value;
+  final List<DropdownMenuItem<int>> items;
+  final ValueChanged<int?> onChanged;
+
+  const _DropdownRow({
+    required this.label,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spacingMd,
+        vertical: AppTheme.spacingMd,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: AppTheme.fontSizeBody),
+          ),
+          DropdownButton<int>(
+            value: value,
+            items: items,
+            onChanged: onChanged,
+            underline: const SizedBox.shrink(),
+            isDense: true,
+            style: const TextStyle(
+              fontSize: AppTheme.fontSizeBody,
+              color: AppColors.textPrimary,
+            ),
+            hint: const Text(
+              '선택',
+              style: TextStyle(
+                fontSize: AppTheme.fontSizeBody,
+                color: AppColors.textHint,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── 시간 행 ─────────────────────────────────────────────────────────────────
+
+class _TimeRow extends StatelessWidget {
+  final String label;
+  final int hour;
+  final int minute;
+  final VoidCallback onTap;
+
+  const _TimeRow({
+    required this.label,
+    required this.hour,
+    required this.minute,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final timeStr =
+        '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.spacingMd,
+          vertical: AppTheme.spacingMd,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(fontSize: AppTheme.fontSizeBody),
+            ),
+            Text(
+              timeStr,
+              style: const TextStyle(
+                fontSize: AppTheme.fontSizeBody,
+                color: AppColors.grey500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── 정보 행 ─────────────────────────────────────────────────────────────────
+
+class _InfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _InfoRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spacingMd,
+        vertical: AppTheme.spacingMd,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: AppTheme.fontSizeBody),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: AppTheme.fontSizeBody,
+              color: AppColors.grey500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -11,6 +11,7 @@ import 'sections/checkbox_section.dart';
 import 'sections/calendar_section.dart';
 import 'widgets/category_edit_dialog.dart';
 import '../statistics/statistics_screen.dart';
+import '../settings/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -81,6 +82,11 @@ class _HomeScreenState extends State<HomeScreen>
       );
     } else if (label == '카테고리 편집') {
       CategoryEditDialog.show(context);
+    } else if (label == '설정') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+      );
     } else {
       SnackBarManager.showText(context, '$label 기능은 준비 중입니다');
     }

@@ -11,6 +11,7 @@ class CalendarDayCell extends StatelessWidget {
   final int? minutes; // 분 단위로 받음
   final int completedChecks;
   final bool isToday;
+  final bool showTime;
   final VoidCallback onTap;
 
   const CalendarDayCell({
@@ -22,6 +23,7 @@ class CalendarDayCell extends StatelessWidget {
     this.minutes,
     this.completedChecks = 0,
     this.isToday = false,
+    this.showTime = true,
     required this.onTap,
   });
 
@@ -92,14 +94,16 @@ class CalendarDayCell extends StatelessWidget {
                               fontSize: Responsive.fontSize(context, 9),
                             ),
                           ),
-                          const SizedBox(width: 2),
-                          Text(
-                            _formatTime(minutes!),
-                            style: TextStyle(
-                              fontSize: Responsive.fontSize(context, 8),
-                              color: AppColors.textSecondary,
+                          if (showTime && minutes != null) ...[
+                            const SizedBox(width: 2),
+                            Text(
+                              _formatTime(minutes!),
+                              style: TextStyle(
+                                fontSize: Responsive.fontSize(context, 8),
+                                color: AppColors.textSecondary,
+                              ),
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     )

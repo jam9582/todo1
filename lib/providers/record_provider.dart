@@ -250,6 +250,18 @@ class RecordProvider extends ChangeNotifier {
     return record!.checkRecords!.where((e) => e.isCompleted).length;
   }
 
+  // 특정 날짜의 특정 카테고리 활동시간 가져오기 (달력 고정 카테고리 모드용)
+  ({int categoryId, int minutes})? getCategoryForDate(DateTime date, int categoryId) {
+    final dateString = _formatDate(date);
+    final record = _monthRecords[dateString];
+    if (record?.timeRecords == null) return null;
+    final entry = record!.timeRecords!
+        .where((e) => e.categoryId == categoryId && e.minutes > 0)
+        .firstOrNull;
+    if (entry == null) return null;
+    return (categoryId: entry.categoryId, minutes: entry.minutes);
+  }
+
   // ========== 통계 관련 메서드 ==========
 
   // 기간별 기록 조회 (통계용)
