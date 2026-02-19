@@ -47,7 +47,7 @@ class _CheckboxSectionState extends State<CheckboxSection> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       color: AppColors.background,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -80,7 +80,7 @@ class _CheckboxSectionState extends State<CheckboxSection> {
           ),
           // 페이지 인디케이터 (페이지가 2개 이상일 때만 표시)
           if (pages.length > 1) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(pages.length, (index) {

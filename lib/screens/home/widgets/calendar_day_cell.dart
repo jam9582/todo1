@@ -9,6 +9,7 @@ class CalendarDayCell extends StatelessWidget {
   final bool isWeekend;
   final String? emoji;
   final int? minutes; // 분 단위로 받음
+  final int completedChecks;
   final VoidCallback onTap;
 
   const CalendarDayCell({
@@ -18,6 +19,7 @@ class CalendarDayCell extends StatelessWidget {
     required this.isWeekend,
     this.emoji,
     this.minutes,
+    this.completedChecks = 0,
     required this.onTap,
   });
 
@@ -85,6 +87,38 @@ class CalendarDayCell extends StatelessWidget {
                             style: TextStyle(
                               fontSize: Responsive.fontSize(context, 8),
                               color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(height: 2),
+            // 체크박스 완료 개수
+            SizedBox(
+              height: 18,
+              child: completedChecks > 0
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: AppColors.grey300.withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check_box_outlined,
+                            size: Responsive.fontSize(context, 9),
+                            color: AppColors.grey500,
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            '$completedChecks',
+                            style: TextStyle(
+                              fontSize: Responsive.fontSize(context, 8),
+                              color: AppColors.grey500,
                             ),
                           ),
                         ],

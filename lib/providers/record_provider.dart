@@ -172,6 +172,10 @@ class RecordProvider extends ChangeNotifier {
       await isar.dailyRecords.put(_currentRecord!);
     });
 
+    // 월별 캐시도 업데이트
+    final dateString = _formatDate(_selectedDate);
+    _monthRecords[dateString] = _currentRecord!;
+
     notifyListeners();
   }
 
@@ -236,6 +240,14 @@ class RecordProvider extends ChangeNotifier {
     if (topEntry == null) return null;
 
     return (categoryId: topEntry.categoryId, minutes: topEntry.minutes);
+  }
+
+  // 특정 날짜의 완료된 체크박스 개수 가져오기 (달력 표시용)
+  int getCompletedCheckCountForDate(DateTime date) {
+    final dateString = _formatDate(date);
+    final record = _monthRecords[dateString];
+    if (record?.checkRecords == null) return 0;
+    return record!.checkRecords!.where((e) => e.isCompleted).length;
   }
 
   // ========== 통계 관련 메서드 ==========

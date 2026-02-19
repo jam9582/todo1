@@ -17,7 +17,12 @@ class CalendarSection extends StatelessWidget {
     final selectedDate = recordProvider.selectedDate;
 
     return Container(
-      padding: EdgeInsets.all(AppTheme.spacingMd),
+      padding: EdgeInsets.only(
+        left: AppTheme.spacingMd,
+        right: AppTheme.spacingMd,
+        top: AppTheme.spacingSm,
+        bottom: AppTheme.spacingMd,
+      ),
       color: AppTheme.backgroundColor,
       child: Column(
         children: [
@@ -130,6 +135,8 @@ class CalendarSection extends StatelessWidget {
         minutes = topCategory.minutes;
       }
 
+      final completedChecks = recordProvider.getCompletedCheckCountForDate(date);
+
       cells.add(
         CalendarDayCell(
           day: day,
@@ -137,6 +144,7 @@ class CalendarSection extends StatelessWidget {
           isWeekend: isWeekend,
           emoji: emoji,
           minutes: minutes,
+          completedChecks: completedChecks,
           onTap: () {
             final newDate = DateTime(selectedDate.year, selectedDate.month, day);
             context.read<RecordProvider>().selectDate(newDate);
@@ -149,7 +157,7 @@ class CalendarSection extends StatelessWidget {
       crossAxisCount: 7,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 0.7, // 세로 여유 공간 확보 (카테고리 정보 표시용)
+      childAspectRatio: 0.62, // 세로 여유 공간 확보 (카테고리 정보 + 체크박스 표시용)
       mainAxisSpacing: 4,
       crossAxisSpacing: 4,
       children: cells,
