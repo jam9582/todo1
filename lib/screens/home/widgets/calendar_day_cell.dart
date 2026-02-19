@@ -10,6 +10,7 @@ class CalendarDayCell extends StatelessWidget {
   final String? emoji;
   final int? minutes; // 분 단위로 받음
   final int completedChecks;
+  final bool isToday;
   final VoidCallback onTap;
 
   const CalendarDayCell({
@@ -20,6 +21,7 @@ class CalendarDayCell extends StatelessWidget {
     this.emoji,
     this.minutes,
     this.completedChecks = 0,
+    this.isToday = false,
     required this.onTap,
   });
 
@@ -38,6 +40,12 @@ class CalendarDayCell extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 2),
+        decoration: isToday
+            ? BoxDecoration(
+                border: Border.all(color: AppColors.grey500, width: 1.5),
+                borderRadius: BorderRadius.circular(2),
+              )
+            : null,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -67,7 +75,10 @@ class CalendarDayCell extends StatelessWidget {
               height: 18,
               child: hasData
                   ? Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 3,
+                        vertical: 1,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.accent.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(4),
@@ -100,7 +111,10 @@ class CalendarDayCell extends StatelessWidget {
               height: 18,
               child: completedChecks > 0
                   ? Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 3,
+                        vertical: 1,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.grey300.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(4),

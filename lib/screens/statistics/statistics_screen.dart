@@ -33,7 +33,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     const Color(0xFFE8A87C), // 웜 오렌지
     const Color(0xFF85C1E9), // 소프트 블루
     const Color(0xFF82E0AA), // 소프트 그린
-    const Color(0xFFF1948A), // 소프트 핑크
+    const Color(0xFFC39BD3), // 소프트 퍼플
   ];
 
   @override

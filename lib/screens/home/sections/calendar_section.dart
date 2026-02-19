@@ -103,6 +103,7 @@ class CalendarSection extends StatelessWidget {
     final lastDayOfMonth = DateTime(selectedDate.year, selectedDate.month + 1, 0);
     final daysInMonth = lastDayOfMonth.day;
     final startWeekday = firstDayOfMonth.weekday % 7; // 0 = Sun, 1 = Mon, ...
+    final today = DateTime.now();
 
     // categoryId -> emoji 매핑
     final categoryMap = {
@@ -136,12 +137,16 @@ class CalendarSection extends StatelessWidget {
       }
 
       final completedChecks = recordProvider.getCompletedCheckCountForDate(date);
+      final isToday = date.year == today.year &&
+          date.month == today.month &&
+          date.day == today.day;
 
       cells.add(
         CalendarDayCell(
           day: day,
           isSelected: isSelected,
           isWeekend: isWeekend,
+          isToday: isToday,
           emoji: emoji,
           minutes: minutes,
           completedChecks: completedChecks,
