@@ -331,37 +331,35 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
               ),
             ),
           ),
-          // 이모지 & 이름
+          // 이모지 & 이름 (탭하면 편집)
           Expanded(
-            child: Row(
-              children: [
-                Text(
-                  category.emoji,
-                  style: const TextStyle(fontSize: 20),
-                ),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: Text(
-                    category.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
+            child: GestureDetector(
+              onTap: () => _onEditCategory(category),
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  children: [
+                    Text(
+                      category.emoji,
+                      style: const TextStyle(fontSize: 20),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Text(
+                        category.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          // 편집 버튼
-          IconButton(
-            onPressed: () => _onEditCategory(category),
-            icon: const Icon(
-              Icons.edit_outlined,
-              size: 18,
-              color: AppColors.grey500,
+              ),
             ),
           ),
           // 삭제 버튼
@@ -448,38 +446,36 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
               ),
             ),
           ),
-          // 체크박스 아이콘 & 이름
+          // 체크박스 아이콘 & 이름 (탭하면 편집)
           Expanded(
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.check_box_outline_blank_rounded,
-                  size: 20,
-                  color: AppColors.grey400,
-                ),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: Text(
-                    checkBox.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
+            child: GestureDetector(
+              onTap: () => _onEditCheckBox(checkBox),
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.check_box_outline_blank_rounded,
+                      size: 20,
+                      color: AppColors.grey400,
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Text(
+                        checkBox.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          // 편집 버튼
-          IconButton(
-            onPressed: () => _onEditCheckBox(checkBox),
-            icon: const Icon(
-              Icons.edit_outlined,
-              size: 18,
-              color: AppColors.grey500,
+              ),
             ),
           ),
           // 삭제 버튼
