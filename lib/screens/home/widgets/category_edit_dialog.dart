@@ -312,6 +312,7 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
   Widget _buildCategoryItem(Category category, int index) {
     return Container(
       key: ValueKey(category.id),
+      height: 48,
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.grey100,
@@ -427,6 +428,7 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
   Widget _buildCheckBoxItem(CheckBox checkBox, int index) {
     return Container(
       key: ValueKey(checkBox.id),
+      height: 48,
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.grey100,
