@@ -133,11 +133,7 @@ class _HomeScreenState extends State<HomeScreen>
               top: AppTheme.spacingMd,
               right: AppTheme.spacingMd,
               child: DebouncedIconButton(
-                icon: AnimatedRotation(
-                  turns: _isMenuOpen ? 0.25 : 0,
-                  duration: const Duration(milliseconds: 200),
-                  child: const Icon(Icons.menu),
-                ),
+                icon: const Icon(Icons.menu),
                 onPressed: _toggleMenu,
               ),
             ),
