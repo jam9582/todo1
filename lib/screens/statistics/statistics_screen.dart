@@ -330,10 +330,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       if (value < 0 || value != value.roundToDouble()) {
                         return const SizedBox.shrink();
                       }
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 4),
+                      return SizedBox(
+                        width: 36,
                         child: Text(
                           '${value.toInt()}h',
+                          textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 10,
                             color: AppColors.grey500,
