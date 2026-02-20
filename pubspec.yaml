@@ -59,6 +59,10 @@ dependencies:
   # App info
   package_info_plus: ^8.1.2
 
+  # In-app purchases (RevenueCat)
+  purchases_flutter: ^8.0.0
+  purchases_ui_flutter: ^8.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

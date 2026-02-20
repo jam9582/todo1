@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import '../../constants/colors.dart';
 import '../../constants/app_theme.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/category_provider.dart';
+import '../../providers/purchase_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -127,6 +130,23 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppTheme.spacingMd),
 
+          // ─── 구매 관리 ────────────────────────────────────────────
+          _SectionHeader(title: '구매'),
+          _SettingsCard(
+            children: [
+              _TapRow(
+                label: '구매 복원',
+                onTap: () => _restorePurchases(context),
+              ),
+              _Divider(),
+              _TapRow(
+                label: '구매 내역 및 지원',
+                onTap: () => RevenueCatUI.presentCustomerCenter(),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingMd),
+
           // ─── 앱 정보 ─────────────────────────────────────────────
           _SectionHeader(title: '앱 정보'),
           _SettingsCard(
@@ -162,6 +182,27 @@ class SettingsScreen extends StatelessWidget {
     );
     if (picked != null && context.mounted) {
       await context.read<SettingsProvider>().setNotifTime(picked.hour, picked.minute);
+    }
+  }
+
+  Future<void> _restorePurchases(BuildContext context) async {
+    final purchaseProvider = context.read<PurchaseProvider>();
+    try {
+      final customerInfo = await Purchases.restorePurchases();
+      final isAdRemoved =
+          customerInfo.entitlements.active.containsKey('remove_ads');
+      await purchaseProvider.refresh();
+      if (context.mounted) {
+        final msg = isAdRemoved ? '구매 내역을 복원했습니다!' : '복원할 구매 내역이 없습니다';
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(msg)));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('복원에 실패했습니다. 다시 시도해주세요.')),
+        );
+      }
     }
   }
 }
@@ -408,6 +449,43 @@ class _TimeRow extends StatelessWidget {
                 fontSize: AppTheme.fontSizeBody,
                 color: AppColors.grey500,
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── 탭 행 ───────────────────────────────────────────────────────────────────
+
+class _TapRow extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _TapRow({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.spacingMd,
+          vertical: AppTheme.spacingMd,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(fontSize: AppTheme.fontSizeBody),
+            ),
+            const Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: AppColors.grey500,
             ),
           ],
         ),

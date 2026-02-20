@@ -7,6 +7,7 @@ import 'providers/category_provider.dart';
 import 'providers/check_box_provider.dart';
 import 'providers/record_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/purchase_provider.dart';
 import 'screens/home/home_screen.dart';
 import 'constants/app_theme.dart';
 import 'constants/colors.dart';
@@ -32,6 +33,9 @@ void main() async {
   // 알림 초기화
   await NotificationService.initialize();
 
+  // RevenueCat 초기화
+  await PurchaseProvider.configure();
+
   runApp(const MyApp());
 }
 
@@ -46,6 +50,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CheckBoxProvider()),
         ChangeNotifierProvider(create: (_) => RecordProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => PurchaseProvider()),
       ],
       child: MaterialApp(
         title: 'Todo1 App',
