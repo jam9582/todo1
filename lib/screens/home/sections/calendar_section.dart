@@ -43,7 +43,20 @@ class CalendarSection extends StatelessWidget {
     );
   }
 
+  String _formatHeaderDate(DateTime date, String languageCode) {
+    if (languageCode == 'ko') {
+      return '${date.year}년 ${date.month}월 ${date.day}일';
+    } else {
+      const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December',
+      ];
+      return '${months[date.month - 1]} ${date.day}, ${date.year}';
+    }
+  }
+
   Widget _buildMonthNavigation(BuildContext context, DateTime date) {
+    final languageCode = Localizations.localeOf(context).languageCode;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -55,7 +68,7 @@ class CalendarSection extends StatelessWidget {
           },
         ),
         Text(
-          '${date.year}년 ${date.month}월 ${date.day}일',
+          _formatHeaderDate(date, languageCode),
           style: TextStyle(
             fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
             fontWeight: FontWeight.bold,
