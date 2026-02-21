@@ -19,6 +19,7 @@ class _CalendarSectionState extends State<CalendarSection> {
   static const int _initialPage = 5000;
   late final PageController _pageController;
   late final DateTime _baseMonth;
+  int _lastSettledPage = _initialPage;
 
   @override
   void initState() {
@@ -26,10 +27,13 @@ class _CalendarSectionState extends State<CalendarSection> {
     final now = DateTime.now();
     _baseMonth = DateTime(now.year, now.month);
     _pageController = PageController(initialPage: _initialPage);
+    // onPageChanged(절반 넘으면 발동) 대신, 완전히 정착했을 때만 업데이트
+    _pageController.addListener(_onPageControllerChanged);
   }
 
   @override
   void dispose() {
+    _pageController.removeListener(_onPageControllerChanged);
     _pageController.dispose();
     super.dispose();
   }
@@ -40,11 +44,18 @@ class _CalendarSectionState extends State<CalendarSection> {
     return DateTime(totalMonths ~/ 12, totalMonths % 12 + 1);
   }
 
-  void _onPageChanged(int index) {
-    final newMonth = _indexToMonth(index);
-    context.read<RecordProvider>().selectDate(
-      DateTime(newMonth.year, newMonth.month, 1),
-    );
+  void _onPageControllerChanged() {
+    final page = _pageController.page;
+    if (page == null) return;
+    final rounded = page.round();
+    // 페이지가 완전히 정착(소수점 없는 정수값)됐을 때만 업데이트
+    if ((page - rounded).abs() < 0.01 && rounded != _lastSettledPage) {
+      _lastSettledPage = rounded;
+      final newMonth = _indexToMonth(rounded);
+      context.read<RecordProvider>().selectDate(
+        DateTime(newMonth.year, newMonth.month, 1),
+      );
+    }
   }
 
   void _onButtonTap(bool isNext) {
@@ -230,7 +241,6 @@ class _CalendarSectionState extends State<CalendarSection> {
                 height: gridHeight,
                 child: PageView.builder(
                   controller: _pageController,
-                  onPageChanged: _onPageChanged,
                   itemBuilder: (context, index) {
                     final month = _indexToMonth(index);
                     return GridView.count(
