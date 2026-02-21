@@ -452,6 +452,36 @@ abstract class AppLocalizations {
   /// **'할 일 이름'**
   String get hintTaskName;
 
+  /// No description provided for @sectionLanguage.
+  ///
+  /// In ko, this message translates to:
+  /// **'언어'**
+  String get sectionLanguage;
+
+  /// No description provided for @labelLanguage.
+  ///
+  /// In ko, this message translates to:
+  /// **'언어'**
+  String get labelLanguage;
+
+  /// No description provided for @langSystem.
+  ///
+  /// In ko, this message translates to:
+  /// **'시스템'**
+  String get langSystem;
+
+  /// No description provided for @langKorean.
+  ///
+  /// In ko, this message translates to:
+  /// **'한국어'**
+  String get langKorean;
+
+  /// No description provided for @langEnglish.
+  ///
+  /// In ko, this message translates to:
+  /// **'English'**
+  String get langEnglish;
+
   /// No description provided for @notifChannelName.
   ///
   /// In ko, this message translates to:

@@ -132,6 +132,25 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppTheme.spacingMd),
 
+          // ─── 언어 ────────────────────────────────────────────────
+          _SectionHeader(title: l10n.sectionLanguage),
+          _SettingsCard(
+            children: [
+              _SegmentedRow<String>(
+                label: l10n.labelLanguage,
+                value: settings.language,
+                segments: [
+                  ButtonSegment(value: 'system', label: Text(l10n.langSystem)),
+                  ButtonSegment(value: 'ko', label: Text(l10n.langKorean)),
+                  ButtonSegment(value: 'en', label: Text(l10n.langEnglish)),
+                ],
+                onChanged: (v) =>
+                    context.read<SettingsProvider>().setLanguage(v),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingMd),
+
           // ─── 구매 관리 ────────────────────────────────────────────
           _SectionHeader(title: l10n.sectionPurchase),
           _SettingsCard(

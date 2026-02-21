@@ -192,6 +192,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get hintTaskName => '할 일 이름';
 
   @override
+  String get sectionLanguage => '언어';
+
+  @override
+  String get labelLanguage => '언어';
+
+  @override
+  String get langSystem => '시스템';
+
+  @override
+  String get langKorean => '한국어';
+
+  @override
+  String get langEnglish => 'English';
+
+  @override
   String get notifChannelName => '매일 알림';
 
   @override

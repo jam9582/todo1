@@ -192,6 +192,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hintTaskName => 'Task name';
 
   @override
+  String get sectionLanguage => 'Language';
+
+  @override
+  String get labelLanguage => 'Language';
+
+  @override
+  String get langSystem => 'System';
+
+  @override
+  String get langKorean => '한국어';
+
+  @override
+  String get langEnglish => 'English';
+
+  @override
   String get notifChannelName => 'Daily Reminder';
 
   @override

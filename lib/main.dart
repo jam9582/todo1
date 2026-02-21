@@ -54,21 +54,52 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => PurchaseProvider()),
       ],
-      child: MaterialApp(
-        title: 'Todo1 App',
-        theme: AppTheme.theme,
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('ko'),
-          Locale('en'),
-        ],
-        home: const HomeScreen(),
-      ),
+      child: const _AppWithLocale(),
+    );
+  }
+}
+
+class _AppWithLocale extends StatelessWidget {
+  const _AppWithLocale();
+
+  @override
+  Widget build(BuildContext context) {
+    final lang = context.watch<SettingsProvider>().language;
+
+    Locale? locale;
+    if (lang == 'ko') {
+      locale = const Locale('ko');
+    } else if (lang == 'en') {
+      locale = const Locale('en');
+    }
+    // lang == 'system' → locale = null, localeResolutionCallback 로 결정
+
+    return MaterialApp(
+      title: 'Todo1 App',
+      theme: AppTheme.theme,
+      locale: locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ko'),
+        Locale('en'),
+      ],
+      // 시스템 언어가 ko/en 아닌 경우 English로 fallback
+      localeResolutionCallback: locale != null
+          ? null
+          : (deviceLocale, supportedLocales) {
+              for (final supported in supportedLocales) {
+                if (deviceLocale?.languageCode == supported.languageCode) {
+                  return supported;
+                }
+              }
+              return const Locale('en');
+            },
+      home: const HomeScreen(),
     );
   }
 }

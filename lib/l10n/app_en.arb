@@ -82,6 +82,12 @@
   "dialogNewCheckboxTitle": "New Checkbox",
   "hintTaskName": "Task name",
 
+  "sectionLanguage": "Language",
+  "labelLanguage": "Language",
+  "langSystem": "System",
+  "langKorean": "한국어",
+  "langEnglish": "English",
+
   "notifChannelName": "Daily Reminder",
   "notifTitle": "How was your day?",
   "notifBody": "Record your activities for today."

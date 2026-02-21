@@ -15,6 +15,7 @@ class SettingsProvider extends ChangeNotifier {
   static const _keyFixedCategoryId = 'fixed_category_id';
   static const _keyShowActivityTime = 'show_activity_time';
   static const _keyShowCheckCount = 'show_check_count';
+  static const _keyLanguage = 'language';
 
   SharedPreferences? _prefs;
 
@@ -35,6 +36,8 @@ class SettingsProvider extends ChangeNotifier {
   int? get fixedCategoryId => _prefs?.getInt(_keyFixedCategoryId);
   bool get showActivityTime => _prefs?.getBool(_keyShowActivityTime) ?? true;
   bool get showCheckCount => _prefs?.getBool(_keyShowCheckCount) ?? true;
+  // 'system' | 'ko' | 'en'
+  String get language => _prefs?.getString(_keyLanguage) ?? 'system';
 
   SettingsProvider() {
     _init();
@@ -112,6 +115,11 @@ class SettingsProvider extends ChangeNotifier {
 
   Future<void> setShowCheckCount(bool v) async {
     await _prefs?.setBool(_keyShowCheckCount, v);
+    notifyListeners();
+  }
+
+  Future<void> setLanguage(String lang) async {
+    await _prefs?.setString(_keyLanguage, lang);
     notifyListeners();
   }
 }
