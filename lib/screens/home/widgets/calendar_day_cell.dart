@@ -42,7 +42,7 @@ class CalendarDayCell extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 2),
-        decoration: isToday
+        foregroundDecoration: isToday
             ? BoxDecoration(
                 border: Border.all(color: AppColors.grey500, width: 1.5),
                 borderRadius: BorderRadius.circular(2),
