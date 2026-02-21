@@ -48,6 +48,8 @@ class _HistoryState {
 }
 
 class _TimeInputDialogState extends State<TimeInputDialog> {
+  static const int _maxMinutes = 1440; // 24시간 상한
+
   int _hours = 0;
   int _minutes = 0;
   _InputField _selectedField = _InputField.hours;
@@ -62,6 +64,13 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
   }
 
   int get _totalMinutes => _hours * 60 + _minutes;
+
+  void _clampToMax() {
+    if (_totalMinutes > _maxMinutes) {
+      _hours = 24;
+      _minutes = 0;
+    }
+  }
 
   void _saveHistory() {
     _history.add(_HistoryState(
@@ -83,7 +92,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
           _isFirstInput = false;
         } else {
           final newValue = _hours * 10 + int.parse(number);
-          if (newValue <= 99) {
+          if (newValue <= 24) {
             _hours = newValue;
           }
         }
@@ -98,6 +107,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
           }
         }
       }
+      _clampToMax();
     });
   }
 
@@ -132,7 +142,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
         _minutes = _minutes % 60;
       }
       _hours += mins ~/ 60;
-      if (_hours > 99) _hours = 99;
+      _clampToMax();
     });
   }
 
