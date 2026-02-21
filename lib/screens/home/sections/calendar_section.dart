@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../constants/colors.dart';
 import '../../../providers/record_provider.dart';
@@ -16,87 +15,45 @@ class CalendarSection extends StatefulWidget {
   State<CalendarSection> createState() => _CalendarSectionState();
 }
 
-class _CalendarSectionState extends State<CalendarSection>
-    with SingleTickerProviderStateMixin {
-  // setState 없이 값만 변경 → ValueListenableBuilder만 업데이트
-  final _offsetNotifier = ValueNotifier<double>(0.0);
-  double _calendarWidth = 0.0;
-
-  late AnimationController _snapController;
-  Animation<double>? _snapAnimation;
+class _CalendarSectionState extends State<CalendarSection> {
+  static const int _initialPage = 5000;
+  late final PageController _pageController;
+  late final DateTime _baseMonth;
 
   @override
   void initState() {
     super.initState();
-    _snapController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    // 스냅 애니메이션도 setState 없이 notifier로만 업데이트
-    _snapController.addListener(() {
-      if (_snapAnimation != null) {
-        _offsetNotifier.value = _snapAnimation!.value;
-      }
-    });
+    final now = DateTime.now();
+    _baseMonth = DateTime(now.year, now.month);
+    _pageController = PageController(initialPage: _initialPage);
   }
 
   @override
   void dispose() {
-    _snapController.dispose();
-    _offsetNotifier.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
-  // setState 없음 - notifier 직접 업데이트 → 그리드 빌드 없이 Transform만 변경
-  void _onDragUpdate(DragUpdateDetails details) {
-    if (_snapController.isAnimating) return;
-    _offsetNotifier.value += details.delta.dx;
+  DateTime _indexToMonth(int index) {
+    final offset = index - _initialPage;
+    final totalMonths = _baseMonth.year * 12 + (_baseMonth.month - 1) + offset;
+    return DateTime(totalMonths ~/ 12, totalMonths % 12 + 1);
   }
 
-  Future<void> _snapTo(double target) async {
-    _snapAnimation = Tween<double>(
-      begin: _offsetNotifier.value,
-      end: target,
-    ).animate(CurvedAnimation(
-      parent: _snapController,
-      curve: Curves.easeOut,
-    ));
-    await _snapController.forward(from: 0);
-  }
-
-  Future<void> _onDragEnd(DragEndDetails details) async {
-    if (_snapController.isAnimating) return;
-    final width = _calendarWidth;
-    final offset = _offsetNotifier.value;
-    final velocity = details.primaryVelocity ?? 0;
-
-    if (velocity < -500 || offset < -width / 3) {
-      await _navigateMonth(isNext: true);
-    } else if (velocity > 500 || offset > width / 3) {
-      await _navigateMonth(isNext: false);
-    } else {
-      await _snapTo(0);
-      _offsetNotifier.value = 0;
-    }
-  }
-
-  Future<void> _navigateMonth({required bool isNext}) async {
-    final width = _calendarWidth;
-    await _snapTo(isNext ? -width : width);
-    if (!mounted) return;
-    _offsetNotifier.value = 0;
-    final date = context.read<RecordProvider>().selectedDate;
+  void _onPageChanged(int index) {
+    final newMonth = _indexToMonth(index);
     context.read<RecordProvider>().selectDate(
-      isNext
-          ? DateTime(date.year, date.month + 1, 1)
-          : DateTime(date.year, date.month - 1, 1),
+      DateTime(newMonth.year, newMonth.month, 1),
     );
-    HapticFeedback.lightImpact();
   }
 
-  Future<void> _onButtonTap(bool isNext) async {
-    if (_snapController.isAnimating) return;
-    await _navigateMonth(isNext: isNext);
+  void _onButtonTap(bool isNext) {
+    final currentPage = _pageController.page?.round() ?? _initialPage;
+    _pageController.animateToPage(
+      isNext ? currentPage + 1 : currentPage - 1,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   String _formatHeaderDate(DateTime date, String languageCode) {
@@ -160,7 +117,7 @@ class _CalendarSectionState extends State<CalendarSection>
     );
   }
 
-  Widget _buildCalendarGrid(
+  List<Widget> _buildCells(
     BuildContext context,
     DateTime month,
     DateTime selectedDate,
@@ -238,15 +195,7 @@ class _CalendarSectionState extends State<CalendarSection>
       );
     }
 
-    return GridView.count(
-      crossAxisCount: 7,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 0.62,
-      mainAxisSpacing: 4,
-      crossAxisSpacing: 4,
-      children: cells,
-    );
+    return cells;
   }
 
   @override
@@ -256,69 +205,51 @@ class _CalendarSectionState extends State<CalendarSection>
     final settings = context.watch<SettingsProvider>();
     final selectedDate = recordProvider.selectedDate;
 
-    final prevMonth = DateTime(selectedDate.year, selectedDate.month - 1, 1);
-    final nextMonth = DateTime(selectedDate.year, selectedDate.month + 1, 1);
+    return Container(
+      padding: EdgeInsets.only(
+        left: AppTheme.spacingMd,
+        right: AppTheme.spacingMd,
+        top: AppTheme.spacingSm,
+        bottom: AppTheme.spacingMd,
+      ),
+      color: AppTheme.backgroundColor,
+      child: Column(
+        children: [
+          _buildMonthNavigation(context, selectedDate),
+          SizedBox(height: AppTheme.spacingMd),
+          _buildWeekdayHeader(context, settings.startDay),
+          SizedBox(height: AppTheme.spacingSm),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // 6행 기준 고정 높이 계산 (childAspectRatio: 0.62, crossAxisSpacing: 4, mainAxisSpacing: 4)
+              final cellWidth = (constraints.maxWidth - 6 * 4) / 7;
+              final cellHeight = cellWidth / 0.62;
+              final gridHeight = 6 * cellHeight + 5 * 4;
 
-    // 그리드는 provider 데이터 변경 시에만 빌드 (드래그 중에는 빌드 안 함)
-    final prevGrid = _buildCalendarGrid(
-        context, prevMonth, selectedDate, recordProvider, categoryProvider, settings);
-    final currentGrid = _buildCalendarGrid(
-        context, selectedDate, selectedDate, recordProvider, categoryProvider, settings);
-    final nextGrid = _buildCalendarGrid(
-        context, nextMonth, selectedDate, recordProvider, categoryProvider, settings);
-
-    return GestureDetector(
-      onHorizontalDragUpdate: _onDragUpdate,
-      onHorizontalDragEnd: _onDragEnd,
-      child: Container(
-        padding: EdgeInsets.only(
-          left: AppTheme.spacingMd,
-          right: AppTheme.spacingMd,
-          top: AppTheme.spacingSm,
-          bottom: AppTheme.spacingMd,
-        ),
-        color: AppTheme.backgroundColor,
-        child: Column(
-          children: [
-            _buildMonthNavigation(context, selectedDate),
-            SizedBox(height: AppTheme.spacingMd),
-            _buildWeekdayHeader(context, settings.startDay),
-            SizedBox(height: AppTheme.spacingSm),
-
-            LayoutBuilder(
-              builder: (context, constraints) {
-                _calendarWidth = constraints.maxWidth;
-                final w = constraints.maxWidth;
-
-                return ClipRect(
-                  // ValueListenableBuilder: offset 변경 시 Transform만 업데이트
-                  // 그리드(prevGrid/currentGrid/nextGrid)는 빌드되지 않음
-                  child: ValueListenableBuilder<double>(
-                    valueListenable: _offsetNotifier,
-                    builder: (context, offset, _) {
-                      return Stack(
-                        children: [
-                          Transform.translate(
-                            offset: Offset(offset - w, 0),
-                            child: SizedBox(width: w, child: prevGrid),
-                          ),
-                          Transform.translate(
-                            offset: Offset(offset, 0),
-                            child: SizedBox(width: w, child: currentGrid),
-                          ),
-                          Transform.translate(
-                            offset: Offset(offset + w, 0),
-                            child: SizedBox(width: w, child: nextGrid),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+              return SizedBox(
+                height: gridHeight,
+                child: PageView.builder(
+                  controller: _pageController,
+                  onPageChanged: _onPageChanged,
+                  itemBuilder: (context, index) {
+                    final month = _indexToMonth(index);
+                    return GridView.count(
+                      crossAxisCount: 7,
+                      childAspectRatio: 0.62,
+                      mainAxisSpacing: 4,
+                      crossAxisSpacing: 4,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: _buildCells(
+                        context, month, selectedDate,
+                        recordProvider, categoryProvider, settings,
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
