@@ -117,7 +117,7 @@ class _CheckboxSectionState extends State<CheckboxSection> {
                   ? Icons.check_box_rounded
                   : Icons.check_box_outline_blank_rounded,
               size: 24,
-              color: isCompleted ? AppColors.textPrimary : AppColors.grey400,
+              color: isCompleted ? AppColors.grey400 : AppColors.textPrimary,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -127,7 +127,7 @@ class _CheckboxSectionState extends State<CheckboxSection> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 14,
-                  color: isCompleted ? AppColors.textPrimary : AppColors.grey400,
+                  color: isCompleted ? AppColors.grey400 : AppColors.textPrimary,
                   decoration: isCompleted
                       ? TextDecoration.lineThrough
                       : TextDecoration.none,
