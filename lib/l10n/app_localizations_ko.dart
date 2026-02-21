@@ -214,4 +214,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get notifBody => '오늘의 활동을 기록해보세요.';
+
+  @override
+  String get restDay => '오늘은 쉬려구요';
 }

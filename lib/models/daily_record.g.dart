@@ -28,13 +28,18 @@ const DailyRecordSchema = CollectionSchema(
       name: r'date',
       type: IsarType.string,
     ),
-    r'message': PropertySchema(
+    r'isRestDay': PropertySchema(
       id: 2,
+      name: r'isRestDay',
+      type: IsarType.bool,
+    ),
+    r'message': PropertySchema(
+      id: 3,
       name: r'message',
       type: IsarType.string,
     ),
     r'timeRecords': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'timeRecords',
       type: IsarType.objectList,
       target: r'TimeEntry',
@@ -128,9 +133,10 @@ void _dailyRecordSerialize(
     object.checkRecords,
   );
   writer.writeString(offsets[1], object.date);
-  writer.writeString(offsets[2], object.message);
+  writer.writeBool(offsets[2], object.isRestDay);
+  writer.writeString(offsets[3], object.message);
   writer.writeObjectList<TimeEntry>(
-    offsets[3],
+    offsets[4],
     allOffsets,
     TimeEntrySchema.serialize,
     object.timeRecords,
@@ -151,9 +157,10 @@ DailyRecord _dailyRecordDeserialize(
       CheckEntry(),
     ),
     date: reader.readStringOrNull(offsets[1]) ?? '',
-    message: reader.readStringOrNull(offsets[2]),
+    isRestDay: reader.readBoolOrNull(offsets[2]) ?? false,
+    message: reader.readStringOrNull(offsets[3]),
     timeRecords: reader.readObjectList<TimeEntry>(
-      offsets[3],
+      offsets[4],
       TimeEntrySchema.deserialize,
       allOffsets,
       TimeEntry(),
@@ -180,8 +187,10 @@ P _dailyRecordDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 3:
+      return (reader.readStringOrNull(offset)) as P;
+    case 4:
       return (reader.readObjectList<TimeEntry>(
         offset,
         TimeEntrySchema.deserialize,
@@ -623,6 +632,16 @@ extension DailyRecordQueryFilter
   }
 
   QueryBuilder<DailyRecord, DailyRecord, QAfterFilterCondition>
+      isRestDayEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isRestDay',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyRecord, DailyRecord, QAfterFilterCondition>
       messageIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -916,6 +935,18 @@ extension DailyRecordQuerySortBy
     });
   }
 
+  QueryBuilder<DailyRecord, DailyRecord, QAfterSortBy> sortByIsRestDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRestDay', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyRecord, DailyRecord, QAfterSortBy> sortByIsRestDayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRestDay', Sort.desc);
+    });
+  }
+
   QueryBuilder<DailyRecord, DailyRecord, QAfterSortBy> sortByMessage() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'message', Sort.asc);
@@ -955,6 +986,18 @@ extension DailyRecordQuerySortThenBy
     });
   }
 
+  QueryBuilder<DailyRecord, DailyRecord, QAfterSortBy> thenByIsRestDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRestDay', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyRecord, DailyRecord, QAfterSortBy> thenByIsRestDayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRestDay', Sort.desc);
+    });
+  }
+
   QueryBuilder<DailyRecord, DailyRecord, QAfterSortBy> thenByMessage() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'message', Sort.asc);
@@ -974,6 +1017,12 @@ extension DailyRecordQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'date', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DailyRecord, DailyRecord, QDistinct> distinctByIsRestDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isRestDay');
     });
   }
 
@@ -1003,6 +1052,12 @@ extension DailyRecordQueryProperty
   QueryBuilder<DailyRecord, String, QQueryOperations> dateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'date');
+    });
+  }
+
+  QueryBuilder<DailyRecord, bool, QQueryOperations> isRestDayProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isRestDay');
     });
   }
 

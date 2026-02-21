@@ -16,6 +16,7 @@ class RecordProvider extends ChangeNotifier {
   DailyRecord? get currentRecord => _currentRecord;
   bool get isLoading => _isLoading;
   Map<String, DailyRecord> get monthRecords => _monthRecords;
+  bool get isCurrentRestDay => _currentRecord?.isRestDay ?? false;
 
   RecordProvider() {
     loadRecord(_selectedDate);
@@ -179,6 +180,47 @@ class RecordProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // 쉬는 날 활성화 (메시지 자동 입력 포함)
+  Future<void> activateRestDay(String message) async {
+    if (_currentRecord == null) return;
+
+    _currentRecord!.isRestDay = true;
+    _currentRecord!.message = message;
+
+    final isar = await IsarService.instance;
+    await isar.writeTxn(() async {
+      await isar.dailyRecords.put(_currentRecord!);
+    });
+
+    final dateString = _formatDate(_selectedDate);
+    _monthRecords[dateString] = _currentRecord!;
+
+    notifyListeners();
+  }
+
+  // 쉬는 날 토글
+  Future<void> toggleRestDay() async {
+    if (_currentRecord == null) return;
+
+    _currentRecord!.isRestDay = !(_currentRecord!.isRestDay);
+
+    final isar = await IsarService.instance;
+    await isar.writeTxn(() async {
+      await isar.dailyRecords.put(_currentRecord!);
+    });
+
+    final dateString = _formatDate(_selectedDate);
+    _monthRecords[dateString] = _currentRecord!;
+
+    notifyListeners();
+  }
+
+  // 특정 날짜 쉬는 날 여부
+  bool getIsRestDayForDate(DateTime date) {
+    final dateString = _formatDate(date);
+    return _monthRecords[dateString]?.isRestDay ?? false;
+  }
+
   // 날짜 포맷팅 (YYYY-MM-DD)
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
@@ -293,7 +335,7 @@ class RecordProvider extends ChangeNotifier {
       final dateString = _formatDate(date);
       final record = records.where((r) => r.date == dateString).firstOrNull;
 
-      if (record?.timeRecords != null) {
+      if (record?.isRestDay != true && record?.timeRecords != null) {
         for (final entry in record!.timeRecords!) {
           if (entry.minutes > 0) {
             final key = entry.categoryId.toString();
@@ -325,7 +367,7 @@ class RecordProvider extends ChangeNotifier {
       final dateString = _formatDate(date);
       final record = records.where((r) => r.date == dateString).firstOrNull;
 
-      if (record?.timeRecords != null) {
+      if (record?.isRestDay != true && record?.timeRecords != null) {
         for (final entry in record!.timeRecords!) {
           if (entry.minutes > 0) {
             final key = entry.categoryId.toString();
@@ -346,6 +388,7 @@ class RecordProvider extends ChangeNotifier {
     final Map<int, int> totals = {};
 
     for (final record in records) {
+      if (record.isRestDay) continue;
       if (record.timeRecords != null) {
         for (final entry in record.timeRecords!) {
           totals[entry.categoryId] = (totals[entry.categoryId] ?? 0) + entry.minutes;

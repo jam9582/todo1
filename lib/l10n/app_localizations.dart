@@ -499,6 +499,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'오늘의 활동을 기록해보세요.'**
   String get notifBody;
+
+  /// No description provided for @restDay.
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘은 쉬려구요'**
+  String get restDay;
 }
 
 class _AppLocalizationsDelegate

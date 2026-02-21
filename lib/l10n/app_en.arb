@@ -90,5 +90,7 @@
 
   "notifChannelName": "Daily Reminder",
   "notifTitle": "How was your day?",
-  "notifBody": "Record your activities for today."
+  "notifBody": "Record your activities for today.",
+
+  "restDay": "Taking it easy"
 }

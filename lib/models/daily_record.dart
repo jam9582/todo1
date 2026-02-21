@@ -15,11 +15,14 @@ class DailyRecord {
 
   List<CheckEntry>? checkRecords;
 
+  bool isRestDay = false;
+
   DailyRecord({
     this.date = '',
     this.message,
     this.timeRecords,
     this.checkRecords,
+    this.isRestDay = false,
   });
 }
 

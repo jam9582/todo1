@@ -186,6 +186,7 @@ class _CalendarSectionState extends State<CalendarSection> {
       final isToday = date.year == today.year &&
           date.month == today.month &&
           date.day == today.day;
+      final isRestDay = recordProvider.getIsRestDayForDate(date);
 
       cells.add(
         CalendarDayCell(
@@ -193,8 +194,9 @@ class _CalendarSectionState extends State<CalendarSection> {
           isSelected: isSelected,
           isWeekend: isWeekend,
           isToday: isToday,
-          emoji: emoji,
-          minutes: minutes,
+          isRestDay: isRestDay,
+          emoji: isRestDay ? null : emoji,
+          minutes: isRestDay ? null : minutes,
           showTime: settings.showActivityTime,
           completedChecks: settings.showCheckCount ? completedChecks : 0,
           onTap: () {

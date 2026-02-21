@@ -38,10 +38,24 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
     _focusNode.unfocus();
   }
 
+  void _toggleRestDay(BuildContext context) {
+    if (_isEditing) _saveMessage(context);
+    final recordProvider = context.read<RecordProvider>();
+    final isRestDay = recordProvider.isCurrentRestDay;
+    if (isRestDay) {
+      recordProvider.toggleRestDay();
+    } else {
+      final l10n = AppLocalizations.of(context)!;
+      recordProvider.activateRestDay(l10n.restDay);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final recordProvider = context.watch<RecordProvider>();
     final message = recordProvider.currentRecord?.message ?? '';
+    final isRestDay = recordProvider.isCurrentRestDay;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       width: double.infinity,
@@ -65,23 +79,56 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              AppLocalizations.of(context)!.dailyMessageLabel,
-              style: TextStyle(
-                fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
-              ),
+            Row(
+              children: [
+                Text(
+                  l10n.dailyMessageLabel,
+                  style: TextStyle(
+                    fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _buildRestDayButton(context, isRestDay, l10n),
+              ],
             ),
             const SizedBox(height: 2),
-            _isEditing ? _buildTextField(context) : _buildDisplayText(message),
+            _isEditing
+                ? _buildTextField(context, l10n)
+                : _buildDisplayText(context, message, l10n),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDisplayText(String message) {
+  Widget _buildRestDayButton(BuildContext context, bool isRestDay, AppLocalizations l10n) {
+    return GestureDetector(
+      onTap: () => _toggleRestDay(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: isRestDay ? AppColors.grey500 : Colors.transparent,
+          border: Border.all(
+            color: isRestDay ? AppColors.grey500 : AppColors.grey400,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          l10n.restDay,
+          style: TextStyle(
+            fontSize: Responsive.fontSize(context, 11),
+            color: isRestDay ? AppColors.textOnAccent : AppColors.grey500,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDisplayText(BuildContext context, String message, AppLocalizations l10n) {
     final hasMessage = message.isNotEmpty;
     return GestureDetector(
       onTap: () => _startEditing(message),
@@ -98,7 +145,7 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
           ),
           Expanded(
             child: Text(
-              hasMessage ? message : AppLocalizations.of(context)!.dailyMessagePlaceholder,
+              hasMessage ? message : l10n.dailyMessagePlaceholder,
               textAlign: TextAlign.left,
               overflow: TextOverflow.visible,
               softWrap: true,
@@ -115,7 +162,7 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
     );
   }
 
-  Widget _buildTextField(BuildContext context) {
+  Widget _buildTextField(BuildContext context, AppLocalizations l10n) {
     return TextField(
       controller: _controller,
       focusNode: _focusNode,
@@ -128,7 +175,7 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
         height: 1.5,
       ),
       decoration: InputDecoration(
-        hintText: AppLocalizations.of(context)!.dailyMessagePlaceholder,
+        hintText: l10n.dailyMessagePlaceholder,
         hintStyle: const TextStyle(
           color: AppColors.grey500,
           fontStyle: FontStyle.italic,

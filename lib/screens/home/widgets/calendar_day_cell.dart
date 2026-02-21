@@ -11,6 +11,7 @@ class CalendarDayCell extends StatelessWidget {
   final int? minutes; // 분 단위로 받음
   final int completedChecks;
   final bool isToday;
+  final bool isRestDay;
   final bool showTime;
   final VoidCallback onTap;
 
@@ -23,6 +24,7 @@ class CalendarDayCell extends StatelessWidget {
     this.minutes,
     this.completedChecks = 0,
     this.isToday = false,
+    this.isRestDay = false,
     this.showTime = true,
     required this.onTap,
   });
@@ -67,7 +69,9 @@ class CalendarDayCell extends StatelessWidget {
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
                       ? AppColors.textOnAccent
-                      : (isWeekend ? AppColors.error : AppColors.textPrimary),
+                      : isRestDay
+                          ? AppColors.grey400
+                          : (isWeekend ? AppColors.error : AppColors.textPrimary),
                 ),
               ),
             ),
@@ -75,45 +79,56 @@ class CalendarDayCell extends StatelessWidget {
             // 카테고리 정보 영역 (항상 공간 유지)
             SizedBox(
               height: 18,
-              child: hasData
-                  ? Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 3,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            emoji!,
-                            style: TextStyle(
-                              fontSize: Responsive.fontSize(context, 9),
-                            ),
-                          ),
-                          if (showTime && minutes != null) ...[
-                            const SizedBox(width: 2),
-                            Text(
-                              _formatTime(minutes!),
-                              style: TextStyle(
-                                fontSize: Responsive.fontSize(context, 8),
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ],
+              child: isRestDay
+                  ? Center(
+                      child: Text(
+                        '—',
+                        style: TextStyle(
+                          fontSize: Responsive.fontSize(context, 12),
+                          color: AppColors.grey400,
+                          fontWeight: FontWeight.w300,
+                        ),
                       ),
                     )
-                  : null,
+                  : hasData
+                      ? Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 3,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.accent.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                emoji!,
+                                style: TextStyle(
+                                  fontSize: Responsive.fontSize(context, 9),
+                                ),
+                              ),
+                              if (showTime && minutes != null) ...[
+                                const SizedBox(width: 2),
+                                Text(
+                                  _formatTime(minutes!),
+                                  style: TextStyle(
+                                    fontSize: Responsive.fontSize(context, 8),
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        )
+                      : null,
             ),
             const SizedBox(height: 2),
-            // 체크박스 완료 개수
+            // 체크박스 완료 개수 (쉬는 날엔 표시 안 함)
             SizedBox(
               height: 18,
-              child: completedChecks > 0
+              child: !isRestDay && completedChecks > 0
                   ? Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 3,

@@ -90,5 +90,7 @@
 
   "notifChannelName": "매일 알림",
   "notifTitle": "오늘 하루는 어땠나요?",
-  "notifBody": "오늘의 활동을 기록해보세요."
+  "notifBody": "오늘의 활동을 기록해보세요.",
+
+  "restDay": "오늘은 쉬려구요"
 }
