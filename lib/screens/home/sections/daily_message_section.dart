@@ -51,21 +51,32 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
         top: AppTheme.spacingMd,
         bottom: AppTheme.spacingSm,
       ),
-      color: AppTheme.backgroundColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalizations.of(context)!.dailyMessageLabel,
-            style: TextStyle(
-              fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+      color: AppColors.background,
+      child: Container(
+        padding: const EdgeInsets.only(left: 12),
+        decoration: const BoxDecoration(
+          border: Border(
+            left: BorderSide(
+              color: AppColors.textOnAccent,
+              width: 3,
             ),
           ),
-          const SizedBox(height: 2),
-          _isEditing ? _buildTextField(context) : _buildDisplayText(message),
-        ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.dailyMessageLabel,
+              style: TextStyle(
+                fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 2),
+            _isEditing ? _buildTextField(context) : _buildDisplayText(message),
+          ],
+        ),
       ),
     );
   }
@@ -74,17 +85,32 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
     final hasMessage = message.isNotEmpty;
     return GestureDetector(
       onTap: () => _startEditing(message),
-      child: Text(
-        hasMessage ? message : AppLocalizations.of(context)!.dailyMessagePlaceholder,
-        textAlign: TextAlign.left,
-        overflow: TextOverflow.visible,
-        softWrap: true,
-        style: TextStyle(
-          fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
-          color: hasMessage ? AppColors.textPrimary : AppColors.grey500,
-          height: 1.5,
-          fontStyle: hasMessage ? FontStyle.normal : FontStyle.italic,
-        ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 3, right: 6),
+            child: Icon(
+              Icons.edit_outlined,
+              size: 14,
+              color: AppColors.grey400,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              hasMessage ? message : AppLocalizations.of(context)!.dailyMessagePlaceholder,
+              textAlign: TextAlign.left,
+              overflow: TextOverflow.visible,
+              softWrap: true,
+              style: TextStyle(
+                fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
+                color: hasMessage ? AppColors.textPrimary : AppColors.grey500,
+                height: 1.5,
+                fontStyle: hasMessage ? FontStyle.normal : FontStyle.italic,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

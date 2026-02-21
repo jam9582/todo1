@@ -157,12 +157,14 @@ class _HomeScreenState extends State<HomeScreen>
                       children: [
                         // 한마디 입력 (오늘의 한마디 라벨 포함)
                         const DailyMessageSection(),
+                        const Divider(height: 1, thickness: 1, color: AppColors.grey200, indent: 16, endIndent: 16),
 
                         // 카테고리 섹션 (4개 카테고리)
                         const CategorySection(),
 
                         // 체크박스 섹션
                         const CheckboxSection(),
+                        const Divider(height: 1, thickness: 1, color: AppColors.grey200, indent: 16, endIndent: 16),
 
                         // 달력
                         const CalendarSection(),
