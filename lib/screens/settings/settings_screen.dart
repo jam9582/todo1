@@ -8,12 +8,14 @@ import '../../constants/app_theme.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../providers/purchase_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final settings = context.watch<SettingsProvider>();
     final categories = context.watch<CategoryProvider>().categories;
 
@@ -28,7 +30,7 @@ class SettingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('설정'),
+        title: Text(l10n.settingsTitle),
         centerTitle: false,
         elevation: 0,
       ),
@@ -39,15 +41,15 @@ class SettingsScreen extends StatelessWidget {
         ),
         children: [
           // ─── 달력 설정 ───────────────────────────────────────────
-          _SectionHeader(title: '달력 설정'),
+          _SectionHeader(title: l10n.sectionCalendar),
           _SettingsCard(
             children: [
               _SegmentedRow<CalendarStartDay>(
-                label: '주 시작 요일',
+                label: l10n.labelWeekStart,
                 value: settings.startDay,
-                segments: const [
-                  ButtonSegment(value: CalendarStartDay.sunday, label: Text('일요일')),
-                  ButtonSegment(value: CalendarStartDay.monday, label: Text('월요일')),
+                segments: [
+                  ButtonSegment(value: CalendarStartDay.sunday, label: Text(l10n.sunday)),
+                  ButtonSegment(value: CalendarStartDay.monday, label: Text(l10n.monday)),
                 ],
                 onChanged: (v) => context.read<SettingsProvider>().setStartDay(v),
               ),
@@ -56,20 +58,20 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: AppTheme.spacingMd),
 
           // ─── 달력 표시 설정 ──────────────────────────────────────
-          _SectionHeader(title: '달력 표시 설정'),
+          _SectionHeader(title: l10n.sectionCalendarDisplay),
           _SettingsCard(
             children: [
               _SegmentedRow<CalendarDisplayMode>(
-                label: '카테고리 표시 방식',
+                label: l10n.labelCategoryDisplay,
                 value: settings.displayMode,
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: CalendarDisplayMode.topCategory,
-                    label: Text('최다 활동'),
+                    label: Text(l10n.displayModeTopCategory),
                   ),
                   ButtonSegment(
                     value: CalendarDisplayMode.fixedCategory,
-                    label: Text('특정 카테고리'),
+                    label: Text(l10n.displayModeFixedCategory),
                   ),
                 ],
                 onChanged: (v) => context.read<SettingsProvider>().setDisplayMode(v),
@@ -77,7 +79,8 @@ class SettingsScreen extends StatelessWidget {
               if (settings.displayMode == CalendarDisplayMode.fixedCategory) ...[
                 _Divider(),
                 _DropdownRow(
-                  label: '표시할 카테고리',
+                  label: l10n.labelDisplayCategory,
+                  hint: l10n.dropdownHint,
                   value: settings.fixedCategoryId,
                   items: categories
                       .map((c) => DropdownMenuItem(
@@ -91,14 +94,14 @@ class SettingsScreen extends StatelessWidget {
               ],
               _Divider(),
               _SwitchRow(
-                label: '카테고리 활동시간 표시',
+                label: l10n.labelShowActivityTime,
                 value: settings.showActivityTime,
                 onChanged: (v) =>
                     context.read<SettingsProvider>().setShowActivityTime(v),
               ),
               _Divider(),
               _SwitchRow(
-                label: '체크박스 완료 개수 표시',
+                label: l10n.labelShowCheckCount,
                 value: settings.showCheckCount,
                 onChanged: (v) =>
                     context.read<SettingsProvider>().setShowCheckCount(v),
@@ -108,22 +111,21 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: AppTheme.spacingMd),
 
           // ─── 알림 ────────────────────────────────────────────────
-          _SectionHeader(title: '알림'),
+          _SectionHeader(title: l10n.sectionNotification),
           _SettingsCard(
             children: [
               _SwitchRow(
-                label: '매일 알림',
+                label: l10n.labelDailyNotif,
                 value: settings.notifEnabled,
-                onChanged: (v) =>
-                    context.read<SettingsProvider>().setNotifEnabled(v),
+                onChanged: (v) => _setNotifEnabled(context, v, l10n),
               ),
               if (settings.notifEnabled) ...[
                 _Divider(),
                 _TimeRow(
-                  label: '알림 시간',
+                  label: l10n.labelNotifTime,
                   hour: settings.notifHour,
                   minute: settings.notifMinute,
-                  onTap: () => _pickTime(context, settings),
+                  onTap: () => _pickTime(context, settings, l10n),
                 ),
               ],
             ],
@@ -131,16 +133,16 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: AppTheme.spacingMd),
 
           // ─── 구매 관리 ────────────────────────────────────────────
-          _SectionHeader(title: '구매'),
+          _SectionHeader(title: l10n.sectionPurchase),
           _SettingsCard(
             children: [
               _TapRow(
-                label: '구매 복원',
-                onTap: () => _restorePurchases(context),
+                label: l10n.labelRestorePurchase,
+                onTap: () => _restorePurchases(context, l10n),
               ),
               _Divider(),
               _TapRow(
-                label: '구매 내역 및 지원',
+                label: l10n.labelPurchaseHistory,
                 onTap: () => RevenueCatUI.presentCustomerCenter(),
               ),
             ],
@@ -148,7 +150,7 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: AppTheme.spacingMd),
 
           // ─── 앱 정보 ─────────────────────────────────────────────
-          _SectionHeader(title: '앱 정보'),
+          _SectionHeader(title: l10n.sectionAppInfo),
           _SettingsCard(
             children: [
               FutureBuilder<PackageInfo>(
@@ -157,7 +159,7 @@ class SettingsScreen extends StatelessWidget {
                   final version = snapshot.hasData
                       ? snapshot.data!.version
                       : '-';
-                  return _InfoRow(label: '버전', value: version);
+                  return _InfoRow(label: l10n.labelVersion, value: version);
                 },
               ),
             ],
@@ -168,7 +170,17 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _pickTime(BuildContext context, SettingsProvider settings) async {
+  Future<void> _setNotifEnabled(
+      BuildContext context, bool v, AppLocalizations l10n) async {
+    await context.read<SettingsProvider>().setNotifEnabled(
+          v,
+          notifTitle: l10n.notifTitle,
+          notifBody: l10n.notifBody,
+        );
+  }
+
+  Future<void> _pickTime(
+      BuildContext context, SettingsProvider settings, AppLocalizations l10n) async {
     final picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay(
@@ -181,11 +193,17 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
     if (picked != null && context.mounted) {
-      await context.read<SettingsProvider>().setNotifTime(picked.hour, picked.minute);
+      await context.read<SettingsProvider>().setNotifTime(
+            picked.hour,
+            picked.minute,
+            notifTitle: l10n.notifTitle,
+            notifBody: l10n.notifBody,
+          );
     }
   }
 
-  Future<void> _restorePurchases(BuildContext context) async {
+  Future<void> _restorePurchases(
+      BuildContext context, AppLocalizations l10n) async {
     final purchaseProvider = context.read<PurchaseProvider>();
     try {
       final customerInfo = await Purchases.restorePurchases();
@@ -193,14 +211,16 @@ class SettingsScreen extends StatelessWidget {
           customerInfo.entitlements.active.containsKey('remove_ads');
       await purchaseProvider.refresh();
       if (context.mounted) {
-        final msg = isAdRemoved ? '구매 내역을 복원했습니다!' : '복원할 구매 내역이 없습니다';
+        final msg = isAdRemoved
+            ? l10n.msgPurchaseRestored
+            : l10n.msgNoPurchaseToRestore;
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(msg)));
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('복원에 실패했습니다. 다시 시도해주세요.')),
+          SnackBar(content: Text(l10n.msgRestoreFailed)),
         );
       }
     }
@@ -359,12 +379,14 @@ class _SegmentedRow<T> extends StatelessWidget {
 
 class _DropdownRow extends StatelessWidget {
   final String label;
+  final String hint;
   final int? value;
   final List<DropdownMenuItem<int>> items;
   final ValueChanged<int?> onChanged;
 
   const _DropdownRow({
     required this.label,
+    required this.hint,
     required this.value,
     required this.items,
     required this.onChanged,
@@ -394,9 +416,9 @@ class _DropdownRow extends StatelessWidget {
               fontSize: AppTheme.fontSizeBody,
               color: AppColors.textPrimary,
             ),
-            hint: const Text(
-              '선택',
-              style: TextStyle(
+            hint: Text(
+              hint,
+              style: const TextStyle(
                 fontSize: AppTheme.fontSizeBody,
                 color: AppColors.textHint,
               ),

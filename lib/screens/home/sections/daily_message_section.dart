@@ -4,6 +4,7 @@ import '../../../constants/colors.dart';
 import '../../../providers/record_provider.dart';
 import '../../../constants/app_theme.dart';
 import '../../../utils/responsive.dart';
+import '../../../l10n/app_localizations.dart';
 
 class DailyMessageSection extends StatefulWidget {
   const DailyMessageSection({super.key});
@@ -55,7 +56,7 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '오늘의 한마디',
+            AppLocalizations.of(context)!.dailyMessageLabel,
             style: TextStyle(
               fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
               fontWeight: FontWeight.w500,
@@ -74,7 +75,7 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
     return GestureDetector(
       onTap: () => _startEditing(message),
       child: Text(
-        hasMessage ? message : '언제나 당신을 응원해요',
+        hasMessage ? message : AppLocalizations.of(context)!.dailyMessagePlaceholder,
         textAlign: TextAlign.left,
         overflow: TextOverflow.visible,
         softWrap: true,
@@ -100,9 +101,9 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
         color: AppColors.textPrimary,
         height: 1.5,
       ),
-      decoration: const InputDecoration(
-        hintText: '언제나 당신을 응원해요',
-        hintStyle: TextStyle(
+      decoration: InputDecoration(
+        hintText: AppLocalizations.of(context)!.dailyMessagePlaceholder,
+        hintStyle: const TextStyle(
           color: AppColors.grey500,
           fontStyle: FontStyle.italic,
         ),

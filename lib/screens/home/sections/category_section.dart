@@ -6,6 +6,7 @@ import '../../../providers/record_provider.dart';
 import '../../../models/extensions.dart';
 import '../widgets/category_button.dart';
 import '../widgets/time_input_dialog.dart';
+import '../../../l10n/app_localizations.dart';
 
 class CategorySection extends StatelessWidget {
   const CategorySection({super.key});
@@ -27,7 +28,7 @@ class CategorySection extends StatelessWidget {
         color: AppColors.background,
         child: Center(
           child: Text(
-            '카테고리를 만들어보세요!',
+            AppLocalizations.of(context)!.emptyCategoryMessage,
             style: TextStyle(
               fontSize: 14,
               color: AppColors.grey400,

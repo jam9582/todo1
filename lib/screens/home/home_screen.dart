@@ -15,6 +15,21 @@ import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import '../statistics/statistics_screen.dart';
 import '../settings/settings_screen.dart';
 import '../../providers/purchase_provider.dart';
+import '../../l10n/app_localizations.dart';
+
+enum _MenuAction { statistics, categoryEdit, removeAds, settings }
+
+class _MenuItem {
+  final IconData icon;
+  final String label;
+  final _MenuAction action;
+
+  const _MenuItem({
+    required this.icon,
+    required this.label,
+    required this.action,
+  });
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,13 +43,6 @@ class _HomeScreenState extends State<HomeScreen>
   bool _isMenuOpen = false;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-
-  final List<_MenuItem> _menuItems = [
-    _MenuItem(icon: Icons.bar_chart_rounded, label: '통계'),
-    _MenuItem(icon: Icons.edit_rounded, label: '카테고리 편집'),
-    _MenuItem(icon: Icons.workspace_premium_rounded, label: '광고 제거'),
-    _MenuItem(icon: Icons.settings_rounded, label: '설정'),
-  ];
 
   @override
   void initState() {
@@ -54,6 +62,13 @@ class _HomeScreenState extends State<HomeScreen>
     _animationController.dispose();
     super.dispose();
   }
+
+  List<_MenuItem> _buildMenuItems(AppLocalizations l10n) => [
+        _MenuItem(icon: Icons.bar_chart_rounded, label: l10n.menuStatistics, action: _MenuAction.statistics),
+        _MenuItem(icon: Icons.edit_rounded, label: l10n.menuCategoryEdit, action: _MenuAction.categoryEdit),
+        _MenuItem(icon: Icons.workspace_premium_rounded, label: l10n.menuRemoveAds, action: _MenuAction.removeAds),
+        _MenuItem(icon: Icons.settings_rounded, label: l10n.settingsTitle, action: _MenuAction.settings),
+      ];
 
   void _toggleMenu() {
     setState(() {
@@ -75,33 +90,33 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-  void _onMenuItemTap(String label) {
+  void _onMenuItemTap(_MenuAction action) {
     _closeMenu();
 
-    if (label == '통계') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const StatisticsScreen()),
-      );
-    } else if (label == '카테고리 편집') {
-      CategoryEditDialog.show(context);
-    } else if (label == '광고 제거') {
-      _showPaywall();
-    } else if (label == '설정') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SettingsScreen()),
-      );
-    } else {
-      SnackBarManager.showText(context, '$label 기능은 준비 중입니다');
+    switch (action) {
+      case _MenuAction.statistics:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const StatisticsScreen()),
+        );
+      case _MenuAction.categoryEdit:
+        CategoryEditDialog.show(context);
+      case _MenuAction.removeAds:
+        _showPaywall();
+      case _MenuAction.settings:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SettingsScreen()),
+        );
     }
   }
 
   Future<void> _showPaywall() async {
+    final l10n = AppLocalizations.of(context)!;
     final purchaseProvider = context.read<PurchaseProvider>();
 
     if (purchaseProvider.isAdRemoved) {
-      SnackBarManager.showText(context, '이미 광고가 제거된 상태입니다 ✓');
+      SnackBarManager.showText(context, l10n.msgAdsAlreadyRemoved);
       return;
     }
 
@@ -111,12 +126,16 @@ class _HomeScreenState extends State<HomeScreen>
 
     if (result == PaywallResult.purchased || result == PaywallResult.restored) {
       await purchaseProvider.refresh();
-      SnackBarManager.showText(context, '광고가 제거되었습니다!');
+      if (!mounted) return;
+      SnackBarManager.showText(context, l10n.msgAdsRemoved);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final menuItems = _buildMenuItems(l10n);
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: AppColors.background,
@@ -184,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen>
                   opacity: _fadeAnimation,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
-                    children: _menuItems.asMap().entries.map((entry) {
+                    children: menuItems.asMap().entries.map((entry) {
                       final index = entry.key;
                       final item = entry.value;
                       return TweenAnimationBuilder<double>(
@@ -203,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen>
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: DebouncedGestureDetector(
-                            onTap: () => _onMenuItemTap(item.label),
+                            onTap: () => _onMenuItemTap(item.action),
                             child: Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
@@ -237,11 +256,4 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-}
-
-class _MenuItem {
-  final IconData icon;
-  final String label;
-
-  const _MenuItem({required this.icon, required this.label});
 }

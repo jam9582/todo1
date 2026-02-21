@@ -42,7 +42,12 @@ class NotificationService {
     return false;
   }
 
-  static Future<void> schedule(int hour, int minute) async {
+  static Future<void> schedule(
+    int hour,
+    int minute, {
+    required String title,
+    required String body,
+  }) async {
     await cancel();
 
     final location = tz.local;
@@ -65,8 +70,8 @@ class NotificationService {
 
     await _plugin.zonedSchedule(
       _notifId,
-      '오늘 하루는 어땠나요?',
-      '오늘의 활동을 기록해보세요.',
+      title,
+      body,
       scheduled,
       details,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

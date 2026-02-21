@@ -6,6 +6,7 @@ import '../../constants/colors.dart';
 import '../../providers/record_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../widgets/ad_banner_widget.dart';
+import '../../l10n/app_localizations.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -84,9 +85,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
-            '통계',
-            style: TextStyle(
+          title: Text(
+            AppLocalizations.of(context)!.menuStatistics,
+            style: const TextStyle(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.bold,
             ),
@@ -143,7 +144,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '주간',
+                  AppLocalizations.of(context)!.periodWeekly,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -169,7 +170,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '월간',
+                  AppLocalizations.of(context)!.periodMonthly,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -196,10 +197,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           color: AppColors.grey100,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
-            '데이터가 없습니다',
-            style: TextStyle(color: AppColors.grey500),
+            AppLocalizations.of(context)!.noData,
+            style: const TextStyle(color: AppColors.grey500),
           ),
         ),
       );
@@ -270,10 +271,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           color: AppColors.grey100,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
-            '데이터가 없습니다',
-            style: TextStyle(color: AppColors.grey500),
+            AppLocalizations.of(context)!.noData,
+            style: const TextStyle(color: AppColors.grey500),
           ),
         ),
       );
@@ -295,7 +296,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _isWeekly ? '주간 활동 추이' : '월간 활동 추이',
+          _isWeekly
+              ? AppLocalizations.of(context)!.chartWeeklyTrend
+              : AppLocalizations.of(context)!.chartMonthlyTrend,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -607,7 +610,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _isWeekly ? '주간 카테고리별 총합' : '월간 카테고리별 총합',
+          _isWeekly
+              ? AppLocalizations.of(context)!.chartWeeklyTotal
+              : AppLocalizations.of(context)!.chartMonthlyTotal,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,

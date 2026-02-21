@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'services/isar_service.dart';
 import 'services/notification_service.dart';
@@ -55,6 +57,16 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Todo1 App',
         theme: AppTheme.theme,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('ko'),
+          Locale('en'),
+        ],
         home: const HomeScreen(),
       ),
     );

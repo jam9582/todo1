@@ -6,6 +6,7 @@ import '../../../models/category.dart';
 import '../../../models/check_box.dart';
 import '../../../providers/category_provider.dart';
 import '../../../providers/check_box_provider.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// 카테고리 편집 다이얼로그
 class CategoryEditDialog extends StatefulWidget {
@@ -85,16 +86,16 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: const Text('카테고리 삭제'),
-        content: Text('\'${category.name}\' 카테고리를 삭제하시겠습니까?'),
+        title: Text(AppLocalizations.of(context)!.dialogDeleteCategoryTitle),
+        content: Text(AppLocalizations.of(context)!.dialogDeleteCategoryContent(category.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('취소', style: TextStyle(color: AppColors.grey500)),
+            child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: AppColors.grey500)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('삭제', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -147,16 +148,16 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: const Text('체크박스 삭제'),
-        content: Text('\'${checkBox.name}\' 항목을 삭제하시겠습니까?'),
+        title: Text(AppLocalizations.of(context)!.dialogDeleteCheckboxTitle),
+        content: Text(AppLocalizations.of(context)!.dialogDeleteCheckboxContent(checkBox.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('취소', style: TextStyle(color: AppColors.grey500)),
+            child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: AppColors.grey500)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('삭제', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -250,7 +251,7 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '카테고리',
+                  AppLocalizations.of(context)!.tabCategory,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -271,7 +272,7 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '체크박스',
+                  AppLocalizations.of(context)!.tabCheckbox,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -392,7 +393,7 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
               ),
               const SizedBox(height: 12),
               Text(
-                '체크박스를 추가해보세요',
+                AppLocalizations.of(context)!.emptyCheckboxMessage,
                 style: TextStyle(
                   fontSize: 14,
                   color: AppColors.grey400,
@@ -518,7 +519,9 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
               ),
               const SizedBox(width: 8),
               Text(
-                isMaxReached ? '최대 $_maxCheckBoxes개' : '체크박스 추가',
+                isMaxReached
+                    ? AppLocalizations.of(context)!.addItemMax(_maxCheckBoxes)
+                    : AppLocalizations.of(context)!.checkboxAdd,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -556,7 +559,9 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
               ),
               const SizedBox(width: 8),
               Text(
-                isMaxReached ? '최대 $_maxCategories개' : '카테고리 추가',
+                isMaxReached
+                    ? AppLocalizations.of(context)!.addItemMax(_maxCategories)
+                    : AppLocalizations.of(context)!.categoryAdd,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -582,8 +587,8 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: const Text(
-          '완료',
+        child: Text(
+          AppLocalizations.of(context)!.done,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -677,7 +682,9 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                _isEditing ? '카테고리 수정' : '새 카테고리',
+                _isEditing
+                  ? AppLocalizations.of(context)!.dialogEditCategoryTitle
+                  : AppLocalizations.of(context)!.dialogNewCategoryTitle,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -751,7 +758,7 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
                 fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
-                hintText: '카테고리 이름',
+                hintText: AppLocalizations.of(context)!.hintCategoryName,
                 hintStyle: TextStyle(
                   fontSize: 16,
                   color: AppColors.grey400,
@@ -794,9 +801,9 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      '취소',
-                      style: TextStyle(
+                    child: Text(
+                      AppLocalizations.of(context)!.cancel,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: AppColors.grey500,
@@ -815,9 +822,9 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      '확인',
-                      style: TextStyle(
+                    child: Text(
+                      AppLocalizations.of(context)!.confirm,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textOnAccent,
@@ -902,7 +909,9 @@ class _CheckBoxItemEditDialogState extends State<_CheckBoxItemEditDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              _isEditing ? '체크박스 수정' : '새 체크박스',
+              _isEditing
+                  ? AppLocalizations.of(context)!.dialogEditCheckboxTitle
+                  : AppLocalizations.of(context)!.dialogNewCheckboxTitle,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -920,7 +929,7 @@ class _CheckBoxItemEditDialogState extends State<_CheckBoxItemEditDialog> {
                 fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
-                hintText: '할 일 이름',
+                hintText: AppLocalizations.of(context)!.hintTaskName,
                 hintStyle: TextStyle(
                   fontSize: 16,
                   color: AppColors.grey400,
@@ -964,9 +973,9 @@ class _CheckBoxItemEditDialogState extends State<_CheckBoxItemEditDialog> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      '취소',
-                      style: TextStyle(
+                    child: Text(
+                      AppLocalizations.of(context)!.cancel,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: AppColors.grey500,
@@ -985,9 +994,9 @@ class _CheckBoxItemEditDialogState extends State<_CheckBoxItemEditDialog> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      '확인',
-                      style: TextStyle(
+                    child: Text(
+                      AppLocalizations.of(context)!.confirm,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textOnAccent,

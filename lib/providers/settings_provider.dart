@@ -50,11 +50,20 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setNotifEnabled(bool v) async {
+  Future<void> setNotifEnabled(
+    bool v, {
+    required String notifTitle,
+    required String notifBody,
+  }) async {
     if (v) {
       final granted = await NotificationService.requestPermission();
       if (!granted) return;
-      await NotificationService.schedule(notifHour, notifMinute);
+      await NotificationService.schedule(
+        notifHour,
+        notifMinute,
+        title: notifTitle,
+        body: notifBody,
+      );
     } else {
       await NotificationService.cancel();
     }
@@ -62,10 +71,22 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setNotifTime(int h, int m) async {
+  Future<void> setNotifTime(
+    int h,
+    int m, {
+    required String notifTitle,
+    required String notifBody,
+  }) async {
     await _prefs?.setInt(_keyNotifHour, h);
     await _prefs?.setInt(_keyNotifMinute, m);
-    if (notifEnabled) await NotificationService.schedule(h, m);
+    if (notifEnabled) {
+      await NotificationService.schedule(
+        h,
+        m,
+        title: notifTitle,
+        body: notifBody,
+      );
+    }
     notifyListeners();
   }
 

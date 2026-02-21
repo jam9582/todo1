@@ -1,0 +1,88 @@
+{
+  "@@locale": "ko",
+
+  "cancel": "취소",
+  "confirm": "확인",
+  "delete": "삭제",
+  "done": "완료",
+
+  "settingsTitle": "설정",
+  "sectionCalendar": "달력 설정",
+  "labelWeekStart": "주 시작 요일",
+  "sunday": "일요일",
+  "monday": "월요일",
+  "sectionCalendarDisplay": "달력 표시 설정",
+  "labelCategoryDisplay": "카테고리 표시 방식",
+  "displayModeTopCategory": "최다 활동",
+  "displayModeFixedCategory": "특정 카테고리",
+  "labelDisplayCategory": "표시할 카테고리",
+  "dropdownHint": "선택",
+  "labelShowActivityTime": "카테고리 활동시간 표시",
+  "labelShowCheckCount": "체크박스 완료 개수 표시",
+  "sectionNotification": "알림",
+  "labelDailyNotif": "매일 알림",
+  "labelNotifTime": "알림 시간",
+  "sectionPurchase": "구매",
+  "labelRestorePurchase": "구매 복원",
+  "labelPurchaseHistory": "구매 내역 및 지원",
+  "sectionAppInfo": "앱 정보",
+  "labelVersion": "버전",
+  "msgPurchaseRestored": "구매 내역을 복원했습니다!",
+  "msgNoPurchaseToRestore": "복원할 구매 내역이 없습니다",
+  "msgRestoreFailed": "복원에 실패했습니다. 다시 시도해주세요.",
+
+  "menuStatistics": "통계",
+  "menuCategoryEdit": "카테고리 편집",
+  "menuRemoveAds": "광고 제거",
+  "msgAdsAlreadyRemoved": "이미 광고가 제거된 상태입니다 ✓",
+  "msgAdsRemoved": "광고가 제거되었습니다!",
+
+  "periodWeekly": "주간",
+  "periodMonthly": "월간",
+  "noData": "데이터가 없습니다",
+  "chartWeeklyTrend": "주간 활동 추이",
+  "chartMonthlyTrend": "월간 활동 추이",
+  "chartWeeklyTotal": "주간 카테고리별 총합",
+  "chartMonthlyTotal": "월간 카테고리별 총합",
+
+  "dailyMessageLabel": "오늘의 한마디",
+  "dailyMessagePlaceholder": "언제나 당신을 응원해요",
+
+  "emptyCategoryMessage": "카테고리를 만들어보세요!",
+
+  "tabCategory": "카테고리",
+  "tabCheckbox": "체크박스",
+  "dialogDeleteCategoryTitle": "카테고리 삭제",
+  "dialogDeleteCategoryContent": "'{name}' 카테고리를 삭제하시겠습니까?",
+  "@dialogDeleteCategoryContent": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "dialogDeleteCheckboxTitle": "체크박스 삭제",
+  "dialogDeleteCheckboxContent": "'{name}' 항목을 삭제하시겠습니까?",
+  "@dialogDeleteCheckboxContent": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "emptyCheckboxMessage": "체크박스를 추가해보세요",
+  "addItemMax": "최대 {count}개",
+  "@addItemMax": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "checkboxAdd": "체크박스 추가",
+  "categoryAdd": "카테고리 추가",
+  "dialogEditCategoryTitle": "카테고리 수정",
+  "dialogNewCategoryTitle": "새 카테고리",
+  "hintCategoryName": "카테고리 이름",
+  "dialogEditCheckboxTitle": "체크박스 수정",
+  "dialogNewCheckboxTitle": "새 체크박스",
+  "hintTaskName": "할 일 이름",
+
+  "notifChannelName": "매일 알림",
+  "notifTitle": "오늘 하루는 어땠나요?",
+  "notifBody": "오늘의 활동을 기록해보세요."
+}

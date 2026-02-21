@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../constants/colors.dart';
 import '../../../models/category.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// 시간 입력 다이얼로그
 class TimeInputDialog extends StatefulWidget {
@@ -361,9 +362,9 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
-              '취소',
-              style: TextStyle(
+            child: Text(
+              AppLocalizations.of(context)!.cancel,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: AppColors.grey500,
@@ -382,9 +383,9 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
-              '확인',
-              style: TextStyle(
+            child: Text(
+              AppLocalizations.of(context)!.confirm,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textOnAccent,

@@ -1,0 +1,88 @@
+{
+  "@@locale": "en",
+
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "delete": "Delete",
+  "done": "Done",
+
+  "settingsTitle": "Settings",
+  "sectionCalendar": "Calendar Settings",
+  "labelWeekStart": "Week Start Day",
+  "sunday": "Sunday",
+  "monday": "Monday",
+  "sectionCalendarDisplay": "Calendar Display",
+  "labelCategoryDisplay": "Category Display Mode",
+  "displayModeTopCategory": "Most Active",
+  "displayModeFixedCategory": "Fixed Category",
+  "labelDisplayCategory": "Category to Display",
+  "dropdownHint": "Select",
+  "labelShowActivityTime": "Show Activity Time",
+  "labelShowCheckCount": "Show Checkbox Count",
+  "sectionNotification": "Notifications",
+  "labelDailyNotif": "Daily Notification",
+  "labelNotifTime": "Notification Time",
+  "sectionPurchase": "Purchase",
+  "labelRestorePurchase": "Restore Purchase",
+  "labelPurchaseHistory": "Purchase History & Support",
+  "sectionAppInfo": "App Info",
+  "labelVersion": "Version",
+  "msgPurchaseRestored": "Purchases restored!",
+  "msgNoPurchaseToRestore": "No purchases to restore",
+  "msgRestoreFailed": "Restore failed. Please try again.",
+
+  "menuStatistics": "Statistics",
+  "menuCategoryEdit": "Edit Categories",
+  "menuRemoveAds": "Remove Ads",
+  "msgAdsAlreadyRemoved": "Ads already removed ✓",
+  "msgAdsRemoved": "Ads removed!",
+
+  "periodWeekly": "Weekly",
+  "periodMonthly": "Monthly",
+  "noData": "No data",
+  "chartWeeklyTrend": "Weekly Activity",
+  "chartMonthlyTrend": "Monthly Activity",
+  "chartWeeklyTotal": "Weekly Category Total",
+  "chartMonthlyTotal": "Monthly Category Total",
+
+  "dailyMessageLabel": "Today's Note",
+  "dailyMessagePlaceholder": "Always cheering for you",
+
+  "emptyCategoryMessage": "Create your first category!",
+
+  "tabCategory": "Category",
+  "tabCheckbox": "Checkbox",
+  "dialogDeleteCategoryTitle": "Delete Category",
+  "dialogDeleteCategoryContent": "Delete the '{name}' category?",
+  "@dialogDeleteCategoryContent": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "dialogDeleteCheckboxTitle": "Delete Checkbox",
+  "dialogDeleteCheckboxContent": "Delete the '{name}' item?",
+  "@dialogDeleteCheckboxContent": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "emptyCheckboxMessage": "Add your first checkbox",
+  "addItemMax": "Max {count}",
+  "@addItemMax": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "checkboxAdd": "Add Checkbox",
+  "categoryAdd": "Add Category",
+  "dialogEditCategoryTitle": "Edit Category",
+  "dialogNewCategoryTitle": "New Category",
+  "hintCategoryName": "Category name",
+  "dialogEditCheckboxTitle": "Edit Checkbox",
+  "dialogNewCheckboxTitle": "New Checkbox",
+  "hintTaskName": "Task name",
+
+  "notifChannelName": "Daily Reminder",
+  "notifTitle": "How was your day?",
+  "notifBody": "Record your activities for today."
+}
