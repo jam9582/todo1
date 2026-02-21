@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../constants/colors.dart';
 import '../../../models/category.dart';
 import '../../../l10n/app_localizations.dart';
@@ -257,7 +258,10 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 3),
             child: GestureDetector(
-              onTap: () => _onQuickButtonPressed(item.$1),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                _onQuickButtonPressed(item.$1);
+              },
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
@@ -315,6 +319,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
 
     return GestureDetector(
       onTap: () {
+        HapticFeedback.lightImpact();
         if (isNumber) {
           _onNumberPressed(key);
         } else if (isDelete) {

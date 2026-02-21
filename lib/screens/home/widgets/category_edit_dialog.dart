@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart' as emoji_picker;
 import '../../../constants/colors.dart';
@@ -94,7 +95,10 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
             child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: AppColors.grey500)),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.pop(context, true);
+            },
             child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
@@ -156,7 +160,10 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
             child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: AppColors.grey500)),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.pop(context, true);
+            },
             child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../constants/colors.dart';
 import '../../../models/check_box.dart';
@@ -106,6 +107,7 @@ class _CheckboxSectionState extends State<CheckboxSection> {
   Widget _buildCheckBoxItem(CheckBox checkBox, bool isCompleted, RecordProvider recordProvider) {
     return GestureDetector(
       onTap: () {
+        HapticFeedback.lightImpact();
         recordProvider.toggleCheckBox(checkBox.id);
       },
       child: Container(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../constants/colors.dart';
 import '../../../providers/record_provider.dart';
@@ -63,6 +64,7 @@ class CalendarSection extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.chevron_left),
           onPressed: () {
+            HapticFeedback.lightImpact();
             final prevMonth = DateTime(date.year, date.month - 1, 1);
             context.read<RecordProvider>().selectDate(prevMonth);
           },
@@ -77,6 +79,7 @@ class CalendarSection extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.chevron_right),
           onPressed: () {
+            HapticFeedback.lightImpact();
             final nextMonth = DateTime(date.year, date.month + 1, 1);
             context.read<RecordProvider>().selectDate(nextMonth);
           },
