@@ -81,6 +81,11 @@ class _CalendarSectionState extends State<CalendarSection> {
 
   Widget _buildMonthNavigation(BuildContext context, DateTime date) {
     final languageCode = Localizations.localeOf(context).languageCode;
+    final today = DateTime.now();
+    final isToday = date.year == today.year &&
+        date.month == today.month &&
+        date.day == today.day;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -93,6 +98,7 @@ class _CalendarSectionState extends State<CalendarSection> {
           style: TextStyle(
             fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
             fontWeight: FontWeight.bold,
+            color: isToday ? AppColors.textPrimary : AppColors.grey500,
           ),
         ),
         IconButton(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../../widgets/ad_banner_widget.dart';
 import '../../constants/colors.dart';
 import '../../constants/app_theme.dart';
@@ -25,7 +24,6 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final recordProvider = context.watch<RecordProvider>();
-    final selectedDate = recordProvider.selectedDate;
     final isRestDay = recordProvider.isCurrentRestDay;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -39,7 +37,7 @@ class HomeScreen extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              _buildHeader(context, l10n, selectedDate),
+              _buildHeader(context, l10n),
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -100,25 +98,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(
-    BuildContext context,
-    AppLocalizations l10n,
-    DateTime selectedDate,
-  ) {
-    final locale = Localizations.localeOf(context).languageCode;
-    final String dateText;
-    if (locale == 'ko') {
-      dateText = DateFormat('M월 d일 EEEE', 'ko').format(selectedDate);
-    } else {
-      dateText = DateFormat('MMM d, EEEE', 'en').format(selectedDate);
-    }
-
-    final today = DateTime.now();
-    final isToday =
-        selectedDate.year == today.year &&
-        selectedDate.month == today.month &&
-        selectedDate.day == today.day;
-
+  Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.only(
         left: AppTheme.spacingMd,
@@ -129,14 +109,6 @@ class HomeScreen extends StatelessWidget {
       color: AppColors.background,
       child: Row(
         children: [
-          Text(
-            dateText,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: isToday ? AppColors.textPrimary : AppColors.grey500,
-            ),
-          ),
           const Spacer(),
           Consumer<TimerProvider>(
             builder: (context, timerProvider, _) => DebouncedIconButton(
