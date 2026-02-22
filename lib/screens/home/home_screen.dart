@@ -98,6 +98,41 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildMiniTimerButton({required IconData icon, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        child: Icon(icon, size: 20, color: AppColors.textPrimary),
+      ),
+    );
+  }
+
+  String _formatElapsed(Duration d) {
+    final h = d.inHours.toString().padLeft(2, '0');
+    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$h:$m:$s';
+  }
+
+  void _handleHeaderComplete(BuildContext context, TimerProvider timerProvider) {
+    final minutes = timerProvider.complete();
+    if (minutes <= 0) {
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.timerTooShort),
+          backgroundColor: AppColors.snackbar,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+    TimerBottomSheet.showForCategorySelection(context, minutes);
+  }
+
   Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.only(
@@ -109,7 +144,57 @@ class HomeScreen extends StatelessWidget {
       color: AppColors.background,
       child: Row(
         children: [
-          const Spacer(),
+          Consumer<TimerProvider>(
+            builder: (context, timerProvider, _) {
+              if (!timerProvider.isActive) return const Spacer();
+              return Expanded(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.grey100,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildMiniTimerButton(
+                        icon: timerProvider.isRunning
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                        onTap: () {
+                          if (timerProvider.isRunning) {
+                            timerProvider.pause();
+                          } else {
+                            timerProvider.resume();
+                          }
+                        },
+                      ),
+                      _buildMiniTimerButton(
+                        icon: Icons.close_rounded,
+                        onTap: () => timerProvider.cancel(),
+                      ),
+                      _buildMiniTimerButton(
+                        icon: Icons.check_rounded,
+                        onTap: () => _handleHeaderComplete(context, timerProvider),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _formatElapsed(timerProvider.elapsed),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                          fontFeatures: [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
           Consumer<TimerProvider>(
             builder: (context, timerProvider, _) => DebouncedIconButton(
               icon: Icon(
@@ -120,7 +205,9 @@ class HomeScreen extends StatelessWidget {
                     ? AppColors.textPrimary
                     : AppColors.textSecondary,
               ),
-              onPressed: () => TimerBottomSheet.show(context),
+              onPressed: timerProvider.isActive
+                  ? () {}
+                  : () => context.read<TimerProvider>().start(),
             ),
           ),
           DebouncedIconButton(
