@@ -223,4 +223,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get restDayOverlay => 'Enjoy your rest day :)';
+
+  @override
+  String get timerTitle => 'Timer';
+
+  @override
+  String get timerStart => 'Start';
+
+  @override
+  String get timerPause => 'Pause';
+
+  @override
+  String get timerResume => 'Resume';
+
+  @override
+  String get timerComplete => 'Done';
+
+  @override
+  String get timerSelectCategory => 'Add to which category?';
+
+  @override
+  String get timerAdded => 'Added to record';
+
+  @override
+  String get timerTooShort => 'Activities under 1 minute are not recorded';
 }

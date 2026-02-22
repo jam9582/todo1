@@ -328,6 +328,53 @@ class RecordProvider extends ChangeNotifier {
     return (categoryId: entry.categoryId, minutes: entry.minutes);
   }
 
+  // 오늘 날짜 기록에 시간 추가 (타이머 완료 시 사용)
+  Future<void> updateTimeRecordForToday(int categoryId, int minutes) async {
+    final today = DateTime.now();
+    final todayString = _formatDate(today);
+
+    final isar = await IsarService.instance;
+
+    // 오늘의 기록 로드 (없으면 생성)
+    DailyRecord? todayRecord = await isar.dailyRecords
+        .filter()
+        .dateEqualTo(todayString)
+        .findFirst();
+
+    todayRecord ??= DailyRecord(date: todayString, timeRecords: []);
+
+    // timeRecords 업데이트
+    final currentRecords = todayRecord.timeRecords ?? [];
+    final index = currentRecords.indexWhere((e) => e.categoryId == categoryId);
+
+    List<TimeEntry> newRecords;
+    if (index != -1) {
+      newRecords = currentRecords.map((e) {
+        if (e.categoryId == categoryId) {
+          return TimeEntry(categoryId: categoryId, minutes: e.minutes + minutes);
+        }
+        return e;
+      }).toList();
+    } else {
+      newRecords = [...currentRecords, TimeEntry(categoryId: categoryId, minutes: minutes)];
+    }
+
+    todayRecord.timeRecords = newRecords;
+
+    await isar.writeTxn(() async {
+      await isar.dailyRecords.put(todayRecord!);
+    });
+
+    // selectedDate가 오늘이면 _currentRecord도 업데이트
+    final selectedString = _formatDate(_selectedDate);
+    if (selectedString == todayString) {
+      _currentRecord = todayRecord;
+    }
+    _monthRecords[todayString] = todayRecord;
+
+    notifyListeners();
+  }
+
   // ========== 통계 관련 메서드 ==========
 
   // 기간별 기록 조회 (통계용)

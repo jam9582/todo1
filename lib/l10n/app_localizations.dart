@@ -517,6 +517,54 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'잘 쉬고 오세요 :)'**
   String get restDayOverlay;
+
+  /// No description provided for @timerTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'타이머'**
+  String get timerTitle;
+
+  /// No description provided for @timerStart.
+  ///
+  /// In ko, this message translates to:
+  /// **'시작'**
+  String get timerStart;
+
+  /// No description provided for @timerPause.
+  ///
+  /// In ko, this message translates to:
+  /// **'일시정지'**
+  String get timerPause;
+
+  /// No description provided for @timerResume.
+  ///
+  /// In ko, this message translates to:
+  /// **'계속하기'**
+  String get timerResume;
+
+  /// No description provided for @timerComplete.
+  ///
+  /// In ko, this message translates to:
+  /// **'완료'**
+  String get timerComplete;
+
+  /// No description provided for @timerSelectCategory.
+  ///
+  /// In ko, this message translates to:
+  /// **'어느 카테고리에 추가할까요?'**
+  String get timerSelectCategory;
+
+  /// No description provided for @timerAdded.
+  ///
+  /// In ko, this message translates to:
+  /// **'기록에 추가됐어요'**
+  String get timerAdded;
+
+  /// No description provided for @timerTooShort.
+  ///
+  /// In ko, this message translates to:
+  /// **'1분 미만 활동은 기록되지 않아요'**
+  String get timerTooShort;
 }
 
 class _AppLocalizationsDelegate

@@ -94,5 +94,14 @@
 
   "restDay": "Rest Day",
   "restDayFill": "Taking it easy today",
-  "restDayOverlay": "Enjoy your rest day :)"
+  "restDayOverlay": "Enjoy your rest day :)",
+
+  "timerTitle": "Timer",
+  "timerStart": "Start",
+  "timerPause": "Pause",
+  "timerResume": "Resume",
+  "timerComplete": "Done",
+  "timerSelectCategory": "Add to which category?",
+  "timerAdded": "Added to record",
+  "timerTooShort": "Activities under 1 minute are not recorded"
 }

@@ -10,6 +10,7 @@ import 'providers/check_box_provider.dart';
 import 'providers/record_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/purchase_provider.dart';
+import 'providers/timer_provider.dart';
 import 'screens/home/home_screen.dart';
 import 'constants/app_theme.dart';
 import 'constants/colors.dart';
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => RecordProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => PurchaseProvider()),
+        ChangeNotifierProvider(create: (_) => TimerProvider()),
       ],
       child: const _AppWithLocale(),
     );

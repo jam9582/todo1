@@ -223,4 +223,28 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get restDayOverlay => '잘 쉬고 오세요 :)';
+
+  @override
+  String get timerTitle => '타이머';
+
+  @override
+  String get timerStart => '시작';
+
+  @override
+  String get timerPause => '일시정지';
+
+  @override
+  String get timerResume => '계속하기';
+
+  @override
+  String get timerComplete => '완료';
+
+  @override
+  String get timerSelectCategory => '어느 카테고리에 추가할까요?';
+
+  @override
+  String get timerAdded => '기록에 추가됐어요';
+
+  @override
+  String get timerTooShort => '1분 미만 활동은 기록되지 않아요';
 }

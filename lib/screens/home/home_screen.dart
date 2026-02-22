@@ -15,6 +15,8 @@ import '../../utils/debounced_gesture_detector.dart';
 import '../statistics/statistics_screen.dart';
 import '../settings/settings_screen.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/timer_provider.dart';
+import 'widgets/timer_bottom_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -136,6 +138,19 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           const Spacer(),
+          Consumer<TimerProvider>(
+            builder: (context, timerProvider, _) => DebouncedIconButton(
+              icon: Icon(
+                timerProvider.isActive
+                    ? Icons.timer_rounded
+                    : Icons.timer_outlined,
+                color: timerProvider.isActive
+                    ? AppColors.textPrimary
+                    : AppColors.textSecondary,
+              ),
+              onPressed: () => TimerBottomSheet.show(context),
+            ),
+          ),
           DebouncedIconButton(
             icon: const Icon(Icons.edit_rounded),
             color: AppColors.textSecondary,
