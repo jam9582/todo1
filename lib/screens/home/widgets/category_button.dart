@@ -9,6 +9,7 @@ class CategoryButton extends StatelessWidget {
   final String name;
   final String time;
   final bool isSelected;
+  final bool enabled;
   final VoidCallback onTap;
 
   const CategoryButton({
@@ -18,24 +19,27 @@ class CategoryButton extends StatelessWidget {
     required this.time,
     required this.isSelected,
     required this.onTap,
+    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return DebouncedGestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: EdgeInsets.symmetric(
-          horizontal: Responsive.spacing(context, AppTheme.spacingXs),
-        ),
-        padding: EdgeInsets.symmetric(
-          vertical: Responsive.spacing(context, AppTheme.spacingSm),
-          horizontal: Responsive.spacing(context, AppTheme.spacingXs),
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.accent : AppColors.grey100,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        ),
+    final container = Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: Responsive.spacing(context, AppTheme.spacingXs),
+      ),
+      padding: EdgeInsets.symmetric(
+        vertical: Responsive.spacing(context, AppTheme.spacingSm),
+        horizontal: Responsive.spacing(context, AppTheme.spacingXs),
+      ),
+      decoration: BoxDecoration(
+        color: enabled
+            ? (isSelected ? AppColors.accent : AppColors.grey100)
+            : AppColors.grey100,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      ),
+      child: Opacity(
+        opacity: enabled ? 1.0 : 0.4,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -53,7 +57,7 @@ class CategoryButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
                 fontWeight: FontWeight.w500,
-                color: isSelected ? AppColors.textOnAccent : AppColors.textPrimary,
+                color: AppColors.textPrimary,
               ),
             ),
             SizedBox(height: Responsive.spacing(context, 2)),
@@ -62,12 +66,19 @@ class CategoryButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
                 fontWeight: FontWeight.bold,
-                color: isSelected ? AppColors.textOnAccent : AppColors.textSecondary,
+                color: AppColors.textSecondary,
               ),
             ),
           ],
         ),
       ),
+    );
+
+    if (!enabled) return container;
+
+    return DebouncedGestureDetector(
+      onTap: onTap,
+      child: container,
     );
   }
 }

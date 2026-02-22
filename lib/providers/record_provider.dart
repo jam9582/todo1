@@ -17,6 +17,12 @@ class RecordProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   Map<String, DailyRecord> get monthRecords => _monthRecords;
   bool get isCurrentRestDay => _currentRecord?.isRestDay ?? false;
+  bool get isFutureDate {
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final selected = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+    return selected.isAfter(todayDate);
+  }
 
   RecordProvider() {
     loadRecord(_selectedDate);

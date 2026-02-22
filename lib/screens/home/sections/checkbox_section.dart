@@ -72,7 +72,7 @@ class _CheckboxSectionState extends State<CheckboxSection> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: pageItems.map((checkBox) {
                       final isCompleted = recordProvider.isCheckBoxCompleted(checkBox.id);
-                      return _buildCheckBoxItem(checkBox, isCompleted, recordProvider);
+                      return _buildCheckBoxItem(checkBox, isCompleted, recordProvider, recordProvider.isFutureDate);
                     }).toList(),
                   ),
                 );
@@ -104,39 +104,42 @@ class _CheckboxSectionState extends State<CheckboxSection> {
     );
   }
 
-  Widget _buildCheckBoxItem(CheckBox checkBox, bool isCompleted, RecordProvider recordProvider) {
+  Widget _buildCheckBoxItem(CheckBox checkBox, bool isCompleted, RecordProvider recordProvider, bool isFutureDate) {
     return GestureDetector(
-      onTap: () {
+      onTap: isFutureDate ? null : () {
         HapticFeedback.lightImpact();
         recordProvider.toggleCheckBox(checkBox.id);
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          children: [
-            Icon(
-              isCompleted
-                  ? Icons.check_box_rounded
-                  : Icons.check_box_outline_blank_rounded,
-              size: 24,
-              color: isCompleted ? AppColors.grey400 : AppColors.textPrimary,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                checkBox.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isCompleted ? AppColors.grey400 : AppColors.textPrimary,
-                  decoration: isCompleted
-                      ? TextDecoration.lineThrough
-                      : TextDecoration.none,
+      child: Opacity(
+        opacity: isFutureDate ? 0.4 : 1.0,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            children: [
+              Icon(
+                isCompleted
+                    ? Icons.check_box_rounded
+                    : Icons.check_box_outline_blank_rounded,
+                size: 24,
+                color: isCompleted ? AppColors.grey400 : AppColors.textPrimary,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  checkBox.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isCompleted ? AppColors.grey400 : AppColors.textPrimary,
+                    decoration: isCompleted
+                        ? TextDecoration.lineThrough
+                        : TextDecoration.none,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

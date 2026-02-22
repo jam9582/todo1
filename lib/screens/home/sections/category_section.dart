@@ -20,6 +20,7 @@ class CategorySection extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
+    final isFutureDate = recordProvider.isFutureDate;
     final categories = categoryProvider.categories;
 
     if (categories.isEmpty) {
@@ -53,6 +54,7 @@ class CategorySection extends StatelessWidget {
               name: category.name,
               time: timeString,
               isSelected: minutes > 0,
+              enabled: !isFutureDate,
               onTap: () async {
                 final result = await TimeInputDialog.show(
                   context,
