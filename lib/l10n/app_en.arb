@@ -92,5 +92,6 @@
   "notifTitle": "How was your day?",
   "notifBody": "Record your activities for today.",
 
-  "restDay": "Taking it easy"
+  "restDay": "Rest Day",
+  "restDayFill": "Taking it easy today"
 }

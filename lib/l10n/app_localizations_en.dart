@@ -216,5 +216,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifBody => 'Record your activities for today.';
 
   @override
-  String get restDay => 'Taking it easy';
+  String get restDay => 'Rest Day';
+
+  @override
+  String get restDayFill => 'Taking it easy today';
 }

@@ -46,7 +46,7 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
       recordProvider.deactivateRestDay();
     } else {
       final l10n = AppLocalizations.of(context)!;
-      recordProvider.activateRestDay(l10n.restDay);
+      recordProvider.activateRestDay(l10n.restDayFill);
     }
   }
 
@@ -79,24 +79,27 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              l10n.dailyMessageLabel,
+              style: TextStyle(
+                fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  l10n.dailyMessageLabel,
-                  style: TextStyle(
-                    fontSize: Responsive.fontSize(context, AppTheme.fontSizeCaption),
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
-                  ),
+                Expanded(
+                  child: _isEditing
+                      ? _buildTextField(context, l10n)
+                      : _buildDisplayText(context, message, l10n),
                 ),
                 const SizedBox(width: 8),
                 _buildRestDayButton(context, isRestDay, l10n),
               ],
             ),
-            const SizedBox(height: 8),
-            _isEditing
-                ? _buildTextField(context, l10n)
-                : _buildDisplayText(context, message, l10n),
           ],
         ),
       ),

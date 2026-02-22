@@ -503,8 +503,14 @@ abstract class AppLocalizations {
   /// No description provided for @restDay.
   ///
   /// In ko, this message translates to:
-  /// **'오늘은 쉬려구요'**
+  /// **'쉬는 날'**
   String get restDay;
+
+  /// No description provided for @restDayFill.
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘은 쉬려구요'**
+  String get restDayFill;
 }
 
 class _AppLocalizationsDelegate
