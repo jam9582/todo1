@@ -33,6 +33,13 @@ class SettingsScreen extends StatelessWidget {
         title: Text(l10n.settingsTitle),
         centerTitle: false,
         elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(

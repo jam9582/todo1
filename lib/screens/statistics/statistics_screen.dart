@@ -81,10 +81,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         appBar: AppBar(
           backgroundColor: AppColors.background,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-            onPressed: () => Navigator.pop(context),
-          ),
+          automaticallyImplyLeading: false,
           title: Text(
             AppLocalizations.of(context)!.menuStatistics,
             style: const TextStyle(
@@ -93,6 +90,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
           ),
           centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.close, color: AppColors.textPrimary),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
         ),
         body: Column(
           children: [
