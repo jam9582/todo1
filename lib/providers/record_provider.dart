@@ -198,6 +198,24 @@ class RecordProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // 쉬는 날 해제 (메시지도 함께 초기화)
+  Future<void> deactivateRestDay() async {
+    if (_currentRecord == null) return;
+
+    _currentRecord!.isRestDay = false;
+    _currentRecord!.message = null;
+
+    final isar = await IsarService.instance;
+    await isar.writeTxn(() async {
+      await isar.dailyRecords.put(_currentRecord!);
+    });
+
+    final dateString = _formatDate(_selectedDate);
+    _monthRecords[dateString] = _currentRecord!;
+
+    notifyListeners();
+  }
+
   // 쉬는 날 토글
   Future<void> toggleRestDay() async {
     if (_currentRecord == null) return;

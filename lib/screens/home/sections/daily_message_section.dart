@@ -43,7 +43,7 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
     final recordProvider = context.read<RecordProvider>();
     final isRestDay = recordProvider.isCurrentRestDay;
     if (isRestDay) {
-      recordProvider.toggleRestDay();
+      recordProvider.deactivateRestDay();
     } else {
       final l10n = AppLocalizations.of(context)!;
       recordProvider.activateRestDay(l10n.restDay);
