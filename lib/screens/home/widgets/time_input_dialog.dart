@@ -92,9 +92,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
           _isFirstInput = false;
         } else {
           final newValue = _hours * 10 + int.parse(number);
-          if (newValue <= 24) {
-            _hours = newValue;
-          }
+          _hours = newValue.clamp(0, 24);
         }
       } else {
         if (_isFirstInput) {
@@ -102,9 +100,7 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
           _isFirstInput = false;
         } else {
           final newValue = _minutes * 10 + int.parse(number);
-          if (newValue <= 59) {
-            _minutes = newValue;
-          }
+          _minutes = newValue.clamp(0, 59);
         }
       }
       _clampToMax();
