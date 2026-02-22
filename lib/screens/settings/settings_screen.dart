@@ -156,6 +156,11 @@ class SettingsScreen extends StatelessWidget {
           _SettingsCard(
             children: [
               _TapRow(
+                label: l10n.menuRemoveAds,
+                onTap: () => _showPaywall(context, l10n),
+              ),
+              _Divider(),
+              _TapRow(
                 label: l10n.labelRestorePurchase,
                 onTap: () => _restorePurchases(context, l10n),
               ),
@@ -218,6 +223,27 @@ class SettingsScreen extends StatelessWidget {
             notifTitle: l10n.notifTitle,
             notifBody: l10n.notifBody,
           );
+    }
+  }
+
+  Future<void> _showPaywall(BuildContext context, AppLocalizations l10n) async {
+    final purchaseProvider = context.read<PurchaseProvider>();
+
+    if (purchaseProvider.isAdRemoved) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.msgAdsAlreadyRemoved)));
+      return;
+    }
+
+    final result = await RevenueCatUI.presentPaywallIfNeeded('remove_ads');
+
+    if (!context.mounted) return;
+
+    if (result == PaywallResult.purchased || result == PaywallResult.restored) {
+      await purchaseProvider.refresh();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.msgAdsRemoved)));
     }
   }
 

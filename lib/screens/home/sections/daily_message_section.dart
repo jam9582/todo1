@@ -62,8 +62,8 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
       padding: EdgeInsets.only(
         left: AppTheme.spacingMd,
         right: AppTheme.spacingMd,
-        top: AppTheme.spacingMd,
-        bottom: AppTheme.spacingSm,
+        top: 20,
+        bottom: AppTheme.spacingMd,
       ),
       color: AppColors.background,
       child: Container(
@@ -93,7 +93,7 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
                 _buildRestDayButton(context, isRestDay, l10n),
               ],
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 8),
             _isEditing
                 ? _buildTextField(context, l10n)
                 : _buildDisplayText(context, message, l10n),
