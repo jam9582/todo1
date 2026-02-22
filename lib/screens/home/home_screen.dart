@@ -137,17 +137,17 @@ class HomeScreen extends StatelessWidget {
           ),
           const Spacer(),
           DebouncedIconButton(
+            icon: const Icon(Icons.edit_rounded),
+            color: AppColors.textSecondary,
+            onPressed: () => CategoryEditDialog.show(context),
+          ),
+          DebouncedIconButton(
             icon: const Icon(Icons.bar_chart_rounded),
             color: AppColors.textSecondary,
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const StatisticsScreen()),
             ),
-          ),
-          DebouncedIconButton(
-            icon: const Icon(Icons.edit_rounded),
-            color: AppColors.textSecondary,
-            onPressed: () => CategoryEditDialog.show(context),
           ),
           DebouncedIconButton(
             icon: const Icon(Icons.settings_rounded),
