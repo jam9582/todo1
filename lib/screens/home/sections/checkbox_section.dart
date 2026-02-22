@@ -6,22 +6,8 @@ import '../../../models/check_box.dart';
 import '../../../providers/check_box_provider.dart';
 import '../../../providers/record_provider.dart';
 
-class CheckboxSection extends StatefulWidget {
+class CheckboxSection extends StatelessWidget {
   const CheckboxSection({super.key});
-
-  @override
-  State<CheckboxSection> createState() => _CheckboxSectionState();
-}
-
-class _CheckboxSectionState extends State<CheckboxSection> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,72 +20,40 @@ class _CheckboxSectionState extends State<CheckboxSection> {
 
     final checkBoxes = checkBoxProvider.checkBoxes;
 
-    // 체크박스가 없으면 표시하지 않음
     if (checkBoxes.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    // 페이지별로 2개씩 그룹화
-    final List<List<CheckBox>> pages = [];
+    final isFutureDate = recordProvider.isFutureDate;
+
+    // 2열 그리드: Row 당 2개씩 배치
+    final List<List<CheckBox>> rows = [];
     for (int i = 0; i < checkBoxes.length; i += 2) {
-      pages.add(
+      rows.add(
         checkBoxes.sublist(i, i + 2 > checkBoxes.length ? checkBoxes.length : i + 2),
       );
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       color: AppColors.background,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          // 체크박스 PageView
-          SizedBox(
-            height: 80, // 2개 세로 배치 높이
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: pages.length,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentPage = index;
-                });
-              },
-              itemBuilder: (context, pageIndex) {
-                final pageItems = pages[pageIndex];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: pageItems.map((checkBox) {
-                      final isCompleted = recordProvider.isCheckBoxCompleted(checkBox.id);
-                      return _buildCheckBoxItem(checkBox, isCompleted, recordProvider, recordProvider.isFutureDate);
-                    }).toList(),
-                  ),
-                );
-              },
-            ),
-          ),
-          // 페이지 인디케이터 (페이지가 2개 이상일 때만 표시)
-          if (pages.length > 1) ...[
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(pages.length, (index) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _currentPage == index
-                        ? AppColors.textPrimary
-                        : AppColors.grey300,
-                  ),
-                );
-              }),
-            ),
-          ],
-        ],
+        children: rows.map((rowItems) {
+          return Row(
+            children: [
+              Expanded(
+                child: _buildCheckBoxItem(rowItems[0], recordProvider.isCheckBoxCompleted(rowItems[0].id), recordProvider, isFutureDate),
+              ),
+              if (rowItems.length > 1)
+                Expanded(
+                  child: _buildCheckBoxItem(rowItems[1], recordProvider.isCheckBoxCompleted(rowItems[1].id), recordProvider, isFutureDate),
+                )
+              else
+                const Expanded(child: SizedBox()),
+            ],
+          );
+        }).toList(),
       ),
     );
   }
@@ -113,7 +67,7 @@ class _CheckboxSectionState extends State<CheckboxSection> {
       child: Opacity(
         opacity: isFutureDate ? 0.4 : 1.0,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
           child: Row(
             children: [
               Icon(
@@ -123,7 +77,7 @@ class _CheckboxSectionState extends State<CheckboxSection> {
                 size: 24,
                 color: isCompleted ? AppColors.grey400 : AppColors.textPrimary,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   checkBox.name,
