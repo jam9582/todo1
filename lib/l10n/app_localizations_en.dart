@@ -220,4 +220,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get restDayFill => 'Taking it easy today';
+
+  @override
+  String get restDayOverlay => 'Enjoy your rest day :)';
 }

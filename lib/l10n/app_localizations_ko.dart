@@ -220,4 +220,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get restDayFill => '오늘은 쉬려구요';
+
+  @override
+  String get restDayOverlay => '잘 쉬고 오세요 :)';
 }

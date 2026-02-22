@@ -22,7 +22,9 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final selectedDate = context.watch<RecordProvider>().selectedDate;
+    final recordProvider = context.watch<RecordProvider>();
+    final selectedDate = recordProvider.selectedDate;
+    final isRestDay = recordProvider.isCurrentRestDay;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -48,8 +50,34 @@ class HomeScreen extends StatelessWidget {
                         indent: 16,
                         endIndent: 16,
                       ),
-                      const CategorySection(),
-                      const CheckboxSection(),
+                      Stack(
+                        children: [
+                          IgnorePointer(
+                            ignoring: isRestDay,
+                            child: const Column(
+                              children: [
+                                CategorySection(),
+                                CheckboxSection(),
+                              ],
+                            ),
+                          ),
+                          if (isRestDay)
+                            Positioned.fill(
+                              child: Container(
+                                color: AppColors.background.withValues(alpha: 0.88),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  l10n.restDayOverlay,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    color: AppColors.textSecondary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                       const Divider(
                         height: 1,
                         thickness: 1,

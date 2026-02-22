@@ -93,5 +93,6 @@
   "notifBody": "Record your activities for today.",
 
   "restDay": "Rest Day",
-  "restDayFill": "Taking it easy today"
+  "restDayFill": "Taking it easy today",
+  "restDayOverlay": "Enjoy your rest day :)"
 }

@@ -511,6 +511,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'오늘은 쉬려구요'**
   String get restDayFill;
+
+  /// No description provided for @restDayOverlay.
+  ///
+  /// In ko, this message translates to:
+  /// **'잘 쉬고 오세요 :)'**
+  String get restDayOverlay;
 }
 
 class _AppLocalizationsDelegate

@@ -93,5 +93,6 @@
   "notifBody": "오늘의 활동을 기록해보세요.",
 
   "restDay": "쉬는 날",
-  "restDayFill": "오늘은 쉬려구요"
+  "restDayFill": "오늘은 쉬려구요",
+  "restDayOverlay": "잘 쉬고 오세요 :)"
 }
