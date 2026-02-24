@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/notification_service.dart';
+import '../services/widget_service.dart';
 
 class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   static const _keyStartTime = 'timer_start_time';
@@ -181,9 +182,26 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused && _isRunning) {
       _stopTicker();
       _saveState();
-    } else if (state == AppLifecycleState.resumed && _isRunning) {
-      _startTicker();
+    } else if (state == AppLifecycleState.resumed) {
+      _syncFromWidgetIfNeeded();
     }
+  }
+
+  /// 위젯이 타이머 상태를 변경했을 때 Flutter 상태 동기화
+  void _syncFromWidgetIfNeeded() {
+    final hasInteraction = _prefs?.getBool('widget_interaction') ?? false;
+    if (!hasInteraction) {
+      if (_isRunning) _startTicker();
+      return;
+    }
+    _prefs?.remove('widget_interaction');
+    // SharedPreferences에서 최신 타이머 상태 재로드
+    _stopTicker();
+    _isRunning = false;
+    _isPaused = false;
+    _startTime = null;
+    _accumulated = Duration.zero;
+    _restore();
   }
 
   void start() {
@@ -195,6 +213,9 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _startTicker();
     _saveState();
     NotificationService.showTimerRunning(
+      originalStartTime: _originalStartTime!,
+    );
+    WidgetService.syncTimerStartedNoCategory(
       originalStartTime: _originalStartTime!,
     );
     notifyListeners();
@@ -212,6 +233,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
         originalStartTime: _originalStartTime!,
       );
     }
+    WidgetService.syncTimerPaused();
     notifyListeners();
   }
 
@@ -227,6 +249,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
         accumulated: _accumulated,
       );
     }
+    WidgetService.syncTimerResumed();
     notifyListeners();
   }
 
@@ -234,6 +257,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _reset();
     _clearState();
     NotificationService.cancelTimerNotification();
+    WidgetService.syncTimerCleared();
     notifyListeners();
   }
 
@@ -243,6 +267,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _reset();
     _clearState();
     NotificationService.cancelTimerNotification();
+    WidgetService.syncTimerCleared();
     notifyListeners();
     return minutes;
   }

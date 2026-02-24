@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:padding="10dp">
+
+    <!-- ── 일반 상태: 4개 카테고리 2x2 그리드 ── -->
+    <LinearLayout
+        android:id="@+id/normal_state"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- 상단 행 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/category_card_0"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/widget_card_bg_0"
+                android:padding="10dp">
+                <TextView android:id="@+id/cat_emoji_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📚" android:textSize="26sp" android:includeFontPadding="false"/>
+                <TextView android:id="@+id/cat_name_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="카테고리" android:textSize="13sp" android:textColor="#2D2926" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+                <TextView android:id="@+id/cat_time_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="0m" android:textSize="12sp" android:textColor="#5C5652" android:includeFontPadding="false"/>
+            </LinearLayout>
+
+            <View android:layout_width="8dp" android:layout_height="match_parent"/>
+
+            <LinearLayout
+                android:id="@+id/category_card_1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/widget_card_bg_1"
+                android:padding="10dp">
+                <TextView android:id="@+id/cat_emoji_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🏃" android:textSize="26sp" android:includeFontPadding="false"/>
+                <TextView android:id="@+id/cat_name_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="카테고리" android:textSize="13sp" android:textColor="#2D2926" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+                <TextView android:id="@+id/cat_time_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="0m" android:textSize="12sp" android:textColor="#5C5652" android:includeFontPadding="false"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View android:layout_width="match_parent" android:layout_height="8dp"/>
+
+        <!-- 하단 행 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/category_card_2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/widget_card_bg_2"
+                android:padding="10dp">
+                <TextView android:id="@+id/cat_emoji_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📖" android:textSize="26sp" android:includeFontPadding="false"/>
+                <TextView android:id="@+id/cat_name_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="카테고리" android:textSize="13sp" android:textColor="#2D2926" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+                <TextView android:id="@+id/cat_time_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="0m" android:textSize="12sp" android:textColor="#5C5652" android:includeFontPadding="false"/>
+            </LinearLayout>
+
+            <View android:layout_width="8dp" android:layout_height="match_parent"/>
+
+            <LinearLayout
+                android:id="@+id/category_card_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/widget_card_bg_3"
+                android:padding="10dp">
+                <TextView android:id="@+id/cat_emoji_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🎵" android:textSize="26sp" android:includeFontPadding="false"/>
+                <TextView android:id="@+id/cat_name_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="카테고리" android:textSize="13sp" android:textColor="#2D2926" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+                <TextView android:id="@+id/cat_time_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="0m" android:textSize="12sp" android:textColor="#5C5652" android:includeFontPadding="false"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- ── 측정 중 상태 ── -->
+    <LinearLayout
+        android:id="@+id/measuring_state"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <!-- 측정 중 카드 (넓게) -->
+        <LinearLayout
+            android:id="@+id/timer_card"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/widget_card_bg_0"
+            android:padding="12dp">
+            <TextView android:id="@+id/timer_emoji" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⏱" android:textSize="30sp" android:includeFontPadding="false"/>
+            <TextView android:id="@+id/timer_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="측정 중" android:textSize="16sp" android:textColor="#2D2926" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+            <TextView android:id="@+id/timer_start_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="오전 9:00부터" android:textSize="12sp" android:textColor="#5C5652" android:includeFontPadding="false"/>
+        </LinearLayout>
+
+        <!-- 버튼 행 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="8dp">
+
+            <TextView android:id="@+id/btn_pause_resume" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="⏸ 일시정지" android:textSize="13sp" android:textColor="#2D2926"/>
+            <TextView android:id="@+id/btn_complete" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="✓ 완료" android:textSize="13sp" android:textColor="#2D2926"/>
+            <TextView android:id="@+id/btn_cancel" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="✕ 취소" android:textSize="13sp" android:textColor="#8A8580"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import '../models/daily_record.dart';
 import '../services/isar_service.dart';
+import '../services/widget_service.dart';
 
 class RecordProvider extends ChangeNotifier {
   DateTime _selectedDate = DateTime.now();
@@ -27,6 +28,14 @@ class RecordProvider extends ChangeNotifier {
   RecordProvider() {
     loadRecord(_selectedDate);
     loadMonthRecords(_selectedDate);
+    _processWidgetPendingCompletion();
+  }
+
+  /// 위젯에서 완료된 타이머 기록이 있으면 Isar에 저장
+  Future<void> _processWidgetPendingCompletion() async {
+    final pending = await WidgetService.popPendingCompletion();
+    if (pending == null) return;
+    await updateTimeRecordForToday(pending.categoryId, pending.minutes);
   }
 
   // 날짜 선택
@@ -371,6 +380,13 @@ class RecordProvider extends ChangeNotifier {
       _currentRecord = todayRecord;
     }
     _monthRecords[todayString] = todayRecord;
+
+    // 위젯 오늘 활동시간 동기화
+    final todayMinutes = {
+      for (final e in todayRecord.timeRecords ?? <TimeEntry>[])
+        e.categoryId: e.minutes,
+    };
+    WidgetService.updateTodayMinutes(todayMinutes);
 
     notifyListeners();
   }

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' hide Category;
 import 'package:isar/isar.dart';
 import '../models/category.dart';
 import '../services/isar_service.dart';
+import '../services/widget_service.dart';
 
 class CategoryProvider extends ChangeNotifier {
   List<Category> _categories = [];
@@ -24,6 +25,7 @@ class CategoryProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+    WidgetService.updateCategories(_categories);
   }
 
   // 카테고리 추가

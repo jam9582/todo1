@@ -34,6 +34,61 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <!-- 홈 화면 위젯: Small -->
+        <receiver
+            android:name=".TimerWidgetSmall"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="com.example.todo1.WIDGET_START"/>
+                <action android:name="com.example.todo1.WIDGET_PAUSE"/>
+                <action android:name="com.example.todo1.WIDGET_RESUME"/>
+                <action android:name="com.example.todo1.WIDGET_COMPLETE"/>
+                <action android:name="com.example.todo1.WIDGET_CANCEL"/>
+                <action android:name="com.example.todo1.WIDGET_PREV"/>
+                <action android:name="com.example.todo1.WIDGET_NEXT"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info_small"/>
+        </receiver>
+
+        <!-- 홈 화면 위젯: Medium -->
+        <receiver
+            android:name=".TimerWidgetMedium"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="com.example.todo1.WIDGET_START"/>
+                <action android:name="com.example.todo1.WIDGET_PAUSE"/>
+                <action android:name="com.example.todo1.WIDGET_RESUME"/>
+                <action android:name="com.example.todo1.WIDGET_COMPLETE"/>
+                <action android:name="com.example.todo1.WIDGET_CANCEL"/>
+                <action android:name="com.example.todo1.WIDGET_PREV"/>
+                <action android:name="com.example.todo1.WIDGET_NEXT"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info_medium"/>
+        </receiver>
+
+        <!-- 홈 화면 위젯: Large -->
+        <receiver
+            android:name=".TimerWidgetLarge"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="com.example.todo1.WIDGET_START"/>
+                <action android:name="com.example.todo1.WIDGET_PAUSE"/>
+                <action android:name="com.example.todo1.WIDGET_RESUME"/>
+                <action android:name="com.example.todo1.WIDGET_COMPLETE"/>
+                <action android:name="com.example.todo1.WIDGET_CANCEL"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info_large"/>
+        </receiver>
+
         <!-- flutter_local_notifications: 예약된 알림 수신 -->
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
