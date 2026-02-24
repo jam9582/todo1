@@ -146,6 +146,14 @@ class HomeScreen extends StatelessWidget {
         children: [
           Consumer<TimerProvider>(
             builder: (context, timerProvider, _) {
+              // 알림 '완료' 액션 → 카테고리 선택 바텀시트 표시
+              if (timerProvider.pendingComplete) {
+                timerProvider.clearPendingComplete();
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _handleHeaderComplete(context, timerProvider);
+                });
+              }
+
               if (!timerProvider.isActive) return const Spacer();
               return Expanded(
                 child: Container(

@@ -1,23 +1,31 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/notification_service.dart';
 
 class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   static const _keyStartTime = 'timer_start_time';
   static const _keyAccumulatedMs = 'timer_accumulated_ms';
   static const _keyIsRunning = 'timer_is_running';
   static const _keyIsPaused = 'timer_is_paused';
+  // 최초 시작 시각 — 일시정지/재개 사이클에도 유지 (알림 표시용)
+  static const _keyOriginalStartTime = 'timer_original_start_time';
 
   DateTime? _startTime;
+  DateTime? _originalStartTime; // 알림에 표시할 최초 시작 시각
   Duration _accumulated = Duration.zero;
   bool _isRunning = false;
   bool _isPaused = false;
   Timer? _ticker;
   SharedPreferences? _prefs;
 
+  // 알림 완료 액션 → HomeScreen이 감지하여 카테고리 바텀시트 표시
+  bool _pendingComplete = false;
+
   bool get isRunning => _isRunning;
   bool get isPaused => _isPaused;
   bool get isActive => _isRunning || _isPaused;
+  bool get pendingComplete => _pendingComplete;
 
   Duration get elapsed {
     if (_startTime == null) return _accumulated;
@@ -32,6 +40,8 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> _init() async {
     _prefs = await SharedPreferences.getInstance();
     _restore();
+    _registerNotificationHandler();
+    _processPendingNotificationAction();
   }
 
   /// 앱 재시작 시 저장된 타이머 상태 복원
@@ -60,6 +70,11 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _isRunning = isRunning;
     _isPaused = isPaused;
 
+    final originalStr = _prefs?.getString(_keyOriginalStartTime);
+    if (originalStr != null) {
+      _originalStartTime = DateTime.tryParse(originalStr);
+    }
+
     if (isRunning) {
       final startTimeStr = _prefs?.getString(_keyStartTime);
       if (startTimeStr != null) {
@@ -68,7 +83,71 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
       }
     }
 
+    // 복원 후 알림 표시 (앱 재시작 시에도 알림 유지)
+    _restoreNotification();
+
     notifyListeners();
+  }
+
+  /// 앱 재시작 후 타이머가 활성 상태이면 알림 복원
+  void _restoreNotification() {
+    if (_originalStartTime == null) return;
+    if (_isRunning) {
+      NotificationService.showTimerRunning(
+        originalStartTime: _originalStartTime!,
+        accumulated: _accumulated,
+      );
+    } else if (_isPaused) {
+      NotificationService.showTimerPaused(
+        originalStartTime: _originalStartTime!,
+      );
+    }
+  }
+
+  /// 알림 액션 버튼 핸들러 등록 (앱이 살아있을 때)
+  void _registerNotificationHandler() {
+    NotificationService.setTimerActionHandler((actionId) {
+      switch (actionId) {
+        case NotificationService.actionPause:
+          if (_isRunning) pause();
+        case NotificationService.actionResume:
+          if (_isPaused) resume();
+        case NotificationService.actionComplete:
+          if (isActive) {
+            _pendingComplete = true;
+            notifyListeners();
+          }
+        case NotificationService.actionCancel:
+          if (isActive) cancel();
+      }
+    });
+  }
+
+  /// 앱이 완전 종료된 상태에서 알림 액션이 눌렸을 때 저장된 명령 처리
+  void _processPendingNotificationAction() {
+    final action = _prefs?.getString(NotificationService.keyPendingAction);
+    if (action == null) return;
+    _prefs?.remove(NotificationService.keyPendingAction);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      switch (action) {
+        case NotificationService.actionPause:
+          if (_isRunning) pause();
+        case NotificationService.actionResume:
+          if (_isPaused) resume();
+        case NotificationService.actionComplete:
+          if (isActive) {
+            _pendingComplete = true;
+            notifyListeners();
+          }
+        case NotificationService.actionCancel:
+          if (isActive) cancel();
+      }
+    });
+  }
+
+  void clearPendingComplete() {
+    _pendingComplete = false;
   }
 
   /// 현재 타이머 상태를 디스크에 저장
@@ -79,6 +158,10 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     } else {
       _prefs!.remove(_keyStartTime);
     }
+    if (_originalStartTime != null) {
+      _prefs!.setString(
+          _keyOriginalStartTime, _originalStartTime!.toIso8601String());
+    }
     _prefs!.setInt(_keyAccumulatedMs, _accumulated.inMilliseconds);
     _prefs!.setBool(_keyIsRunning, _isRunning);
     _prefs!.setBool(_keyIsPaused, _isPaused);
@@ -87,6 +170,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   /// 저장된 타이머 상태 삭제
   void _clearState() {
     _prefs?.remove(_keyStartTime);
+    _prefs?.remove(_keyOriginalStartTime);
     _prefs?.remove(_keyAccumulatedMs);
     _prefs?.remove(_keyIsRunning);
     _prefs?.remove(_keyIsPaused);
@@ -96,7 +180,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused && _isRunning) {
       _stopTicker();
-      _saveState(); // 백그라운드 전환 시 상태 저장
+      _saveState();
     } else if (state == AppLifecycleState.resumed && _isRunning) {
       _startTicker();
     }
@@ -104,11 +188,15 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   void start() {
     _startTime = DateTime.now();
+    _originalStartTime = _startTime;
     _accumulated = Duration.zero;
     _isRunning = true;
     _isPaused = false;
     _startTicker();
     _saveState();
+    NotificationService.showTimerRunning(
+      originalStartTime: _originalStartTime!,
+    );
     notifyListeners();
   }
 
@@ -119,6 +207,11 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _isPaused = true;
     _stopTicker();
     _saveState();
+    if (_originalStartTime != null) {
+      NotificationService.showTimerPaused(
+        originalStartTime: _originalStartTime!,
+      );
+    }
     notifyListeners();
   }
 
@@ -128,12 +221,19 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _isPaused = false;
     _startTicker();
     _saveState();
+    if (_originalStartTime != null) {
+      NotificationService.showTimerRunning(
+        originalStartTime: _originalStartTime!,
+        accumulated: _accumulated,
+      );
+    }
     notifyListeners();
   }
 
   void cancel() {
     _reset();
     _clearState();
+    NotificationService.cancelTimerNotification();
     notifyListeners();
   }
 
@@ -142,15 +242,18 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     final minutes = elapsed.inMinutes;
     _reset();
     _clearState();
+    NotificationService.cancelTimerNotification();
     notifyListeners();
     return minutes;
   }
 
   void _reset() {
     _startTime = null;
+    _originalStartTime = null;
     _accumulated = Duration.zero;
     _isRunning = false;
     _isPaused = false;
+    _pendingComplete = false;
     _stopTicker();
   }
 
