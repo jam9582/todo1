@@ -5,6 +5,7 @@ import 'l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'services/isar_service.dart';
 import 'services/notification_service.dart';
+import 'services/widget_service.dart';
 import 'providers/category_provider.dart';
 import 'providers/check_box_provider.dart';
 import 'providers/record_provider.dart';
@@ -38,6 +39,9 @@ void main() async {
 
   // RevenueCat 초기화
   await PurchaseProvider.configure();
+
+  // iOS 홈 위젯 App Group 설정
+  await WidgetService.initialize();
 
   runApp(const MyApp());
 }

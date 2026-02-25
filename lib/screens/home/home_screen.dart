@@ -1,5 +1,8 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/ad_banner_widget.dart';
 import '../../constants/colors.dart';
@@ -17,8 +20,65 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/timer_provider.dart';
 import 'widgets/timer_bottom_sheet.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  StreamSubscription? _widgetClickSub;
+
+  @override
+  void initState() {
+    super.initState();
+    if (Platform.isIOS) {
+      _setupWidgetClickListener();
+    }
+  }
+
+  void _setupWidgetClickListener() {
+    // 앱이 이미 실행 중일 때 위젯 탭
+    _widgetClickSub = HomeWidget.widgetClicked.listen(_handleWidgetUrl);
+    // 위젯 탭으로 앱이 처음 열린 경우
+    HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
+      if (uri != null) _handleWidgetUrl(uri);
+    });
+  }
+
+  void _handleWidgetUrl(Uri? uri) {
+    if (uri == null) return;
+    if (uri.scheme != 'todo1' || uri.host != 'start') return;
+
+    final timerProvider = context.read<TimerProvider>();
+    if (timerProvider.isActive) return; // 이미 타이머 실행 중이면 무시
+
+    final categoryIdStr = uri.queryParameters['categoryId'];
+    final name = uri.queryParameters['name'] ?? '';
+    final emoji = uri.queryParameters['emoji'] ?? '';
+    final colorIndexStr = uri.queryParameters['colorIndex'];
+
+    final categoryId = int.tryParse(categoryIdStr ?? '');
+    final colorIndex = int.tryParse(colorIndexStr ?? '') ?? 0;
+
+    if (categoryId != null && categoryId > 0 && name.isNotEmpty) {
+      timerProvider.startWithCategory(
+        categoryId: categoryId,
+        categoryName: name,
+        categoryEmoji: emoji,
+        colorIndex: colorIndex,
+      );
+    } else {
+      timerProvider.start();
+    }
+  }
+
+  @override
+  void dispose() {
+    _widgetClickSub?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

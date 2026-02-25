@@ -1,5 +1,5 @@
-# Uncomment this line to define a global platform for your project
-# platform :ios, '13.0'
+# home_widget 패키지가 iOS 14.0 이상 요구
+platform :ios, '14.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -34,6 +34,12 @@ target 'Runner' do
   target 'RunnerTests' do
     inherit! :search_paths
   end
+end
+
+# WidgetKit Extension — Flutter 플러그인 불필요, WidgetKit/SwiftUI/AppIntents만 사용
+target 'TimerWidget' do
+  use_frameworks!
+  platform :ios, '14.0'
 end
 
 post_install do |installer|

@@ -184,10 +184,11 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
       _saveState();
     } else if (state == AppLifecycleState.resumed) {
       _syncFromWidgetIfNeeded();
+      _processIOSWidgetInteraction(); // iOS 위젯 인터랙션 처리 (비동기)
     }
   }
 
-  /// 위젯이 타이머 상태를 변경했을 때 Flutter 상태 동기화
+  /// Android 위젯이 타이머 상태를 변경했을 때 Flutter 상태 동기화
   void _syncFromWidgetIfNeeded() {
     final hasInteraction = _prefs?.getBool('widget_interaction') ?? false;
     if (!hasInteraction) {
@@ -202,6 +203,44 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _startTime = null;
     _accumulated = Duration.zero;
     _restore();
+  }
+
+  /// iOS 위젯 App Intent가 저장한 액션을 읽고 적용
+  Future<void> _processIOSWidgetInteraction() async {
+    final action = await WidgetService.popIOSWidgetAction();
+    if (action == null) return;
+
+    switch (action) {
+      case 'pause':
+        if (_isRunning) pause();
+      case 'resume':
+        if (_isPaused) resume();
+      case 'complete':
+        if (isActive) {
+          _pendingComplete = true;
+          notifyListeners();
+        }
+      case 'cancel':
+        if (isActive) cancel();
+      case 'start':
+        final startTimeStr = await WidgetService.popIOSWidgetStartTime();
+        if (startTimeStr != null) _startFromWidgetTime(startTimeStr);
+    }
+  }
+
+  /// iOS 위젯에서 시작된 타이머를 startTime 기준으로 복원
+  void _startFromWidgetTime(String startTimeStr) {
+    final startTime = DateTime.tryParse(startTimeStr);
+    if (startTime == null) return;
+    _startTime = startTime;
+    _originalStartTime = startTime;
+    _accumulated = Duration.zero;
+    _isRunning = true;
+    _isPaused = false;
+    _startTicker();
+    _saveState();
+    NotificationService.showTimerRunning(originalStartTime: _originalStartTime!);
+    notifyListeners();
   }
 
   void start() {
@@ -221,6 +260,33 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  /// iOS 위젯 카테고리 카드 탭 → 해당 카테고리로 타이머 시작
+  void startWithCategory({
+    required int categoryId,
+    required String categoryName,
+    required String categoryEmoji,
+    required int colorIndex,
+  }) {
+    _startTime = DateTime.now();
+    _originalStartTime = _startTime;
+    _accumulated = Duration.zero;
+    _isRunning = true;
+    _isPaused = false;
+    _startTicker();
+    _saveState();
+    NotificationService.showTimerRunning(
+      originalStartTime: _originalStartTime!,
+    );
+    WidgetService.syncTimerStarted(
+      categoryId: categoryId,
+      categoryName: categoryName,
+      categoryEmoji: categoryEmoji,
+      colorIndex: colorIndex,
+      originalStartTime: _originalStartTime!,
+    );
+    notifyListeners();
+  }
+
   void pause() {
     _accumulated = elapsed;
     _startTime = null;
@@ -233,7 +299,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
         originalStartTime: _originalStartTime!,
       );
     }
-    WidgetService.syncTimerPaused();
+    WidgetService.syncTimerPaused(elapsed: _accumulated);
     notifyListeners();
   }
 
@@ -249,7 +315,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
         accumulated: _accumulated,
       );
     }
-    WidgetService.syncTimerResumed();
+    WidgetService.syncTimerResumed(accumulated: _accumulated);
     notifyListeners();
   }
 
