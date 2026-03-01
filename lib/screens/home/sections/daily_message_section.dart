@@ -150,7 +150,6 @@ class _DailyMessageSectionState extends State<DailyMessageSection> {
             child: Text(
               hasMessage ? message : l10n.dailyMessagePlaceholder,
               textAlign: TextAlign.left,
-              overflow: TextOverflow.visible,
               softWrap: true,
               style: TextStyle(
                 fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),

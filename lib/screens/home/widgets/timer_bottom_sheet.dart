@@ -98,11 +98,15 @@ class TimerBottomSheet extends StatelessWidget {
                   children: [
                     Text(category.emoji, style: const TextStyle(fontSize: 24)),
                     const SizedBox(width: 16),
-                    Text(
-                      category.name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: AppColors.textPrimary,
+                    Expanded(
+                      child: Text(
+                        category.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
                   ],

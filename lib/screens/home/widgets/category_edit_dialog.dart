@@ -733,7 +733,7 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
               // 이모지 피커
               if (_showEmojiPicker)
                 Container(
-                  height: 250,
+                  height: MediaQuery.of(context).size.height * 0.3,
                   margin: const EdgeInsets.only(top: 8),
                   clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(

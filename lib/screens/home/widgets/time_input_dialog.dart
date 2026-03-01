@@ -295,35 +295,38 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
   }
 
   Widget _buildKeypad() {
-    return Column(
-      children: [
-        _buildKeypadRow(['1', '2', '3']),
-        const SizedBox(height: 12),
-        _buildKeypadRow(['4', '5', '6']),
-        const SizedBox(height: 12),
-        _buildKeypadRow(['7', '8', '9']),
-        const SizedBox(height: 12),
-        _buildKeypadRow(['undo', '0', 'backspace']),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final buttonSize = (constraints.maxWidth / 4).clamp(48.0, 64.0);
+        return Column(
+          children: [
+            _buildKeypadRow(['1', '2', '3'], buttonSize),
+            const SizedBox(height: 12),
+            _buildKeypadRow(['4', '5', '6'], buttonSize),
+            const SizedBox(height: 12),
+            _buildKeypadRow(['7', '8', '9'], buttonSize),
+            const SizedBox(height: 12),
+            _buildKeypadRow(['undo', '0', 'backspace'], buttonSize),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildKeypadRow(List<String> keys) {
+  Widget _buildKeypadRow(List<String> keys, double buttonSize) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: keys.map((key) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: _buildKeypadButton(key),
-        );
+        return _buildKeypadButton(key, buttonSize);
       }).toList(),
     );
   }
 
-  Widget _buildKeypadButton(String key) {
+  Widget _buildKeypadButton(String key, double buttonSize) {
     final isNumber = int.tryParse(key) != null;
     final isDelete = key == 'backspace';
     final isUndo = key == 'undo';
+    final iconSize = buttonSize * 0.375;
 
     return GestureDetector(
       onTap: () {
@@ -337,8 +340,8 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
         }
       },
       child: Container(
-        width: 64,
-        height: 64,
+        width: buttonSize,
+        height: buttonSize,
         decoration: BoxDecoration(
           color: isNumber ? AppColors.grey100 : Colors.transparent,
           shape: BoxShape.circle,
@@ -347,15 +350,15 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
           child: isNumber
               ? Text(
                   key,
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: iconSize,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
                   ),
                 )
               : Icon(
                   isUndo ? Icons.undo_rounded : Icons.backspace_outlined,
-                  size: 24,
+                  size: iconSize,
                   color: AppColors.grey500,
                 ),
         ),
