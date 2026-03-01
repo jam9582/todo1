@@ -247,4 +247,70 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get timerTooShort => '1분 미만 활동은 기록되지 않아요';
+
+  @override
+  String get adPlaceholder => '광고영역';
+
+  @override
+  String get weekdaySun => '일';
+
+  @override
+  String get weekdayMon => '월';
+
+  @override
+  String get weekdayTue => '화';
+
+  @override
+  String get weekdayWed => '수';
+
+  @override
+  String get weekdayThu => '목';
+
+  @override
+  String get weekdayFri => '금';
+
+  @override
+  String get weekdaySat => '토';
+
+  @override
+  String calendarHeaderDate(String year, String month, String day) {
+    return '$year년 $month월 $day일';
+  }
+
+  @override
+  String get notifTimerRunning => '⏱ 타임워치 측정 중';
+
+  @override
+  String get notifTimerPaused => '⏸ 타임워치 일시정지';
+
+  @override
+  String notifTimerStartedFrom(String time) {
+    return '$time부터 시작';
+  }
+
+  @override
+  String notifTimerStartedAt(String time) {
+    return '$time에 시작';
+  }
+
+  @override
+  String get notifActionPause => '일시정지';
+
+  @override
+  String get notifActionResume => '재개';
+
+  @override
+  String get notifActionComplete => '완료';
+
+  @override
+  String get notifActionCancel => '취소';
+
+  @override
+  String get notifTimerChannel => '타임워치';
+
+  @override
+  String get timeAm => '오전';
+
+  @override
+  String get timePm => '오후';
 }

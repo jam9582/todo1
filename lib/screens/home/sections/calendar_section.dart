@@ -6,6 +6,7 @@ import '../../../providers/category_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../constants/app_theme.dart';
 import '../../../utils/responsive.dart';
+import '../../../l10n/app_localizations.dart';
 import '../widgets/calendar_day_cell.dart';
 
 class CalendarSection extends StatefulWidget {
@@ -67,20 +68,16 @@ class _CalendarSectionState extends State<CalendarSection> {
     );
   }
 
-  String _formatHeaderDate(DateTime date, String languageCode) {
-    if (languageCode == 'ko') {
-      return '${date.year}년 ${date.month}월 ${date.day}일';
-    } else {
-      const months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December',
-      ];
-      return '${months[date.month - 1]} ${date.day}, ${date.year}';
-    }
+  String _formatHeaderDate(DateTime date, AppLocalizations l10n) {
+    return l10n.calendarHeaderDate(
+      '${date.year}',
+      '${date.month}',
+      '${date.day}',
+    );
   }
 
   Widget _buildMonthNavigation(BuildContext context, DateTime date) {
-    final languageCode = Localizations.localeOf(context).languageCode;
+    final l10n = AppLocalizations.of(context)!;
     final today = DateTime.now();
     final isToday = date.year == today.year &&
         date.month == today.month &&
@@ -94,7 +91,7 @@ class _CalendarSectionState extends State<CalendarSection> {
           onPressed: () => _onButtonTap(false),
         ),
         Text(
-          _formatHeaderDate(date, languageCode),
+          _formatHeaderDate(date, l10n),
           style: TextStyle(
             fontSize: Responsive.fontSize(context, AppTheme.fontSizeBody),
             fontWeight: FontWeight.bold,
@@ -110,14 +107,22 @@ class _CalendarSectionState extends State<CalendarSection> {
   }
 
   Widget _buildWeekdayHeader(BuildContext context, CalendarStartDay startDay) {
+    final l10n = AppLocalizations.of(context)!;
+    final allDays = [
+      l10n.weekdaySun, l10n.weekdayMon, l10n.weekdayTue,
+      l10n.weekdayWed, l10n.weekdayThu, l10n.weekdayFri, l10n.weekdaySat,
+    ];
     final weekdays = startDay == CalendarStartDay.sunday
-        ? const ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-        : const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        ? allDays
+        : [...allDays.sublist(1), allDays[0]];
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: weekdays.map((day) {
-        final isWeekend = day == 'Sun' || day == 'Sat';
+      children: weekdays.asMap().entries.map((entry) {
+        final day = entry.value;
+        final isWeekend = startDay == CalendarStartDay.sunday
+            ? (entry.key == 0 || entry.key == 6)
+            : (entry.key == 5 || entry.key == 6);
         return Expanded(
           child: Center(
             child: Text(

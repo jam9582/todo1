@@ -103,5 +103,46 @@
   "timerComplete": "Done",
   "timerSelectCategory": "Add to which category?",
   "timerAdded": "Added to record",
-  "timerTooShort": "Activities under 1 minute are not recorded"
+  "timerTooShort": "Activities under 1 minute are not recorded",
+
+  "adPlaceholder": "Ad Space",
+
+  "weekdaySun": "Sun",
+  "weekdayMon": "Mon",
+  "weekdayTue": "Tue",
+  "weekdayWed": "Wed",
+  "weekdayThu": "Thu",
+  "weekdayFri": "Fri",
+  "weekdaySat": "Sat",
+
+  "calendarHeaderDate": "{month} {day}, {year}",
+  "@calendarHeaderDate": {
+    "placeholders": {
+      "year": { "type": "String" },
+      "month": { "type": "String" },
+      "day": { "type": "String" }
+    }
+  },
+
+  "notifTimerRunning": "⏱ Timer Running",
+  "notifTimerPaused": "⏸ Timer Paused",
+  "notifTimerStartedFrom": "Started at {time}",
+  "@notifTimerStartedFrom": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "notifTimerStartedAt": "Started at {time}",
+  "@notifTimerStartedAt": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "notifActionPause": "Pause",
+  "notifActionResume": "Resume",
+  "notifActionComplete": "Done",
+  "notifActionCancel": "Cancel",
+  "notifTimerChannel": "Timer",
+  "timeAm": "AM",
+  "timePm": "PM"
 }

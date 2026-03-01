@@ -103,5 +103,46 @@
   "timerComplete": "완료",
   "timerSelectCategory": "어느 카테고리에 추가할까요?",
   "timerAdded": "기록에 추가됐어요",
-  "timerTooShort": "1분 미만 활동은 기록되지 않아요"
+  "timerTooShort": "1분 미만 활동은 기록되지 않아요",
+
+  "adPlaceholder": "광고영역",
+
+  "weekdaySun": "일",
+  "weekdayMon": "월",
+  "weekdayTue": "화",
+  "weekdayWed": "수",
+  "weekdayThu": "목",
+  "weekdayFri": "금",
+  "weekdaySat": "토",
+
+  "calendarHeaderDate": "{year}년 {month}월 {day}일",
+  "@calendarHeaderDate": {
+    "placeholders": {
+      "year": { "type": "String" },
+      "month": { "type": "String" },
+      "day": { "type": "String" }
+    }
+  },
+
+  "notifTimerRunning": "⏱ 타임워치 측정 중",
+  "notifTimerPaused": "⏸ 타임워치 일시정지",
+  "notifTimerStartedFrom": "{time}부터 시작",
+  "@notifTimerStartedFrom": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "notifTimerStartedAt": "{time}에 시작",
+  "@notifTimerStartedAt": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "notifActionPause": "일시정지",
+  "notifActionResume": "재개",
+  "notifActionComplete": "완료",
+  "notifActionCancel": "취소",
+  "notifTimerChannel": "타임워치",
+  "timeAm": "오전",
+  "timePm": "오후"
 }

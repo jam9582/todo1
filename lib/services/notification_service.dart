@@ -1,7 +1,9 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
+import '../l10n/app_localizations.dart';
 
 /// 앱이 완전히 종료된 상태에서 알림 액션 버튼을 눌렀을 때 호출되는 핸들러.
 /// 별도 isolate에서 실행되므로 SharedPreferences에 명령을 저장하고 종료.
@@ -17,12 +19,10 @@ void onBackgroundNotificationResponse(NotificationResponse response) async {
 class NotificationService {
   // ─── 매일 알림 ──────────────────────────────────────────────────────────
   static const _dailyChannelId = 'todo1_daily';
-  static const _dailyChannelName = '매일 알림';
   static const _dailyNotifId = 0;
 
   // ─── 타이머 알림 ─────────────────────────────────────────────────────────
   static const _timerChannelId = 'todo1_timer';
-  static const _timerChannelName = '타임워치';
   static const timerNotifId = 1;
 
   // 알림 액션 ID (TimerProvider와 공유)
@@ -36,6 +36,9 @@ class NotificationService {
 
   static final _plugin = FlutterLocalNotificationsPlugin();
   static bool _initialized = false;
+
+  // l10n 캐시 — initialize() 시 로드, 언어 변경 시 refreshLocale()로 갱신
+  static AppLocalizations? _l10n;
 
   /// 앱이 살아있을 때 타이머 액션 버튼 처리 콜백 (TimerProvider가 등록)
   static void Function(String actionId)? _timerActionHandler;
@@ -51,12 +54,24 @@ class NotificationService {
     }
   }
 
+  /// 사용자가 언어를 변경했을 때 호출하여 l10n 캐시 갱신
+  static Future<void> refreshLocale() async {
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    _l10n = await AppLocalizations.delegate.load(locale);
+  }
+
   static Future<void> initialize() async {
     if (_initialized) return;
+
+    // l10n 로드
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    _l10n = await AppLocalizations.delegate.load(locale);
 
     tz_data.initializeTimeZones();
 
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    final l10n = _l10n!;
 
     // iOS: 타이머 측정 중 / 일시정지 두 가지 카테고리 등록
     final ios = DarwinInitializationSettings(
@@ -67,11 +82,11 @@ class NotificationService {
         DarwinNotificationCategory(
           'TIMER_RUNNING',
           actions: [
-            DarwinNotificationAction.plain(actionPause, '일시정지'),
-            DarwinNotificationAction.plain(actionComplete, '완료'),
+            DarwinNotificationAction.plain(actionPause, l10n.notifActionPause),
+            DarwinNotificationAction.plain(actionComplete, l10n.notifActionComplete),
             DarwinNotificationAction.plain(
               actionCancel,
-              '취소',
+              l10n.notifActionCancel,
               options: {DarwinNotificationActionOption.destructive},
             ),
           ],
@@ -79,11 +94,11 @@ class NotificationService {
         DarwinNotificationCategory(
           'TIMER_PAUSED',
           actions: [
-            DarwinNotificationAction.plain(actionResume, '재개'),
-            DarwinNotificationAction.plain(actionComplete, '완료'),
+            DarwinNotificationAction.plain(actionResume, l10n.notifActionResume),
+            DarwinNotificationAction.plain(actionComplete, l10n.notifActionComplete),
             DarwinNotificationAction.plain(
               actionCancel,
-              '취소',
+              l10n.notifActionCancel,
               options: {DarwinNotificationActionOption.destructive},
             ),
           ],
@@ -109,13 +124,16 @@ class NotificationService {
     required DateTime originalStartTime,
     Duration accumulated = Duration.zero,
   }) async {
+    final l10n = _l10n;
+    if (l10n == null) return;
+
     // Android 크로노미터 기준 시각: 현재 - 누적 = 전체 경과 시간이 반영된 기준점
     final chronoBase =
         DateTime.now().millisecondsSinceEpoch - accumulated.inMilliseconds;
 
     final androidDetails = AndroidNotificationDetails(
       _timerChannelId,
-      _timerChannelName,
+      l10n.notifTimerChannel,
       importance: Importance.low,
       priority: Priority.low,
       ongoing: true,
@@ -124,10 +142,10 @@ class NotificationService {
       when: chronoBase,
       usesChronometer: true,
       chronometerCountDown: false,
-      actions: const [
-        AndroidNotificationAction(actionPause, '일시정지'),
-        AndroidNotificationAction(actionComplete, '완료'),
-        AndroidNotificationAction(actionCancel, '취소'),
+      actions: [
+        AndroidNotificationAction(actionPause, l10n.notifActionPause),
+        AndroidNotificationAction(actionComplete, l10n.notifActionComplete),
+        AndroidNotificationAction(actionCancel, l10n.notifActionCancel),
       ],
     );
 
@@ -137,8 +155,8 @@ class NotificationService {
 
     await _plugin.show(
       timerNotifId,
-      '⏱ 타임워치 측정 중',
-      '${_formatTime(originalStartTime)}부터 시작',
+      l10n.notifTimerRunning,
+      l10n.notifTimerStartedFrom(_formatTime(originalStartTime, l10n)),
       NotificationDetails(android: androidDetails, iOS: iosDetails),
     );
   }
@@ -147,17 +165,20 @@ class NotificationService {
   static Future<void> showTimerPaused({
     required DateTime originalStartTime,
   }) async {
-    const androidDetails = AndroidNotificationDetails(
+    final l10n = _l10n;
+    if (l10n == null) return;
+
+    final androidDetails = AndroidNotificationDetails(
       _timerChannelId,
-      _timerChannelName,
+      l10n.notifTimerChannel,
       importance: Importance.low,
       priority: Priority.low,
       ongoing: true,
       autoCancel: false,
       actions: [
-        AndroidNotificationAction(actionResume, '재개'),
-        AndroidNotificationAction(actionComplete, '완료'),
-        AndroidNotificationAction(actionCancel, '취소'),
+        AndroidNotificationAction(actionResume, l10n.notifActionResume),
+        AndroidNotificationAction(actionComplete, l10n.notifActionComplete),
+        AndroidNotificationAction(actionCancel, l10n.notifActionCancel),
       ],
     );
 
@@ -167,9 +188,9 @@ class NotificationService {
 
     await _plugin.show(
       timerNotifId,
-      '⏸ 타임워치 일시정지',
-      '${_formatTime(originalStartTime)}에 시작',
-      const NotificationDetails(android: androidDetails, iOS: iosDetails),
+      l10n.notifTimerPaused,
+      l10n.notifTimerStartedAt(_formatTime(originalStartTime, l10n)),
+      NotificationDetails(android: androidDetails, iOS: iosDetails),
     );
   }
 
@@ -178,10 +199,10 @@ class NotificationService {
     await _plugin.cancel(timerNotifId);
   }
 
-  static String _formatTime(DateTime dt) {
+  static String _formatTime(DateTime dt, AppLocalizations l10n) {
     final h = dt.hour;
     final m = dt.minute.toString().padLeft(2, '0');
-    final period = h < 12 ? '오전' : '오후';
+    final period = h < 12 ? l10n.timeAm : l10n.timePm;
     final displayH = h == 0 ? 12 : (h > 12 ? h - 12 : h);
     return '$period $displayH:$m';
   }
@@ -211,6 +232,8 @@ class NotificationService {
   }) async {
     await cancel();
 
+    final l10n = _l10n;
+
     final location = tz.local;
     final now = tz.TZDateTime.now(location);
     var scheduled =
@@ -219,14 +242,14 @@ class NotificationService {
       scheduled = scheduled.add(const Duration(days: 1));
     }
 
-    const details = NotificationDetails(
+    final details = NotificationDetails(
       android: AndroidNotificationDetails(
         _dailyChannelId,
-        _dailyChannelName,
+        l10n?.notifChannelName ?? 'Daily Reminder',
         importance: Importance.defaultImportance,
         priority: Priority.defaultPriority,
       ),
-      iOS: DarwinNotificationDetails(),
+      iOS: const DarwinNotificationDetails(),
     );
 
     await _plugin.zonedSchedule(

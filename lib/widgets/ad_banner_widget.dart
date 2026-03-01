@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/purchase_provider.dart';
 
 class AdBannerWidget extends StatelessWidget {
@@ -16,8 +17,8 @@ class AdBannerWidget extends StatelessWidget {
       height: 60,
       color: AppColors.adBanner,
       alignment: Alignment.center,
-      child: const Text(
-        '광고영역',
+      child: Text(
+        AppLocalizations.of(context)!.adPlaceholder,
         style: TextStyle(
           fontSize: 16,
           color: AppColors.textSecondary,

@@ -247,4 +247,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timerTooShort => 'Activities under 1 minute are not recorded';
+
+  @override
+  String get adPlaceholder => 'Ad Space';
+
+  @override
+  String get weekdaySun => 'Sun';
+
+  @override
+  String get weekdayMon => 'Mon';
+
+  @override
+  String get weekdayTue => 'Tue';
+
+  @override
+  String get weekdayWed => 'Wed';
+
+  @override
+  String get weekdayThu => 'Thu';
+
+  @override
+  String get weekdayFri => 'Fri';
+
+  @override
+  String get weekdaySat => 'Sat';
+
+  @override
+  String calendarHeaderDate(String year, String month, String day) {
+    return '$month $day, $year';
+  }
+
+  @override
+  String get notifTimerRunning => '⏱ Timer Running';
+
+  @override
+  String get notifTimerPaused => '⏸ Timer Paused';
+
+  @override
+  String notifTimerStartedFrom(String time) {
+    return 'Started at $time';
+  }
+
+  @override
+  String notifTimerStartedAt(String time) {
+    return 'Started at $time';
+  }
+
+  @override
+  String get notifActionPause => 'Pause';
+
+  @override
+  String get notifActionResume => 'Resume';
+
+  @override
+  String get notifActionComplete => 'Done';
+
+  @override
+  String get notifActionCancel => 'Cancel';
+
+  @override
+  String get notifTimerChannel => 'Timer';
+
+  @override
+  String get timeAm => 'AM';
+
+  @override
+  String get timePm => 'PM';
 }

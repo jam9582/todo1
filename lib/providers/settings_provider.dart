@@ -120,6 +120,7 @@ class SettingsProvider extends ChangeNotifier {
 
   Future<void> setLanguage(String lang) async {
     await _prefs?.setString(_keyLanguage, lang);
+    await NotificationService.refreshLocale();
     notifyListeners();
   }
 }

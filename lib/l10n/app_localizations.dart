@@ -565,6 +565,126 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'1분 미만 활동은 기록되지 않아요'**
   String get timerTooShort;
+
+  /// No description provided for @adPlaceholder.
+  ///
+  /// In ko, this message translates to:
+  /// **'광고영역'**
+  String get adPlaceholder;
+
+  /// No description provided for @weekdaySun.
+  ///
+  /// In ko, this message translates to:
+  /// **'일'**
+  String get weekdaySun;
+
+  /// No description provided for @weekdayMon.
+  ///
+  /// In ko, this message translates to:
+  /// **'월'**
+  String get weekdayMon;
+
+  /// No description provided for @weekdayTue.
+  ///
+  /// In ko, this message translates to:
+  /// **'화'**
+  String get weekdayTue;
+
+  /// No description provided for @weekdayWed.
+  ///
+  /// In ko, this message translates to:
+  /// **'수'**
+  String get weekdayWed;
+
+  /// No description provided for @weekdayThu.
+  ///
+  /// In ko, this message translates to:
+  /// **'목'**
+  String get weekdayThu;
+
+  /// No description provided for @weekdayFri.
+  ///
+  /// In ko, this message translates to:
+  /// **'금'**
+  String get weekdayFri;
+
+  /// No description provided for @weekdaySat.
+  ///
+  /// In ko, this message translates to:
+  /// **'토'**
+  String get weekdaySat;
+
+  /// No description provided for @calendarHeaderDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'{year}년 {month}월 {day}일'**
+  String calendarHeaderDate(String year, String month, String day);
+
+  /// No description provided for @notifTimerRunning.
+  ///
+  /// In ko, this message translates to:
+  /// **'⏱ 타임워치 측정 중'**
+  String get notifTimerRunning;
+
+  /// No description provided for @notifTimerPaused.
+  ///
+  /// In ko, this message translates to:
+  /// **'⏸ 타임워치 일시정지'**
+  String get notifTimerPaused;
+
+  /// No description provided for @notifTimerStartedFrom.
+  ///
+  /// In ko, this message translates to:
+  /// **'{time}부터 시작'**
+  String notifTimerStartedFrom(String time);
+
+  /// No description provided for @notifTimerStartedAt.
+  ///
+  /// In ko, this message translates to:
+  /// **'{time}에 시작'**
+  String notifTimerStartedAt(String time);
+
+  /// No description provided for @notifActionPause.
+  ///
+  /// In ko, this message translates to:
+  /// **'일시정지'**
+  String get notifActionPause;
+
+  /// No description provided for @notifActionResume.
+  ///
+  /// In ko, this message translates to:
+  /// **'재개'**
+  String get notifActionResume;
+
+  /// No description provided for @notifActionComplete.
+  ///
+  /// In ko, this message translates to:
+  /// **'완료'**
+  String get notifActionComplete;
+
+  /// No description provided for @notifActionCancel.
+  ///
+  /// In ko, this message translates to:
+  /// **'취소'**
+  String get notifActionCancel;
+
+  /// No description provided for @notifTimerChannel.
+  ///
+  /// In ko, this message translates to:
+  /// **'타임워치'**
+  String get notifTimerChannel;
+
+  /// No description provided for @timeAm.
+  ///
+  /// In ko, this message translates to:
+  /// **'오전'**
+  String get timeAm;
+
+  /// No description provided for @timePm.
+  ///
+  /// In ko, this message translates to:
+  /// **'오후'**
+  String get timePm;
 }
 
 class _AppLocalizationsDelegate
