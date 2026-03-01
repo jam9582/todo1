@@ -8,6 +8,7 @@ import '../../../models/check_box.dart';
 import '../../../providers/category_provider.dart';
 import '../../../providers/check_box_provider.dart';
 import '../../../l10n/app_localizations.dart';
+import 'custom_emoji_picker_view.dart';
 
 /// 카테고리 편집 다이얼로그
 class CategoryEditDialog extends StatefulWidget {
@@ -731,29 +732,38 @@ class _CategoryItemEditDialogState extends State<_CategoryItemEditDialog> {
                 ),
               ),
               // 이모지 피커
-              if (_showEmojiPicker)
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.3,
-                  margin: const EdgeInsets.only(top: 8),
-                  clipBehavior: Clip.hardEdge,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: emoji_picker.EmojiPicker(
-                    onEmojiSelected: _onEmojiSelected,
-                    config: const emoji_picker.Config(
-                      emojiViewConfig: emoji_picker.EmojiViewConfig(
-                        columns: 7,
-                      ),
-                      categoryViewConfig: emoji_picker.CategoryViewConfig(
-                        initCategory: emoji_picker.Category.SMILEYS,
-                      ),
-                      bottomActionBarConfig: emoji_picker.BottomActionBarConfig(
-                        enabled: false,
-                      ),
-                    ),
-                  ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                child: SizedBox(
+                  height: _showEmojiPicker
+                      ? MediaQuery.of(context).size.height * 0.3
+                      : 0,
+                  child: _showEmojiPicker
+                      ? Container(
+                          margin: const EdgeInsets.only(top: 8),
+                          clipBehavior: Clip.hardEdge,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: emoji_picker.EmojiPicker(
+                            onEmojiSelected: _onEmojiSelected,
+                            customWidget: (config, state, showSearchBar) =>
+                                CustomEmojiPickerView(config: config, state: state),
+                            config: const emoji_picker.Config(
+                              checkPlatformCompatibility: true,
+                              categoryViewConfig: emoji_picker.CategoryViewConfig(
+                                initCategory: emoji_picker.Category.SMILEYS,
+                              ),
+                              bottomActionBarConfig: emoji_picker.BottomActionBarConfig(
+                                enabled: false,
+                              ),
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
+              ),
               const SizedBox(height: 16),
             // 이름 입력
             TextField(
