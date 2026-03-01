@@ -115,7 +115,7 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
 
   static const int _maxCategories = 4;
   static const int _maxCheckBoxes = 4;
-  static const double _itemHeight = 56.0; // IconButton(48) + margin(8)
+  static const double _itemHeight = 64.0;
 
   // 체크박스 관련 메서드
   Future<void> _onCheckBoxReorder(int oldIndex, int newIndex) async {
@@ -321,7 +321,6 @@ class _CategoryEditDialogState extends State<CategoryEditDialog> {
   Widget _buildCategoryItem(Category category, int index) {
     return Container(
       key: ValueKey(category.id),
-      height: 48,
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.grey100,
