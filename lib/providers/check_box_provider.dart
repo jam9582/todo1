@@ -19,8 +19,12 @@ class CheckBoxProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final isar = await IsarService.instance;
-    _checkBoxes = await isar.checkBoxs.where().sortByOrder().findAll();
+    try {
+      final isar = await IsarService.instance;
+      _checkBoxes = await isar.checkBoxs.where().sortByOrder().findAll();
+    } catch (e) {
+      debugPrint('체크박스 로드 실패: $e');
+    }
 
     _isLoading = false;
     notifyListeners();
@@ -28,40 +32,56 @@ class CheckBoxProvider extends ChangeNotifier {
 
   // 체크박스 추가
   Future<void> addCheckBox(CheckBox checkBox) async {
-    final isar = await IsarService.instance;
-    await isar.writeTxn(() async {
-      await isar.checkBoxs.put(checkBox);
-    });
+    try {
+      final isar = await IsarService.instance;
+      await isar.writeTxn(() async {
+        await isar.checkBoxs.put(checkBox);
+      });
+    } catch (e) {
+      debugPrint('체크박스 추가 실패: $e');
+    }
     await loadCheckBoxes();
   }
 
   // 체크박스 수정
   Future<void> updateCheckBox(CheckBox checkBox) async {
-    final isar = await IsarService.instance;
-    await isar.writeTxn(() async {
-      await isar.checkBoxs.put(checkBox);
-    });
+    try {
+      final isar = await IsarService.instance;
+      await isar.writeTxn(() async {
+        await isar.checkBoxs.put(checkBox);
+      });
+    } catch (e) {
+      debugPrint('체크박스 수정 실패: $e');
+    }
     await loadCheckBoxes();
   }
 
   // 체크박스 삭제
   Future<void> deleteCheckBox(int id) async {
-    final isar = await IsarService.instance;
-    await isar.writeTxn(() async {
-      await isar.checkBoxs.delete(id);
-    });
+    try {
+      final isar = await IsarService.instance;
+      await isar.writeTxn(() async {
+        await isar.checkBoxs.delete(id);
+      });
+    } catch (e) {
+      debugPrint('체크박스 삭제 실패: $e');
+    }
     await loadCheckBoxes();
   }
 
   // 순서 업데이트
   Future<void> reorderCheckBoxes(List<CheckBox> reorderedList) async {
-    final isar = await IsarService.instance;
-    await isar.writeTxn(() async {
-      for (int i = 0; i < reorderedList.length; i++) {
-        reorderedList[i].order = i;
-        await isar.checkBoxs.put(reorderedList[i]);
-      }
-    });
+    try {
+      final isar = await IsarService.instance;
+      await isar.writeTxn(() async {
+        for (int i = 0; i < reorderedList.length; i++) {
+          reorderedList[i].order = i;
+          await isar.checkBoxs.put(reorderedList[i]);
+        }
+      });
+    } catch (e) {
+      debugPrint('체크박스 순서 변경 실패: $e');
+    }
     await loadCheckBoxes();
   }
 }

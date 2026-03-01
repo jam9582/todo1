@@ -20,8 +20,12 @@ class CategoryProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final isar = await IsarService.instance;
-    _categories = await isar.categorys.where().sortByOrder().findAll();
+    try {
+      final isar = await IsarService.instance;
+      _categories = await isar.categorys.where().sortByOrder().findAll();
+    } catch (e) {
+      debugPrint('카테고리 로드 실패: $e');
+    }
 
     _isLoading = false;
     notifyListeners();
@@ -30,28 +34,40 @@ class CategoryProvider extends ChangeNotifier {
 
   // 카테고리 추가
   Future<void> addCategory(Category category) async {
-    final isar = await IsarService.instance;
-    await isar.writeTxn(() async {
-      await isar.categorys.put(category);
-    });
+    try {
+      final isar = await IsarService.instance;
+      await isar.writeTxn(() async {
+        await isar.categorys.put(category);
+      });
+    } catch (e) {
+      debugPrint('카테고리 추가 실패: $e');
+    }
     await loadCategories();
   }
 
   // 카테고리 수정
   Future<void> updateCategory(Category category) async {
-    final isar = await IsarService.instance;
-    await isar.writeTxn(() async {
-      await isar.categorys.put(category);
-    });
+    try {
+      final isar = await IsarService.instance;
+      await isar.writeTxn(() async {
+        await isar.categorys.put(category);
+      });
+    } catch (e) {
+      debugPrint('카테고리 수정 실패: $e');
+    }
     await loadCategories();
   }
 
   // 카테고리 삭제
   Future<void> deleteCategory(int id) async {
-    final isar = await IsarService.instance;
-    await isar.writeTxn(() async {
-      await isar.categorys.delete(id);
-    });
+    try {
+      final isar = await IsarService.instance;
+      await isar.writeTxn(() async {
+        await isar.categorys.delete(id);
+      });
+    } catch (e) {
+      debugPrint('카테고리 삭제 실패: $e');
+    }
     await loadCategories();
   }
 }

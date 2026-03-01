@@ -53,22 +53,24 @@ class RecordProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final isar = await IsarService.instance;
-    final dateString = _formatDate(date);
+    try {
+      final isar = await IsarService.instance;
+      final dateString = _formatDate(date);
 
-    _currentRecord = await isar.dailyRecords
-        .filter()
-        .dateEqualTo(dateString)
-        .findFirst();
+      _currentRecord = await isar.dailyRecords
+          .filter()
+          .dateEqualTo(dateString)
+          .findFirst();
+    } catch (e) {
+      debugPrint('기록 로드 실패: $e');
+    }
 
     // 기록이 없으면 빈 기록 생성
-    if (_currentRecord == null) {
-      _currentRecord = DailyRecord(
-        date: dateString,
-        message: null,
-        timeRecords: [],
-      );
-    }
+    _currentRecord ??= DailyRecord(
+      date: _formatDate(date),
+      message: null,
+      timeRecords: [],
+    );
 
     _isLoading = false;
     notifyListeners();
@@ -81,10 +83,14 @@ class RecordProvider extends ChangeNotifier {
 
     record.message = message;
 
-    final isar = await IsarService.instance;
-    await isar.writeTxn(() async {
-      await isar.dailyRecords.put(record);
-    });
+    try {
+      final isar = await IsarService.instance;
+      await isar.writeTxn(() async {
+        await isar.dailyRecords.put(record);
+      });
+    } catch (e) {
+      debugPrint('메시지 저장 실패: $e');
+    }
 
     notifyListeners();
   }
@@ -120,10 +126,14 @@ class RecordProvider extends ChangeNotifier {
 
     record.timeRecords = newRecords;
 
-    final isar = await IsarService.instance;
-    await isar.writeTxn(() async {
-      await isar.dailyRecords.put(record);
-    });
+    try {
+      final isar = await IsarService.instance;
+      await isar.writeTxn(() async {
+        await isar.dailyRecords.put(record);
+      });
+    } catch (e) {
+      debugPrint('시간 기록 저장 실패: $e');
+    }
 
     // 월별 캐시도 업데이트
     final dateString = _formatDate(_selectedDate);
@@ -188,10 +198,14 @@ class RecordProvider extends ChangeNotifier {
 
     record.checkRecords = newRecords;
 
-    final isar = await IsarService.instance;
-    await isar.writeTxn(() async {
-      await isar.dailyRecords.put(record);
-    });
+    try {
+      final isar = await IsarService.instance;
+      await isar.writeTxn(() async {
+        await isar.dailyRecords.put(record);
+      });
+    } catch (e) {
+      debugPrint('체크박스 저장 실패: $e');
+    }
 
     // 월별 캐시도 업데이트
     final dateString = _formatDate(_selectedDate);
@@ -208,10 +222,14 @@ class RecordProvider extends ChangeNotifier {
     record.isRestDay = true;
     record.message = message;
 
-    final isar = await IsarService.instance;
-    await isar.writeTxn(() async {
-      await isar.dailyRecords.put(record);
-    });
+    try {
+      final isar = await IsarService.instance;
+      await isar.writeTxn(() async {
+        await isar.dailyRecords.put(record);
+      });
+    } catch (e) {
+      debugPrint('쉬는 날 활성화 실패: $e');
+    }
 
     final dateString = _formatDate(_selectedDate);
     _monthRecords[dateString] = record;
@@ -227,10 +245,14 @@ class RecordProvider extends ChangeNotifier {
     record.isRestDay = false;
     record.message = null;
 
-    final isar = await IsarService.instance;
-    await isar.writeTxn(() async {
-      await isar.dailyRecords.put(record);
-    });
+    try {
+      final isar = await IsarService.instance;
+      await isar.writeTxn(() async {
+        await isar.dailyRecords.put(record);
+      });
+    } catch (e) {
+      debugPrint('쉬는 날 해제 실패: $e');
+    }
 
     final dateString = _formatDate(_selectedDate);
     _monthRecords[dateString] = record;
@@ -245,10 +267,14 @@ class RecordProvider extends ChangeNotifier {
 
     record.isRestDay = !(record.isRestDay);
 
-    final isar = await IsarService.instance;
-    await isar.writeTxn(() async {
-      await isar.dailyRecords.put(record);
-    });
+    try {
+      final isar = await IsarService.instance;
+      await isar.writeTxn(() async {
+        await isar.dailyRecords.put(record);
+      });
+    } catch (e) {
+      debugPrint('쉬는 날 토글 실패: $e');
+    }
 
     final dateString = _formatDate(_selectedDate);
     _monthRecords[dateString] = record;
@@ -279,24 +305,28 @@ class RecordProvider extends ChangeNotifier {
     // 이미 로드된 월이면 스킵
     if (_loadedMonth == monthKey) return;
 
-    final isar = await IsarService.instance;
+    try {
+      final isar = await IsarService.instance;
 
-    // 해당 월의 시작일과 종료일
-    final startDate = _formatDate(DateTime(month.year, month.month, 1));
-    final endDate = _formatDate(DateTime(month.year, month.month + 1, 0));
+      // 해당 월의 시작일과 종료일
+      final startDate = _formatDate(DateTime(month.year, month.month, 1));
+      final endDate = _formatDate(DateTime(month.year, month.month + 1, 0));
 
-    // 해당 월의 모든 기록 조회
-    final records = await isar.dailyRecords
-        .filter()
-        .dateGreaterThan(startDate, include: true)
-        .dateLessThan(endDate, include: true)
-        .findAll();
+      // 해당 월의 모든 기록 조회
+      final records = await isar.dailyRecords
+          .filter()
+          .dateGreaterThan(startDate, include: true)
+          .dateLessThan(endDate, include: true)
+          .findAll();
 
-    // Map으로 변환
-    _monthRecords = {
-      for (var record in records) record.date: record
-    };
-    _loadedMonth = monthKey;
+      // Map으로 변환
+      _monthRecords = {
+        for (var record in records) record.date: record
+      };
+      _loadedMonth = monthKey;
+    } catch (e) {
+      debugPrint('월별 기록 로드 실패: $e');
+    }
 
     notifyListeners();
   }
@@ -350,49 +380,53 @@ class RecordProvider extends ChangeNotifier {
     final today = DateTime.now();
     final todayString = _formatDate(today);
 
-    final isar = await IsarService.instance;
+    try {
+      final isar = await IsarService.instance;
 
-    // 오늘의 기록 로드 (없으면 생성)
-    final todayRecord = await isar.dailyRecords
-        .filter()
-        .dateEqualTo(todayString)
-        .findFirst() ?? DailyRecord(date: todayString, timeRecords: []);
+      // 오늘의 기록 로드 (없으면 생성)
+      final todayRecord = await isar.dailyRecords
+          .filter()
+          .dateEqualTo(todayString)
+          .findFirst() ?? DailyRecord(date: todayString, timeRecords: []);
 
-    // timeRecords 업데이트
-    final currentRecords = todayRecord.timeRecords ?? [];
-    final index = currentRecords.indexWhere((e) => e.categoryId == categoryId);
+      // timeRecords 업데이트
+      final currentRecords = todayRecord.timeRecords ?? [];
+      final index = currentRecords.indexWhere((e) => e.categoryId == categoryId);
 
-    List<TimeEntry> newRecords;
-    if (index != -1) {
-      newRecords = currentRecords.map((e) {
-        if (e.categoryId == categoryId) {
-          return TimeEntry(categoryId: categoryId, minutes: e.minutes + minutes);
-        }
-        return e;
-      }).toList();
-    } else {
-      newRecords = [...currentRecords, TimeEntry(categoryId: categoryId, minutes: minutes)];
+      List<TimeEntry> newRecords;
+      if (index != -1) {
+        newRecords = currentRecords.map((e) {
+          if (e.categoryId == categoryId) {
+            return TimeEntry(categoryId: categoryId, minutes: e.minutes + minutes);
+          }
+          return e;
+        }).toList();
+      } else {
+        newRecords = [...currentRecords, TimeEntry(categoryId: categoryId, minutes: minutes)];
+      }
+
+      todayRecord.timeRecords = newRecords;
+
+      await isar.writeTxn(() async {
+        await isar.dailyRecords.put(todayRecord);
+      });
+
+      // selectedDate가 오늘이면 _currentRecord도 업데이트
+      final selectedString = _formatDate(_selectedDate);
+      if (selectedString == todayString) {
+        _currentRecord = todayRecord;
+      }
+      _monthRecords[todayString] = todayRecord;
+
+      // 위젯 오늘 활동시간 동기화
+      final todayMinutes = {
+        for (final e in todayRecord.timeRecords ?? <TimeEntry>[])
+          e.categoryId: e.minutes,
+      };
+      WidgetService.updateTodayMinutes(todayMinutes);
+    } catch (e) {
+      debugPrint('오늘 시간 기록 저장 실패: $e');
     }
-
-    todayRecord.timeRecords = newRecords;
-
-    await isar.writeTxn(() async {
-      await isar.dailyRecords.put(todayRecord);
-    });
-
-    // selectedDate가 오늘이면 _currentRecord도 업데이트
-    final selectedString = _formatDate(_selectedDate);
-    if (selectedString == todayString) {
-      _currentRecord = todayRecord;
-    }
-    _monthRecords[todayString] = todayRecord;
-
-    // 위젯 오늘 활동시간 동기화
-    final todayMinutes = {
-      for (final e in todayRecord.timeRecords ?? <TimeEntry>[])
-        e.categoryId: e.minutes,
-    };
-    WidgetService.updateTodayMinutes(todayMinutes);
 
     notifyListeners();
   }
@@ -401,15 +435,20 @@ class RecordProvider extends ChangeNotifier {
 
   // 기간별 기록 조회 (통계용)
   Future<List<DailyRecord>> getRecordsForDateRange(DateTime start, DateTime end) async {
-    final isar = await IsarService.instance;
-    final startDate = _formatDate(start);
-    final endDate = _formatDate(end);
+    try {
+      final isar = await IsarService.instance;
+      final startDate = _formatDate(start);
+      final endDate = _formatDate(end);
 
-    return await isar.dailyRecords
-        .filter()
-        .dateGreaterThan(startDate, include: true)
-        .dateLessThan(endDate, include: true)
-        .findAll();
+      return await isar.dailyRecords
+          .filter()
+          .dateGreaterThan(startDate, include: true)
+          .dateLessThan(endDate, include: true)
+          .findAll();
+    } catch (e) {
+      debugPrint('기간별 기록 조회 실패: $e');
+      return [];
+    }
   }
 
   // 주간 통계 데이터 (최근 7일)
