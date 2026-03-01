@@ -377,6 +377,7 @@ class RecordProvider extends ChangeNotifier {
 
   // 오늘 날짜 기록에 시간 추가 (타이머 완료 시 사용)
   Future<void> updateTimeRecordForToday(int categoryId, int minutes) async {
+    if (minutes <= 0) return;
     final today = DateTime.now();
     final todayString = _formatDate(today);
 
