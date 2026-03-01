@@ -180,7 +180,11 @@ class SettingsScreen extends StatelessWidget {
               _Divider(),
               _TapRow(
                 label: l10n.labelPurchaseHistory,
-                onTap: () => RevenueCatUI.presentCustomerCenter(),
+                onTap: () {
+                  try {
+                    RevenueCatUI.presentCustomerCenter();
+                  } catch (_) {}
+                },
               ),
             ],
           ),
@@ -246,7 +250,12 @@ class SettingsScreen extends StatelessWidget {
       return;
     }
 
-    final result = await RevenueCatUI.presentPaywallIfNeeded('remove_ads');
+    final PaywallResult result;
+    try {
+      result = await RevenueCatUI.presentPaywallIfNeeded('remove_ads');
+    } catch (_) {
+      return;
+    }
 
     if (!context.mounted) return;
 

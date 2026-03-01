@@ -84,22 +84,24 @@ class _TimeInputDialogState extends State<TimeInputDialog> {
   }
 
   void _onNumberPressed(String number) {
+    final digit = int.tryParse(number);
+    if (digit == null) return;
     _saveHistory();
     setState(() {
       if (_selectedField == _InputField.hours) {
         if (_isFirstInput) {
-          _hours = int.parse(number);
+          _hours = digit;
           _isFirstInput = false;
         } else {
-          final newValue = _hours * 10 + int.parse(number);
+          final newValue = _hours * 10 + digit;
           _hours = newValue.clamp(0, 24);
         }
       } else {
         if (_isFirstInput) {
-          _minutes = int.parse(number);
+          _minutes = digit;
           _isFirstInput = false;
         } else {
-          final newValue = _minutes * 10 + int.parse(number);
+          final newValue = _minutes * 10 + digit;
           _minutes = newValue.clamp(0, 59);
         }
       }

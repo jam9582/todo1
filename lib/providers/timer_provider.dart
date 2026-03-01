@@ -59,8 +59,9 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     Duration totalElapsed = accumulated;
     if (isRunning) {
       final startTimeStr = _prefs?.getString(_keyStartTime);
-      if (startTimeStr != null) {
-        totalElapsed += DateTime.now().difference(DateTime.parse(startTimeStr));
+      final parsedStart = startTimeStr != null ? DateTime.tryParse(startTimeStr) : null;
+      if (parsedStart != null) {
+        totalElapsed += DateTime.now().difference(parsedStart);
       }
     }
     if (totalElapsed.inHours >= 24) {
@@ -79,8 +80,9 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
     if (isRunning) {
       final startTimeStr = _prefs?.getString(_keyStartTime);
-      if (startTimeStr != null) {
-        _startTime = DateTime.parse(startTimeStr);
+      final parsedStart = startTimeStr != null ? DateTime.tryParse(startTimeStr) : null;
+      if (parsedStart != null) {
+        _startTime = parsedStart;
         _startTicker();
       }
     }

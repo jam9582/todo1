@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // 위젯 탭으로 앱이 처음 열린 경우
     HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
       if (uri != null) _handleWidgetUrl(uri);
-    });
+    }).catchError((_) {});
   }
 
   void _handleWidgetUrl(Uri? uri) {

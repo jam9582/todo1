@@ -23,9 +23,13 @@ class PurchaseProvider extends ChangeNotifier {
   // ─── RevenueCat 초기화 ──────────────────────────────────────────────────────
 
   static Future<void> configure() async {
-    final apiKey = Platform.isIOS ? _iosApiKey : _androidApiKey;
-    final configuration = PurchasesConfiguration(apiKey);
-    await Purchases.configure(configuration);
+    try {
+      final apiKey = Platform.isIOS ? _iosApiKey : _androidApiKey;
+      final configuration = PurchasesConfiguration(apiKey);
+      await Purchases.configure(configuration);
+    } catch (e) {
+      debugPrint('[PurchaseProvider] configure 실패: $e');
+    }
   }
 
   // ─── 현재 구매 상태 확인 ────────────────────────────────────────────────────
