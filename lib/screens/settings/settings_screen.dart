@@ -193,9 +193,7 @@ class SettingsScreen extends StatelessWidget {
               FutureBuilder<PackageInfo>(
                 future: PackageInfo.fromPlatform(),
                 builder: (context, snapshot) {
-                  final version = snapshot.hasData
-                      ? snapshot.data!.version
-                      : '-';
+                  final version = snapshot.data?.version ?? '-';
                   return _InfoRow(label: l10n.labelVersion, value: version);
                 },
               ),

@@ -411,38 +411,48 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 },
               ),
               borderData: FlBorderData(show: false),
-              extraLinesData: (_selectedDateIndex != null || _selectedSpot != null)
-                  ? ExtraLinesData(
+              extraLinesData: () {
+                    final dateIdx = _selectedDateIndex;
+                    final spot = _selectedSpot;
+                    final xIndex = dateIdx ?? spot?.spotIndex;
+                    if (xIndex == null) return null;
+                    return ExtraLinesData(
                       extraLinesOnTop: false,
                       verticalLines: [
                         VerticalLine(
-                          x: (_selectedDateIndex ?? _selectedSpot!.spotIndex).toDouble(),
+                          x: xIndex.toDouble(),
                           color: AppColors.grey300,
                           strokeWidth: 1,
                         ),
                       ],
-                    )
-                  : null,
-              showingTooltipIndicators: _selectedDateIndex != null
-                  ? [
-                      ShowingTooltipIndicators(
-                        lineBars.asMap().entries
-                            .where((e) => e.value.spots.length > _selectedDateIndex!)
-                            .map((e) => LineBarSpot(e.value, e.key, e.value.spots[_selectedDateIndex!]))
-                            .toList(),
-                      ),
-                    ]
-                  : _selectedSpot != null
-                      ? [
-                          ShowingTooltipIndicators([
-                            LineBarSpot(
-                              lineBars[_selectedSpot!.barIndex],
-                              _selectedSpot!.barIndex,
-                              lineBars[_selectedSpot!.barIndex].spots[_selectedSpot!.spotIndex],
-                            ),
-                          ]),
-                        ]
-                      : [],
+                    );
+                  }(),
+              showingTooltipIndicators: () {
+                    final dateIdx = _selectedDateIndex;
+                    final spot = _selectedSpot;
+                    if (dateIdx != null) {
+                      return [
+                        ShowingTooltipIndicators(
+                          lineBars.asMap().entries
+                              .where((e) => e.value.spots.length > dateIdx)
+                              .map((e) => LineBarSpot(e.value, e.key, e.value.spots[dateIdx]))
+                              .toList(),
+                        ),
+                      ];
+                    }
+                    if (spot != null) {
+                      return [
+                        ShowingTooltipIndicators([
+                          LineBarSpot(
+                            lineBars[spot.barIndex],
+                            spot.barIndex,
+                            lineBars[spot.barIndex].spots[spot.spotIndex],
+                          ),
+                        ]),
+                      ];
+                    }
+                    return <ShowingTooltipIndicators>[];
+                  }(),
               lineTouchData: LineTouchData(
                 enabled: true,
                 handleBuiltInTouches: false,
@@ -465,7 +475,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   } else {
                     // 카테고리 모드: 선택된 카테고리 점 토글
                     // barIndex == categoryIndex 로 직접 대응
-                    final selectedBarIndex = _selectedCategoryIndex!;
+                    final selectedBarIndex = _selectedCategoryIndex ?? 0;
                     if (selectedBarIndex >= lineBars.length) return;
 
                     final matchedSpots = response?.lineBarSpots

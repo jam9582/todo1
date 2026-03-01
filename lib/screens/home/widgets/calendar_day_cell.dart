@@ -38,7 +38,9 @@ class CalendarDayCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasData = emoji != null && minutes != null && minutes! > 0;
+    final emojiValue = emoji;
+    final minutesValue = minutes;
+    final hasData = emojiValue != null && minutesValue != null && minutesValue > 0;
 
     return DebouncedGestureDetector(
       onTap: onTap,
@@ -104,15 +106,15 @@ class CalendarDayCell extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                emoji!,
+                                emojiValue,
                                 style: TextStyle(
                                   fontSize: Responsive.fontSize(context, 9),
                                 ),
                               ),
-                              if (showTime && minutes != null) ...[
+                              if (showTime) ...[
                                 const SizedBox(width: 2),
                                 Text(
-                                  _formatTime(minutes!),
+                                  _formatTime(minutesValue),
                                   style: TextStyle(
                                     fontSize: Responsive.fontSize(context, 8),
                                     color: AppColors.textSecondary,

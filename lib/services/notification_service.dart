@@ -7,11 +7,10 @@ import 'package:timezone/data/latest_all.dart' as tz_data;
 /// 별도 isolate에서 실행되므로 SharedPreferences에 명령을 저장하고 종료.
 @pragma('vm:entry-point')
 void onBackgroundNotificationResponse(NotificationResponse response) async {
-  if (response.id == NotificationService.timerNotifId &&
-      response.actionId != null) {
+  final actionId = response.actionId;
+  if (response.id == NotificationService.timerNotifId && actionId != null) {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-        NotificationService.keyPendingAction, response.actionId!);
+    await prefs.setString(NotificationService.keyPendingAction, actionId);
   }
 }
 
@@ -46,8 +45,9 @@ class NotificationService {
   }
 
   static void _handleNotificationResponse(NotificationResponse response) {
-    if (response.id == timerNotifId && response.actionId != null) {
-      _timerActionHandler?.call(response.actionId!);
+    final actionId = response.actionId;
+    if (response.id == timerNotifId && actionId != null) {
+      _timerActionHandler?.call(actionId);
     }
   }
 

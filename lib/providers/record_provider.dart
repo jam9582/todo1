@@ -76,13 +76,14 @@ class RecordProvider extends ChangeNotifier {
 
   // 한마디 업데이트
   Future<void> updateMessage(String message) async {
-    if (_currentRecord == null) return;
+    final record = _currentRecord;
+    if (record == null) return;
 
-    _currentRecord!.message = message;
+    record.message = message;
 
     final isar = await IsarService.instance;
     await isar.writeTxn(() async {
-      await isar.dailyRecords.put(_currentRecord!);
+      await isar.dailyRecords.put(record);
     });
 
     notifyListeners();
@@ -90,10 +91,11 @@ class RecordProvider extends ChangeNotifier {
 
   // 시간 기록 업데이트
   Future<void> updateTimeRecord(int categoryId, int minutes) async {
-    if (_currentRecord == null) return;
+    final record = _currentRecord;
+    if (record == null) return;
 
     // 기존 timeRecords가 null이면 빈 리스트 생성
-    final currentRecords = _currentRecord!.timeRecords ?? [];
+    final currentRecords = record.timeRecords ?? [];
 
     // 해당 카테고리의 기록 찾기
     final index = currentRecords.indexWhere((entry) => entry.categoryId == categoryId);
@@ -116,25 +118,26 @@ class RecordProvider extends ChangeNotifier {
       ];
     }
 
-    _currentRecord!.timeRecords = newRecords;
+    record.timeRecords = newRecords;
 
     final isar = await IsarService.instance;
     await isar.writeTxn(() async {
-      await isar.dailyRecords.put(_currentRecord!);
+      await isar.dailyRecords.put(record);
     });
 
     // 월별 캐시도 업데이트
     final dateString = _formatDate(_selectedDate);
-    _monthRecords[dateString] = _currentRecord!;
+    _monthRecords[dateString] = record;
 
     notifyListeners();
   }
 
   // 특정 카테고리의 시간 가져오기
   int getMinutesForCategory(int categoryId) {
-    if (_currentRecord?.timeRecords == null) return 0;
+    final timeRecords = _currentRecord?.timeRecords;
+    if (timeRecords == null) return 0;
 
-    final entry = _currentRecord!.timeRecords!
+    final entry = timeRecords
         .firstWhere(
           (entry) => entry.categoryId == categoryId,
           orElse: () => TimeEntry(categoryId: categoryId, minutes: 0),
@@ -145,9 +148,10 @@ class RecordProvider extends ChangeNotifier {
 
   // 체크박스 완료 여부 확인
   bool isCheckBoxCompleted(int checkBoxId) {
-    if (_currentRecord?.checkRecords == null) return false;
+    final checkRecords = _currentRecord?.checkRecords;
+    if (checkRecords == null) return false;
 
-    final entry = _currentRecord!.checkRecords!
+    final entry = checkRecords
         .where((entry) => entry.checkBoxId == checkBoxId)
         .firstOrNull;
 
@@ -156,9 +160,10 @@ class RecordProvider extends ChangeNotifier {
 
   // 체크박스 토글
   Future<void> toggleCheckBox(int checkBoxId) async {
-    if (_currentRecord == null) return;
+    final record = _currentRecord;
+    if (record == null) return;
 
-    final currentRecords = _currentRecord!.checkRecords ?? [];
+    final currentRecords = record.checkRecords ?? [];
     final currentStatus = isCheckBoxCompleted(checkBoxId);
 
     // 해당 체크박스의 기록 찾기
@@ -181,69 +186,72 @@ class RecordProvider extends ChangeNotifier {
       ];
     }
 
-    _currentRecord!.checkRecords = newRecords;
+    record.checkRecords = newRecords;
 
     final isar = await IsarService.instance;
     await isar.writeTxn(() async {
-      await isar.dailyRecords.put(_currentRecord!);
+      await isar.dailyRecords.put(record);
     });
 
     // 월별 캐시도 업데이트
     final dateString = _formatDate(_selectedDate);
-    _monthRecords[dateString] = _currentRecord!;
+    _monthRecords[dateString] = record;
 
     notifyListeners();
   }
 
   // 쉬는 날 활성화 (메시지 자동 입력 포함)
   Future<void> activateRestDay(String message) async {
-    if (_currentRecord == null) return;
+    final record = _currentRecord;
+    if (record == null) return;
 
-    _currentRecord!.isRestDay = true;
-    _currentRecord!.message = message;
+    record.isRestDay = true;
+    record.message = message;
 
     final isar = await IsarService.instance;
     await isar.writeTxn(() async {
-      await isar.dailyRecords.put(_currentRecord!);
+      await isar.dailyRecords.put(record);
     });
 
     final dateString = _formatDate(_selectedDate);
-    _monthRecords[dateString] = _currentRecord!;
+    _monthRecords[dateString] = record;
 
     notifyListeners();
   }
 
   // 쉬는 날 해제 (메시지도 함께 초기화)
   Future<void> deactivateRestDay() async {
-    if (_currentRecord == null) return;
+    final record = _currentRecord;
+    if (record == null) return;
 
-    _currentRecord!.isRestDay = false;
-    _currentRecord!.message = null;
+    record.isRestDay = false;
+    record.message = null;
 
     final isar = await IsarService.instance;
     await isar.writeTxn(() async {
-      await isar.dailyRecords.put(_currentRecord!);
+      await isar.dailyRecords.put(record);
     });
 
     final dateString = _formatDate(_selectedDate);
-    _monthRecords[dateString] = _currentRecord!;
+    _monthRecords[dateString] = record;
 
     notifyListeners();
   }
 
   // 쉬는 날 토글
   Future<void> toggleRestDay() async {
-    if (_currentRecord == null) return;
+    final record = _currentRecord;
+    if (record == null) return;
 
-    _currentRecord!.isRestDay = !(_currentRecord!.isRestDay);
+    record.isRestDay = !(record.isRestDay);
 
     final isar = await IsarService.instance;
     await isar.writeTxn(() async {
-      await isar.dailyRecords.put(_currentRecord!);
+      await isar.dailyRecords.put(record);
     });
 
     final dateString = _formatDate(_selectedDate);
-    _monthRecords[dateString] = _currentRecord!;
+    _monthRecords[dateString] = record;
 
     notifyListeners();
   }
@@ -296,15 +304,15 @@ class RecordProvider extends ChangeNotifier {
   // 특정 날짜의 최다 시간 카테고리 정보 가져오기
   ({int categoryId, int minutes})? getTopCategoryForDate(DateTime date) {
     final dateString = _formatDate(date);
-    final record = _monthRecords[dateString];
+    final timeRecords = _monthRecords[dateString]?.timeRecords;
 
-    if (record == null || record.timeRecords == null || record.timeRecords!.isEmpty) {
+    if (timeRecords == null || timeRecords.isEmpty) {
       return null;
     }
 
     // 가장 시간이 많은 카테고리 찾기
     TimeEntry? topEntry;
-    for (final entry in record.timeRecords!) {
+    for (final entry in timeRecords) {
       if (entry.minutes > 0) {
         if (topEntry == null || entry.minutes > topEntry.minutes) {
           topEntry = entry;
@@ -320,17 +328,17 @@ class RecordProvider extends ChangeNotifier {
   // 특정 날짜의 완료된 체크박스 개수 가져오기 (달력 표시용)
   int getCompletedCheckCountForDate(DateTime date) {
     final dateString = _formatDate(date);
-    final record = _monthRecords[dateString];
-    if (record?.checkRecords == null) return 0;
-    return record!.checkRecords!.where((e) => e.isCompleted).length;
+    final checkRecords = _monthRecords[dateString]?.checkRecords;
+    if (checkRecords == null) return 0;
+    return checkRecords.where((e) => e.isCompleted).length;
   }
 
   // 특정 날짜의 특정 카테고리 활동시간 가져오기 (달력 고정 카테고리 모드용)
   ({int categoryId, int minutes})? getCategoryForDate(DateTime date, int categoryId) {
     final dateString = _formatDate(date);
-    final record = _monthRecords[dateString];
-    if (record?.timeRecords == null) return null;
-    final entry = record!.timeRecords!
+    final timeRecords = _monthRecords[dateString]?.timeRecords;
+    if (timeRecords == null) return null;
+    final entry = timeRecords
         .where((e) => e.categoryId == categoryId && e.minutes > 0)
         .firstOrNull;
     if (entry == null) return null;
@@ -345,12 +353,10 @@ class RecordProvider extends ChangeNotifier {
     final isar = await IsarService.instance;
 
     // 오늘의 기록 로드 (없으면 생성)
-    DailyRecord? todayRecord = await isar.dailyRecords
+    final todayRecord = await isar.dailyRecords
         .filter()
         .dateEqualTo(todayString)
-        .findFirst();
-
-    todayRecord ??= DailyRecord(date: todayString, timeRecords: []);
+        .findFirst() ?? DailyRecord(date: todayString, timeRecords: []);
 
     // timeRecords 업데이트
     final currentRecords = todayRecord.timeRecords ?? [];
@@ -371,7 +377,7 @@ class RecordProvider extends ChangeNotifier {
     todayRecord.timeRecords = newRecords;
 
     await isar.writeTxn(() async {
-      await isar.dailyRecords.put(todayRecord!);
+      await isar.dailyRecords.put(todayRecord);
     });
 
     // selectedDate가 오늘이면 _currentRecord도 업데이트
@@ -422,8 +428,9 @@ class RecordProvider extends ChangeNotifier {
       final dateString = _formatDate(date);
       final record = records.where((r) => r.date == dateString).firstOrNull;
 
-      if (record?.isRestDay != true && record?.timeRecords != null) {
-        for (final entry in record!.timeRecords!) {
+      final timeRecords = record?.timeRecords;
+      if (record?.isRestDay != true && timeRecords != null) {
+        for (final entry in timeRecords) {
           if (entry.minutes > 0) {
             final key = entry.categoryId.toString();
             categoryData.putIfAbsent(key, () => []);
@@ -454,8 +461,9 @@ class RecordProvider extends ChangeNotifier {
       final dateString = _formatDate(date);
       final record = records.where((r) => r.date == dateString).firstOrNull;
 
-      if (record?.isRestDay != true && record?.timeRecords != null) {
-        for (final entry in record!.timeRecords!) {
+      final timeRecords = record?.timeRecords;
+      if (record?.isRestDay != true && timeRecords != null) {
+        for (final entry in timeRecords) {
           if (entry.minutes > 0) {
             final key = entry.categoryId.toString();
             categoryData.putIfAbsent(key, () => []);
@@ -476,8 +484,9 @@ class RecordProvider extends ChangeNotifier {
 
     for (final record in records) {
       if (record.isRestDay) continue;
-      if (record.timeRecords != null) {
-        for (final entry in record.timeRecords!) {
+      final timeRecords = record.timeRecords;
+      if (timeRecords != null) {
+        for (final entry in timeRecords) {
           totals[entry.categoryId] = (totals[entry.categoryId] ?? 0) + entry.minutes;
         }
       }

@@ -37,18 +37,20 @@ class _DebouncedGestureDetectorState extends State<DebouncedGestureDetector> {
 
     // Throttle 체크: 마지막 터치로부터 일정 시간이 지나지 않았으면 무시
     final now = DateTime.now();
-    if (_lastTapTime != null &&
-        now.difference(_lastTapTime!) < widget.throttleDuration) {
+    final lastTap = _lastTapTime;
+    if (lastTap != null &&
+        now.difference(lastTap) < widget.throttleDuration) {
       return;
     }
 
     _lastTapTime = now;
 
     // 비동기 작업인 경우
-    if (widget.onTapAsync != null) {
+    final onTapAsync = widget.onTapAsync;
+    if (onTapAsync != null) {
       setState(() => _isProcessing = true);
       try {
-        await widget.onTapAsync!();
+        await onTapAsync();
       } finally {
         if (mounted) {
           setState(() => _isProcessing = false);
@@ -56,8 +58,8 @@ class _DebouncedGestureDetectorState extends State<DebouncedGestureDetector> {
       }
     }
     // 동기 작업인 경우
-    else if (widget.onTap != null) {
-      widget.onTap!();
+    else {
+      widget.onTap?.call();
     }
   }
 
@@ -111,24 +113,26 @@ class _DebouncedIconButtonState extends State<DebouncedIconButton> {
     if (_isProcessing) return;
 
     final now = DateTime.now();
-    if (_lastTapTime != null &&
-        now.difference(_lastTapTime!) < widget.throttleDuration) {
+    final lastTap = _lastTapTime;
+    if (lastTap != null &&
+        now.difference(lastTap) < widget.throttleDuration) {
       return;
     }
 
     _lastTapTime = now;
 
-    if (widget.onPressedAsync != null) {
+    final onPressedAsync = widget.onPressedAsync;
+    if (onPressedAsync != null) {
       setState(() => _isProcessing = true);
       try {
-        await widget.onPressedAsync!();
+        await onPressedAsync();
       } finally {
         if (mounted) {
           setState(() => _isProcessing = false);
         }
       }
-    } else if (widget.onPressed != null) {
-      widget.onPressed!();
+    } else {
+      widget.onPressed?.call();
     }
   }
 

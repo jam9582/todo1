@@ -9,23 +9,24 @@ class IsarService {
 
   // Isar 인스턴스 가져오기
   static Future<Isar> get instance async {
-    if (_isar != null) return _isar!;
+    final existing = _isar;
+    if (existing != null) return existing;
 
     final dir = await getApplicationDocumentsDirectory();
-    _isar = await Isar.open(
+    final isar = await Isar.open(
       [CategorySchema, CheckBoxSchema, DailyRecordSchema],
       directory: dir.path,
     );
+    _isar = isar;
 
     // 첫 실행 시 기본 카테고리 생성
-    await _initializeDefaultCategories();
+    await _initializeDefaultCategories(isar);
 
-    return _isar!;
+    return isar;
   }
 
   // 기본 카테고리 초기화
-  static Future<void> _initializeDefaultCategories() async {
-    final isar = _isar!;
+  static Future<void> _initializeDefaultCategories(Isar isar) async {
 
     // 이미 카테고리가 있으면 스킵
     final count = await isar.categorys.count();

@@ -29,8 +29,9 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool get pendingComplete => _pendingComplete;
 
   Duration get elapsed {
-    if (_startTime == null) return _accumulated;
-    return _accumulated + DateTime.now().difference(_startTime!);
+    final startTime = _startTime;
+    if (startTime == null) return _accumulated;
+    return _accumulated + DateTime.now().difference(startTime);
   }
 
   TimerProvider() {
@@ -92,15 +93,16 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// 앱 재시작 후 타이머가 활성 상태이면 알림 복원
   void _restoreNotification() {
-    if (_originalStartTime == null) return;
+    final originalStartTime = _originalStartTime;
+    if (originalStartTime == null) return;
     if (_isRunning) {
       NotificationService.showTimerRunning(
-        originalStartTime: _originalStartTime!,
+        originalStartTime: originalStartTime,
         accumulated: _accumulated,
       );
     } else if (_isPaused) {
       NotificationService.showTimerPaused(
-        originalStartTime: _originalStartTime!,
+        originalStartTime: originalStartTime,
       );
     }
   }
@@ -153,19 +155,22 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// 현재 타이머 상태를 디스크에 저장
   void _saveState() {
-    if (_prefs == null) return;
-    if (_isRunning && _startTime != null) {
-      _prefs!.setString(_keyStartTime, _startTime!.toIso8601String());
+    final prefs = _prefs;
+    if (prefs == null) return;
+    final startTime = _startTime;
+    if (_isRunning && startTime != null) {
+      prefs.setString(_keyStartTime, startTime.toIso8601String());
     } else {
-      _prefs!.remove(_keyStartTime);
+      prefs.remove(_keyStartTime);
     }
-    if (_originalStartTime != null) {
-      _prefs!.setString(
-          _keyOriginalStartTime, _originalStartTime!.toIso8601String());
+    final originalStartTime = _originalStartTime;
+    if (originalStartTime != null) {
+      prefs.setString(
+          _keyOriginalStartTime, originalStartTime.toIso8601String());
     }
-    _prefs!.setInt(_keyAccumulatedMs, _accumulated.inMilliseconds);
-    _prefs!.setBool(_keyIsRunning, _isRunning);
-    _prefs!.setBool(_keyIsPaused, _isPaused);
+    prefs.setInt(_keyAccumulatedMs, _accumulated.inMilliseconds);
+    prefs.setBool(_keyIsRunning, _isRunning);
+    prefs.setBool(_keyIsPaused, _isPaused);
   }
 
   /// 저장된 타이머 상태 삭제
@@ -239,23 +244,24 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _isPaused = false;
     _startTicker();
     _saveState();
-    NotificationService.showTimerRunning(originalStartTime: _originalStartTime!);
+    NotificationService.showTimerRunning(originalStartTime: startTime);
     notifyListeners();
   }
 
   void start() {
-    _startTime = DateTime.now();
-    _originalStartTime = _startTime;
+    final now = DateTime.now();
+    _startTime = now;
+    _originalStartTime = now;
     _accumulated = Duration.zero;
     _isRunning = true;
     _isPaused = false;
     _startTicker();
     _saveState();
     NotificationService.showTimerRunning(
-      originalStartTime: _originalStartTime!,
+      originalStartTime: now,
     );
     WidgetService.syncTimerStartedNoCategory(
-      originalStartTime: _originalStartTime!,
+      originalStartTime: now,
     );
     notifyListeners();
   }
@@ -267,22 +273,23 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     required String categoryEmoji,
     required int colorIndex,
   }) {
-    _startTime = DateTime.now();
-    _originalStartTime = _startTime;
+    final now = DateTime.now();
+    _startTime = now;
+    _originalStartTime = now;
     _accumulated = Duration.zero;
     _isRunning = true;
     _isPaused = false;
     _startTicker();
     _saveState();
     NotificationService.showTimerRunning(
-      originalStartTime: _originalStartTime!,
+      originalStartTime: now,
     );
     WidgetService.syncTimerStarted(
       categoryId: categoryId,
       categoryName: categoryName,
       categoryEmoji: categoryEmoji,
       colorIndex: colorIndex,
-      originalStartTime: _originalStartTime!,
+      originalStartTime: now,
     );
     notifyListeners();
   }
@@ -294,9 +301,10 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _isPaused = true;
     _stopTicker();
     _saveState();
-    if (_originalStartTime != null) {
+    final originalStartTime = _originalStartTime;
+    if (originalStartTime != null) {
       NotificationService.showTimerPaused(
-        originalStartTime: _originalStartTime!,
+        originalStartTime: originalStartTime,
       );
     }
     WidgetService.syncTimerPaused(elapsed: _accumulated);
@@ -309,9 +317,10 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _isPaused = false;
     _startTicker();
     _saveState();
-    if (_originalStartTime != null) {
+    final originalStartTime = _originalStartTime;
+    if (originalStartTime != null) {
       NotificationService.showTimerRunning(
-        originalStartTime: _originalStartTime!,
+        originalStartTime: originalStartTime,
         accumulated: _accumulated,
       );
     }
