@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import '../models/check_box.dart';
+import '../models/daily_record.dart';
 import '../services/isar_service.dart';
 
 class CheckBoxProvider extends ChangeNotifier {
@@ -56,12 +57,23 @@ class CheckBoxProvider extends ChangeNotifier {
     await loadCheckBoxes();
   }
 
-  // 체크박스 삭제
+  // 체크박스 삭제 (연관된 체크 기록도 함께 정리)
   Future<void> deleteCheckBox(int id) async {
     try {
       final isar = await IsarService.instance;
       await isar.writeTxn(() async {
         await isar.checkBoxs.delete(id);
+        // 연관된 CheckEntry 정리
+        final records = await isar.dailyRecords.where().findAll();
+        for (final record in records) {
+          final entries = record.checkRecords;
+          if (entries == null) continue;
+          final filtered = entries.where((e) => e.checkBoxId != id).toList();
+          if (filtered.length != entries.length) {
+            record.checkRecords = filtered.isEmpty ? null : filtered;
+            await isar.dailyRecords.put(record);
+          }
+        }
       });
     } catch (e) {
       debugPrint('체크박스 삭제 실패: $e');
