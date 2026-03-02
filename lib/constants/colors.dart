@@ -33,8 +33,8 @@ class AppColors {
   static const border = Color(0xFFD8D4CF); // 웜 그레이 보더
   static const borderLight = Color(0xFFEBE8E4); // 라이트 웜 보더
 
-  // Functional
-  static const success = Color(0xFF4CAF50);
-  static const error = Color(0xFFF44336);
-  static const warning = Color(0xFFFF9800);
+  // Functional (웜 팔레트에 맞춘 뮤트 톤)
+  static const success = Color(0xFF6B9470); // 뮤트 세이지 그린
+  static const error = Color(0xFFB85C52); // 뮤트 테라코타
+  static const warning = Color(0xFFC88B4A); // 뮤트 웜 앰버
 }
