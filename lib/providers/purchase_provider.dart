@@ -5,10 +5,10 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 class PurchaseProvider extends ChangeNotifier {
   static const _entitlementId = 'remove_ads';
 
-  // iOS API key (App Store Connect)
-  static const _iosApiKey = 'test_SBdoFimIyjwdiAMuQbfSCKcAaDA';
-  // TODO: Android API key를 RevenueCat 대시보드 → Android 앱에서 복사해 교체
-  static const _androidApiKey = 'test_SBdoFimIyjwdiAMuQbfSCKcAaDA';
+  // RevenueCat Public API Key
+  static const _iosApiKey = 'appl_eTkQvOcrSgdUScNbRwnECDzlWyY';
+  // TODO: Google Play 앱 등록 후 Android API key 교체
+  static const _androidApiKey = 'test_ccnEcLPRkpbKmbErdWTYuJdrBuq';
 
   bool _isAdRemoved = false;
   bool _isLoading = true;
