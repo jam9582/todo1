@@ -8,8 +8,8 @@ require 'fileutils'
 
 PROJECT_PATH   = File.expand_path('../Runner.xcodeproj', __FILE__)
 WIDGET_DIR     = File.expand_path('../TimerWidget', __FILE__)
-BUNDLE_ID_APP  = 'com.example.todo1'
-BUNDLE_ID_EXT  = 'com.example.todo1.TimerWidget'
+BUNDLE_ID_APP  = 'com.studiovanilla.tinylog'
+BUNDLE_ID_EXT  = 'com.studiovanilla.tinylog.TimerWidget'
 TEAM_ID        = '5489HYLR4U'
 DEPLOY_TARGET  = '14.0'
 EXT_NAME       = 'TimerWidget'

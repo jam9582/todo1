@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _handleWidgetUrl(Uri? uri) {
     if (uri == null) return;
-    if (uri.scheme != 'todo1' || uri.host != 'start') return;
+    if (uri.scheme != 'tinylog' || uri.host != 'start') return;
 
     final timerProvider = context.read<TimerProvider>();
     if (timerProvider.isActive) return; // 이미 타이머 실행 중이면 무시

@@ -1,4 +1,4 @@
-package com.example.todo1
+package com.studiovanilla.tinylog
 
 import io.flutter.embedding.android.FlutterActivity
 

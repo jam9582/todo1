@@ -10,7 +10,7 @@ class WidgetService {
   static const _androidWidgetMedium = 'TimerWidgetMedium';
   static const _androidWidgetLarge = 'TimerWidgetLarge';
   static const _iosWidgetName = 'TimerWidget'; // WidgetBundle 이름
-  static const _appGroupId = 'group.com.example.todo1';
+  static const _appGroupId = 'group.com.studiovanilla.tinylog';
 
   // 앱의 카테고리 색상 팔레트 (통계 화면과 동일)
   static const categoryColorHexes = [

@@ -1,4 +1,4 @@
-package com.example.todo1
+package com.studiovanilla.tinylog
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -22,13 +22,13 @@ class TimerWidgetMedium : BaseTimerWidget(WidgetSize.MEDIUM)
 class TimerWidgetLarge : BaseTimerWidget(WidgetSize.LARGE)
 
 // ─── 인텐트 액션 상수 ─────────────────────────────────────────────────────
-private const val ACTION_START    = "com.example.todo1.WIDGET_START"
-private const val ACTION_PAUSE    = "com.example.todo1.WIDGET_PAUSE"
-private const val ACTION_RESUME   = "com.example.todo1.WIDGET_RESUME"
-private const val ACTION_COMPLETE = "com.example.todo1.WIDGET_COMPLETE"
-private const val ACTION_CANCEL   = "com.example.todo1.WIDGET_CANCEL"
-private const val ACTION_PREV     = "com.example.todo1.WIDGET_PREV"
-private const val ACTION_NEXT     = "com.example.todo1.WIDGET_NEXT"
+private const val ACTION_START    = "com.studiovanilla.tinylog.WIDGET_START"
+private const val ACTION_PAUSE    = "com.studiovanilla.tinylog.WIDGET_PAUSE"
+private const val ACTION_RESUME   = "com.studiovanilla.tinylog.WIDGET_RESUME"
+private const val ACTION_COMPLETE = "com.studiovanilla.tinylog.WIDGET_COMPLETE"
+private const val ACTION_CANCEL   = "com.studiovanilla.tinylog.WIDGET_CANCEL"
+private const val ACTION_PREV     = "com.studiovanilla.tinylog.WIDGET_PREV"
+private const val ACTION_NEXT     = "com.studiovanilla.tinylog.WIDGET_NEXT"
 
 private const val EXTRA_CATEGORY_INDEX = "category_index"
 private const val EXTRA_WIDGET_SIZE    = "widget_size"

@@ -236,8 +236,8 @@ private struct SmallMeasuringView: View {
 private func startURL(for cat: CategoryData) -> URL {
     let nameEncoded = cat.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? cat.name
     let emojiEncoded = cat.emoji.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? cat.emoji
-    return URL(string: "todo1://start?categoryId=\(cat.id)&name=\(nameEncoded)&emoji=\(emojiEncoded)&colorIndex=\(cat.colorIndex)")
-        ?? URL(string: "todo1://start")!
+    return URL(string: "tinylog://start?categoryId=\(cat.id)&name=\(nameEncoded)&emoji=\(emojiEncoded)&colorIndex=\(cat.colorIndex)")
+        ?? URL(string: "tinylog://start")!
 }
 
 // MARK: - iOS 17 Background Helper

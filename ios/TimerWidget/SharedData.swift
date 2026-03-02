@@ -3,7 +3,7 @@ import SwiftUI
 import WidgetKit
 
 // MARK: - App Group
-let kAppGroup = "group.com.example.todo1"
+let kAppGroup = "group.com.studiovanilla.tinylog"
 var sharedDefaults: UserDefaults? { UserDefaults(suiteName: kAppGroup) }
 
 // MARK: - Data Models
