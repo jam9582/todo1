@@ -21,28 +21,28 @@ import 'constants/app_theme.dart';
 import 'constants/colors.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Firebase 초기화
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // Flutter 프레임워크 에러 → Crashlytics
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-
-  // 상태바 & 네비게이션바 스타일 설정 (Android)
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      // 상태바 (상단)
-      statusBarColor: AppColors.background,
-      statusBarIconBrightness: Brightness.dark,
-      // 네비게이션바 (하단)
-      systemNavigationBarColor: AppColors.background,
-      systemNavigationBarIconBrightness: Brightness.dark,
-    ),
-  );
-
   // Dart 비동기 에러 → Crashlytics
   await runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    // Firebase 초기화
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+    // Flutter 프레임워크 에러 → Crashlytics
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+    // 상태바 & 네비게이션바 스타일 설정 (Android)
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        // 상태바 (상단)
+        statusBarColor: AppColors.background,
+        statusBarIconBrightness: Brightness.dark,
+        // 네비게이션바 (하단)
+        systemNavigationBarColor: AppColors.background,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    );
+
     // Isar 초기화
     await IsarService.instance;
 
