@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "407637819858",
+    "project_id": "tiny-log",
+    "storage_bucket": "tiny-log.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:407637819858:android:041983940e43dfc0b2080b",
+        "android_client_info": {
+          "package_name": "com.studiovanilla.tinylog"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAm_RmJ67GGeLuZEjJw1uWSCZ53Ljxdhfo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

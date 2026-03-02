@@ -1,6 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'services/isar_service.dart';
@@ -19,6 +23,12 @@ import 'constants/colors.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Firebase 초기화
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Flutter 프레임워크 에러 → Crashlytics
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
   // 상태바 & 네비게이션바 스타일 설정 (Android)
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -31,19 +41,24 @@ void main() async {
     ),
   );
 
-  // Isar 초기화
-  await IsarService.instance;
+  // Dart 비동기 에러 → Crashlytics
+  await runZonedGuarded(() async {
+    // Isar 초기화
+    await IsarService.instance;
 
-  // 알림 초기화
-  await NotificationService.initialize();
+    // 알림 초기화
+    await NotificationService.initialize();
 
-  // RevenueCat 초기화
-  await PurchaseProvider.configure();
+    // RevenueCat 초기화
+    await PurchaseProvider.configure();
 
-  // iOS 홈 위젯 App Group 설정
-  await WidgetService.initialize();
+    // iOS 홈 위젯 App Group 설정
+    await WidgetService.initialize();
 
-  runApp(const MyApp());
+    runApp(const MyApp());
+  }, (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+  });
 }
 
 class MyApp extends StatelessWidget {
