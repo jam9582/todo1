@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:home_widget/home_widget.dart';
 import '../models/category.dart';
 
@@ -33,7 +34,7 @@ class WidgetService {
       if (Platform.isIOS) {
         await HomeWidget.setAppGroupId(_appGroupId);
       }
-    } catch (_) {}
+    } catch (e, s) { FirebaseCrashlytics.instance.recordError(e, s, fatal: false); }
   }
 
   // ─── Flutter → 위젯 데이터 동기화 ────────────────────────────────────
@@ -61,7 +62,7 @@ class WidgetService {
       await HomeWidget.saveWidgetData<String>(
           'widget_categories', json.encode(data));
       await _updateAllWidgets();
-    } catch (_) {}
+    } catch (e, s) { FirebaseCrashlytics.instance.recordError(e, s, fatal: false); }
   }
 
   // ─── 타이머 상태 위젯 동기화 ──────────────────────────────────────────
@@ -89,7 +90,7 @@ class WidgetService {
       await HomeWidget.saveWidgetData<String>(
           'widget_timer', json.encode(data));
       await _updateAllWidgets();
-    } catch (_) {}
+    } catch (e, s) { FirebaseCrashlytics.instance.recordError(e, s, fatal: false); }
   }
 
   /// 타이머 시작 (카테고리 없음 — 앱에서 바로 시작한 경우)
@@ -110,7 +111,7 @@ class WidgetService {
       await HomeWidget.saveWidgetData<String>(
           'widget_timer', json.encode(data));
       await _updateAllWidgets();
-    } catch (_) {}
+    } catch (e, s) { FirebaseCrashlytics.instance.recordError(e, s, fatal: false); }
   }
 
   /// 타이머 일시정지 (elapsed: 총 경과 시간)
@@ -125,7 +126,7 @@ class WidgetService {
       await HomeWidget.saveWidgetData<String>(
           'widget_timer', json.encode(data));
       await _updateAllWidgets();
-    } catch (_) {}
+    } catch (e, s) { FirebaseCrashlytics.instance.recordError(e, s, fatal: false); }
   }
 
   /// 타이머 재개 (accumulated: 기존 누적 시간)
@@ -143,14 +144,14 @@ class WidgetService {
       await HomeWidget.saveWidgetData<String>(
           'widget_timer', json.encode(data));
       await _updateAllWidgets();
-    } catch (_) {}
+    } catch (e, s) { FirebaseCrashlytics.instance.recordError(e, s, fatal: false); }
   }
 
   static Future<void> syncTimerCleared() async {
     try {
       await HomeWidget.saveWidgetData<String>('widget_timer', null);
       await _updateAllWidgets();
-    } catch (_) {}
+    } catch (e, s) { FirebaseCrashlytics.instance.recordError(e, s, fatal: false); }
   }
 
   // ─── 위젯 → 앱 완료 기록 처리 ─────────────────────────────────────────
@@ -168,7 +169,8 @@ class WidgetService {
       final minutes = data['minutes'] as int?;
       if (categoryId == null || minutes == null || minutes <= 0) return null;
       return (categoryId: categoryId, minutes: minutes);
-    } catch (_) {
+    } catch (e, s) {
+      FirebaseCrashlytics.instance.recordError(e, s, fatal: false);
       return null;
     }
   }
@@ -185,7 +187,8 @@ class WidgetService {
       await HomeWidget.saveWidgetData<String>('widget_interaction_action', null);
       await HomeWidget.saveWidgetData<bool>('widget_interaction', null);
       return action;
-    } catch (_) {
+    } catch (e, s) {
+      FirebaseCrashlytics.instance.recordError(e, s, fatal: false);
       return null;
     }
   }
@@ -200,7 +203,8 @@ class WidgetService {
       await HomeWidget.saveWidgetData<String>(
           'widget_interaction_start_time', null);
       return t;
-    } catch (_) {
+    } catch (e, s) {
+      FirebaseCrashlytics.instance.recordError(e, s, fatal: false);
       return null;
     }
   }
@@ -213,7 +217,8 @@ class WidgetService {
       final raw = await HomeWidget.getWidgetData<String>('widget_timer');
       if (raw == null) return null;
       return json.decode(raw) as Map<String, dynamic>;
-    } catch (_) {
+    } catch (e, s) {
+      FirebaseCrashlytics.instance.recordError(e, s, fatal: false);
       return null;
     }
   }
@@ -227,6 +232,6 @@ class WidgetService {
       } else if (Platform.isIOS) {
         await HomeWidget.updateWidget(iOSName: _iosWidgetName);
       }
-    } catch (_) {}
+    } catch (e, s) { FirebaseCrashlytics.instance.recordError(e, s, fatal: false); }
   }
 }

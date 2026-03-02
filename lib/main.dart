@@ -96,7 +96,7 @@ class _AppWithLocale extends StatelessWidget {
     // lang == 'system' → locale = null, localeResolutionCallback 로 결정
 
     return MaterialApp(
-      title: 'Todo1 App',
+      title: 'Tiny Log',
       theme: AppTheme.theme,
       locale: locale,
       localizationsDelegates: const [

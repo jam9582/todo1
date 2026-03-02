@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/ad_banner_widget.dart';
@@ -44,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // 위젯 탭으로 앱이 처음 열린 경우
     HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
       if (uri != null) _handleWidgetUrl(uri);
-    }).catchError((_) {});
+    }).catchError((e, s) { FirebaseCrashlytics.instance.recordError(e, s, fatal: false); });
   }
 
   void _handleWidgetUrl(Uri? uri) {
