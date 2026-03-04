@@ -175,6 +175,22 @@ class WidgetService {
     }
   }
 
+  // ─── iOS 위젯 카테고리 탭 URL 처리 ────────────────────────────────────
+
+  /// AppDelegate가 App Group에 저장한 위젯 실행 URL 읽고 삭제. 없으면 null 반환.
+  static Future<Uri?> popWidgetLaunchUrl() async {
+    if (!Platform.isIOS) return null;
+    try {
+      final urlStr = await HomeWidget.getWidgetData<String>('widget_launch_url');
+      if (urlStr == null) return null;
+      await HomeWidget.saveWidgetData<String>('widget_launch_url', null);
+      return Uri.tryParse(urlStr);
+    } catch (e, s) {
+      FirebaseCrashlytics.instance.recordError(e, s, fatal: false);
+      return null;
+    }
+  }
+
   // ─── iOS 위젯 인터랙션 처리 ────────────────────────────────────────────
 
   /// iOS 위젯 App Intent가 저장한 액션을 읽고 삭제. 없으면 null 반환.

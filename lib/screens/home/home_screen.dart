@@ -19,6 +19,7 @@ import '../statistics/statistics_screen.dart';
 import '../settings/settings_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/timer_provider.dart';
+import '../../services/widget_service.dart';
 import 'widgets/timer_bottom_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -28,14 +29,30 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   StreamSubscription? _widgetClickSub;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (Platform.isIOS) {
       _setupWidgetClickListener();
+      _checkWidgetLaunchUrl(); // cold start: App Group에서 위젯 URL 읽기
+    }
+  }
+
+  // iOS 위젯 카테고리 탭 URL을 App Group UserDefaults에서 읽어 타이머 시작
+  Future<void> _checkWidgetLaunchUrl() async {
+    final uri = await WidgetService.popWidgetLaunchUrl();
+    if (uri != null) _handleWidgetUrl(uri);
+  }
+
+  // 앱이 포그라운드로 돌아올 때 위젯 URL 확인 (warm start)
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && Platform.isIOS) {
+      _checkWidgetLaunchUrl();
     }
   }
 
@@ -77,6 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _widgetClickSub?.cancel();
     super.dispose();
   }

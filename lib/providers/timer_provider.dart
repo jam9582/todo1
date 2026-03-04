@@ -196,7 +196,8 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   /// Android 위젯이 타이머 상태를 변경했을 때 Flutter 상태 동기화
-  void _syncFromWidgetIfNeeded() {
+  Future<void> _syncFromWidgetIfNeeded() async {
+    await _prefs?.reload(); // 네이티브 위젯(Kotlin)이 쓴 최신 값 반영
     final hasInteraction = _prefs?.getBool('widget_interaction') ?? false;
     if (!hasInteraction) {
       if (_isRunning) _startTicker();

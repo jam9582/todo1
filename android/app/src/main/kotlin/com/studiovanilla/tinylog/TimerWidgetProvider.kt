@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.SystemClock
 import android.view.View
 import android.widget.RemoteViews
 import org.json.JSONArray
@@ -296,19 +297,30 @@ private fun bindMeasuringState(
     views.setTextViewText(R.id.timer_emoji, emoji)
     views.setTextViewText(R.id.timer_name,  name)
 
-    val origStr = timer.optString("originalStartTime", "")
-    val startLabel = if (origStr.isNotEmpty()) {
-        runCatching {
-            val date = isoFormat.parse(origStr) ?: Date()
-            "${displayFormat.format(date)}부터"
-        }.getOrElse { "" }
-    } else ""
-    views.setTextViewText(R.id.timer_start_label, startLabel)
+    // 경과 시간 계산 및 Chronometer/정적 텍스트 설정
+    val accumulated = flutterPrefs.getLong(KEY_ACCUMULATED, 0L)
+    if (isPaused) {
+        // 일시정지: Chronometer 숨기고 정적 텍스트 표시
+        views.setViewVisibility(R.id.timer_chronometer, View.GONE)
+        views.setViewVisibility(R.id.timer_paused_time, View.VISIBLE)
+        views.setTextViewText(R.id.timer_paused_time, formatElapsed(accumulated))
+    } else {
+        // 측정 중: Chronometer로 실시간 표시
+        views.setViewVisibility(R.id.timer_chronometer, View.VISIBLE)
+        views.setViewVisibility(R.id.timer_paused_time, View.GONE)
+        val startTimeStr = flutterPrefs.getString(KEY_START_TIME, null)
+        val runningMs = if (startTimeStr != null) {
+            val startMs = runCatching { isoFormat.parse(startTimeStr)!!.time }.getOrElse { System.currentTimeMillis() }
+            accumulated + (System.currentTimeMillis() - startMs)
+        } else accumulated
+        val base = SystemClock.elapsedRealtime() - runningMs
+        views.setChronometer(R.id.timer_chronometer, base, null, true)
+    }
 
     // 일시정지/재개 버튼 텍스트
     val pauseResumeText = when (size) {
-        WidgetSize.LARGE -> if (isPaused) "▶ 재개" else "⏸ 일시정지"
-        else             -> if (isPaused) "▶"     else "⏸"
+        WidgetSize.LARGE -> if (isPaused) "▶ 재개" else "|| 일시정지"
+        else             -> if (isPaused) "▶"     else "||"
     }
     views.setTextViewText(R.id.btn_pause_resume, pauseResumeText)
 
@@ -580,4 +592,13 @@ private fun formatMinutes(minutes: Int): String {
     val h = minutes / 60
     val m = minutes % 60
     return if (h > 0) "${h}h ${m}m" else "${m}m"
+}
+
+private fun formatElapsed(ms: Long): String {
+    val totalSec = ms / 1000
+    val h = totalSec / 3600
+    val m = (totalSec % 3600) / 60
+    val s = totalSec % 60
+    return if (h > 0) String.format("%d:%02d:%02d", h, m, s)
+    else String.format("%d:%02d", m, s)
 }

@@ -119,8 +119,7 @@
         <LinearLayout
             android:id="@+id/timer_card"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
             android:background="@drawable/widget_card_bg_0"
@@ -147,14 +146,24 @@
                 android:ellipsize="end"
                 android:includeFontPadding="false"/>
 
-            <TextView
-                android:id="@+id/timer_start_label"
+            <Chronometer
+                android:id="@+id/timer_chronometer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="오전 9:00"
-                android:textSize="9sp"
+                android:textSize="11sp"
                 android:textColor="#5C5652"
+                android:includeFontPadding="false"/>
+
+            <TextView
+                android:id="@+id/timer_paused_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text=""
+                android:textSize="11sp"
+                android:textColor="#5C5652"
+                android:visibility="gone"
                 android:includeFontPadding="false"/>
 
         </LinearLayout>
@@ -162,19 +171,21 @@
         <!-- 버튼 행 -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="24dp"
+            android:layout_height="28dp"
             android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginTop="4dp">
+            android:layout_marginTop="6dp">
 
             <TextView
                 android:id="@+id/btn_pause_resume"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:layout_marginEnd="3dp"
                 android:gravity="center"
-                android:text="⏸"
-                android:textSize="14sp"
+                android:background="@drawable/widget_btn_bg"
+                android:text="||"
+                android:textSize="12sp"
                 android:textColor="#2D2926"/>
 
             <TextView
@@ -182,9 +193,11 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:layout_marginEnd="3dp"
                 android:gravity="center"
-                android:text="✓"
-                android:textSize="14sp"
+                android:background="@drawable/widget_btn_bg"
+                android:text="✔"
+                android:textSize="12sp"
                 android:textColor="#2D2926"/>
 
             <TextView
@@ -193,8 +206,9 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
+                android:background="@drawable/widget_btn_cancel_bg"
                 android:text="✕"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 android:textColor="#8A8580"/>
 
         </LinearLayout>

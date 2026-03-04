@@ -1,10 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:isar/isar.dart';
 import '../models/daily_record.dart';
 import '../services/isar_service.dart';
 import '../services/widget_service.dart';
 
-class RecordProvider extends ChangeNotifier {
+class RecordProvider extends ChangeNotifier with WidgetsBindingObserver {
   DateTime _selectedDate = DateTime.now();
   DailyRecord? _currentRecord;
   bool _isLoading = false;
@@ -26,13 +26,21 @@ class RecordProvider extends ChangeNotifier {
   }
 
   RecordProvider() {
+    WidgetsBinding.instance.addObserver(this);
     loadRecord(_selectedDate);
     loadMonthRecords(_selectedDate);
-    _processWidgetPendingCompletion();
+    processWidgetPendingCompletion();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      processWidgetPendingCompletion();
+    }
   }
 
   /// 위젯에서 완료된 타이머 기록이 있으면 Isar에 저장
-  Future<void> _processWidgetPendingCompletion() async {
+  Future<void> processWidgetPendingCompletion() async {
     final pending = await WidgetService.popPendingCompletion();
     if (pending == null) return;
     await updateTimeRecordForToday(pending.categoryId, pending.minutes);
@@ -533,5 +541,11 @@ class RecordProvider extends ChangeNotifier {
     }
 
     return totals;
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }
