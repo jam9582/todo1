@@ -103,7 +103,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final recordProvider = context.watch<RecordProvider>();
+    final timerProvider = context.watch<TimerProvider>();
     final isRestDay = recordProvider.isCurrentRestDay;
+    final isSelecting = timerProvider.isSelecting;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -121,7 +123,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      const DailyMessageSection(),
+                      // 선택 대기 중엔 카테고리 외 섹션 흐리게 + 터치 차단
+                      IgnorePointer(
+                        ignoring: isSelecting,
+                        child: AnimatedOpacity(
+                          opacity: isSelecting ? 0.15 : 1.0,
+                          duration: const Duration(milliseconds: 250),
+                          child: const DailyMessageSection(),
+                        ),
+                      ),
                       const Divider(
                         height: 1,
                         thickness: 1,
@@ -131,14 +141,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       ),
                       Stack(
                         children: [
-                          IgnorePointer(
-                            ignoring: isRestDay,
-                            child: const Column(
-                              children: [
-                                CategorySection(),
-                                CheckboxSection(),
-                              ],
-                            ),
+                          Column(
+                            children: [
+                              // 카테고리 섹션: isSelecting 중에도 터치 활성
+                              IgnorePointer(
+                                ignoring: isRestDay,
+                                child: const CategorySection(),
+                              ),
+                              // 체크박스 섹션: isSelecting 중 흐리게 + 터치 차단
+                              IgnorePointer(
+                                ignoring: isRestDay || isSelecting,
+                                child: AnimatedOpacity(
+                                  opacity: isSelecting ? 0.15 : 1.0,
+                                  duration: const Duration(milliseconds: 250),
+                                  child: const CheckboxSection(),
+                                ),
+                              ),
+                            ],
                           ),
                           if (isRestDay)
                             Positioned.fill(
@@ -164,7 +183,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         indent: 16,
                         endIndent: 16,
                       ),
-                      const CalendarSection(),
+                      IgnorePointer(
+                        ignoring: isSelecting,
+                        child: AnimatedOpacity(
+                          opacity: isSelecting ? 0.15 : 1.0,
+                          duration: const Duration(milliseconds: 250),
+                          child: const CalendarSection(),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -196,9 +222,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _handleHeaderComplete(BuildContext context, TimerProvider timerProvider) {
-    final minutes = timerProvider.complete();
-    if (minutes <= 0) {
-      final l10n = AppLocalizations.of(context)!;
+    final result = timerProvider.complete();
+    final l10n = AppLocalizations.of(context)!;
+
+    if (result.minutes <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.timerTooShort),
@@ -209,7 +236,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       );
       return;
     }
-    TimerBottomSheet.showForCategorySelection(context, minutes);
+
+    final categoryId = result.categoryId;
+    final categoryName = result.categoryName;
+    if (categoryId != null && categoryName != null && categoryName.isNotEmpty) {
+      // 카테고리 있음 → 자동 저장 + 스낵바
+      context.read<RecordProvider>()
+        ..updateTimeRecordForToday(categoryId, result.minutes)
+        ..selectDate(DateTime.now());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$categoryName에 ${result.minutes}분 추가되었어요'),
+          backgroundColor: AppColors.snackbar,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else {
+      // 카테고리 없음(위젯/알림에서 시작) → 기존 바텀시트
+      TimerBottomSheet.showForCategorySelection(context, result.minutes);
+    }
   }
 
   Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
@@ -266,6 +312,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         onTap: () => _handleHeaderComplete(context, timerProvider),
                       ),
                       const SizedBox(width: 4),
+                      if (timerProvider.categoryEmoji != null) ...[
+                        Text(
+                          timerProvider.categoryEmoji!,
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        const SizedBox(width: 3),
+                      ],
                       Text(
                         _formatElapsed(timerProvider.elapsed),
                         style: const TextStyle(
@@ -285,16 +338,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Consumer<TimerProvider>(
             builder: (context, timerProvider, _) => DebouncedIconButton(
               icon: Icon(
-                timerProvider.isActive
-                    ? Icons.timer_rounded
-                    : Icons.timer_outlined,
-                color: timerProvider.isActive
+                timerProvider.isSelecting
+                    ? Icons.close_rounded        // 선택 취소
+                    : timerProvider.isActive
+                        ? Icons.timer_rounded
+                        : Icons.timer_outlined,
+                color: (timerProvider.isSelecting || timerProvider.isActive)
                     ? AppColors.textPrimary
                     : AppColors.textSecondary,
               ),
               onPressed: timerProvider.isActive
-                  ? () {}
-                  : () => context.read<TimerProvider>().start(),
+                  ? () {}                        // 측정 중엔 타이머 버튼 무반응
+                  : timerProvider.isSelecting
+                      ? () => context.read<TimerProvider>().cancelSelecting()
+                      : () => context.read<TimerProvider>().startSelecting(),
             ),
           ),
           DebouncedIconButton(

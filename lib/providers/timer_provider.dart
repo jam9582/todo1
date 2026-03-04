@@ -9,23 +9,32 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   static const _keyAccumulatedMs = 'timer_accumulated_ms';
   static const _keyIsRunning = 'timer_is_running';
   static const _keyIsPaused = 'timer_is_paused';
-  // 최초 시작 시각 — 일시정지/재개 사이클에도 유지 (알림 표시용)
   static const _keyOriginalStartTime = 'timer_original_start_time';
+  static const _keyCategoryId = 'timer_category_id';
+  static const _keyCategoryName = 'timer_category_name';
+  static const _keyCategoryEmoji = 'timer_category_emoji';
 
   DateTime? _startTime;
-  DateTime? _originalStartTime; // 알림에 표시할 최초 시작 시각
+  DateTime? _originalStartTime;
   Duration _accumulated = Duration.zero;
   bool _isRunning = false;
   bool _isPaused = false;
+  bool _isSelecting = false; // 타이머 버튼 탭 후 카테고리 선택 대기 중
+  int? _categoryId;
+  String? _categoryName;
+  String? _categoryEmoji;
   Timer? _ticker;
   SharedPreferences? _prefs;
 
-  // 알림 완료 액션 → HomeScreen이 감지하여 카테고리 바텀시트 표시
   bool _pendingComplete = false;
 
   bool get isRunning => _isRunning;
   bool get isPaused => _isPaused;
   bool get isActive => _isRunning || _isPaused;
+  bool get isSelecting => _isSelecting;
+  int? get categoryId => _categoryId;
+  String? get categoryName => _categoryName;
+  String? get categoryEmoji => _categoryEmoji;
   bool get pendingComplete => _pendingComplete;
 
   Duration get elapsed {
@@ -77,6 +86,10 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (originalStr != null) {
       _originalStartTime = DateTime.tryParse(originalStr);
     }
+
+    _categoryId = _prefs?.getInt(_keyCategoryId);
+    _categoryName = _prefs?.getString(_keyCategoryName);
+    _categoryEmoji = _prefs?.getString(_keyCategoryEmoji);
 
     if (isRunning) {
       final startTimeStr = _prefs?.getString(_keyStartTime);
@@ -173,6 +186,16 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     prefs.setInt(_keyAccumulatedMs, _accumulated.inMilliseconds);
     prefs.setBool(_keyIsRunning, _isRunning);
     prefs.setBool(_keyIsPaused, _isPaused);
+    final categoryId = _categoryId;
+    if (categoryId != null) {
+      prefs.setInt(_keyCategoryId, categoryId);
+      prefs.setString(_keyCategoryName, _categoryName ?? '');
+      prefs.setString(_keyCategoryEmoji, _categoryEmoji ?? '');
+    } else {
+      prefs.remove(_keyCategoryId);
+      prefs.remove(_keyCategoryName);
+      prefs.remove(_keyCategoryEmoji);
+    }
   }
 
   /// 저장된 타이머 상태 삭제
@@ -182,6 +205,9 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _prefs?.remove(_keyAccumulatedMs);
     _prefs?.remove(_keyIsRunning);
     _prefs?.remove(_keyIsPaused);
+    _prefs?.remove(_keyCategoryId);
+    _prefs?.remove(_keyCategoryName);
+    _prefs?.remove(_keyCategoryEmoji);
   }
 
   @override
@@ -251,6 +277,18 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  /// 앱 타이머 버튼 탭 → 카테고리 선택 대기 상태로 전환
+  void startSelecting() {
+    _isSelecting = true;
+    notifyListeners();
+  }
+
+  /// 카테고리 선택 취소 (타이머 버튼 재탭 등)
+  void cancelSelecting() {
+    _isSelecting = false;
+    notifyListeners();
+  }
+
   void start() {
     final now = DateTime.now();
     _startTime = now;
@@ -258,18 +296,15 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _accumulated = Duration.zero;
     _isRunning = true;
     _isPaused = false;
+    _isSelecting = false;
     _startTicker();
     _saveState();
-    NotificationService.showTimerRunning(
-      originalStartTime: now,
-    );
-    WidgetService.syncTimerStartedNoCategory(
-      originalStartTime: now,
-    );
+    NotificationService.showTimerRunning(originalStartTime: now);
+    WidgetService.syncTimerStartedNoCategory(originalStartTime: now);
     notifyListeners();
   }
 
-  /// iOS 위젯 카테고리 카드 탭 → 해당 카테고리로 타이머 시작
+  /// 카테고리 선택 후 타이머 시작 (앱/iOS 위젯 공용)
   void startWithCategory({
     required int categoryId,
     required String categoryName,
@@ -282,11 +317,13 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _accumulated = Duration.zero;
     _isRunning = true;
     _isPaused = false;
+    _isSelecting = false;
+    _categoryId = categoryId;
+    _categoryName = categoryName;
+    _categoryEmoji = categoryEmoji;
     _startTicker();
     _saveState();
-    NotificationService.showTimerRunning(
-      originalStartTime: now,
-    );
+    NotificationService.showTimerRunning(originalStartTime: now);
     WidgetService.syncTimerStarted(
       categoryId: categoryId,
       categoryName: categoryName,
@@ -339,15 +376,17 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  /// 경과 시간(분 단위)을 반환하고 타이머를 리셋.
-  int complete() {
+  /// 경과 시간(분)과 카테고리 정보를 반환하고 타이머를 리셋.
+  ({int minutes, int? categoryId, String? categoryName}) complete() {
     final minutes = elapsed.inMinutes;
+    final categoryId = _categoryId;
+    final categoryName = _categoryName;
     _reset();
     _clearState();
     NotificationService.cancelTimerNotification();
     WidgetService.syncTimerCleared();
     notifyListeners();
-    return minutes;
+    return (minutes: minutes, categoryId: categoryId, categoryName: categoryName);
   }
 
   void _reset() {
@@ -356,6 +395,10 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _accumulated = Duration.zero;
     _isRunning = false;
     _isPaused = false;
+    _isSelecting = false;
+    _categoryId = null;
+    _categoryName = null;
+    _categoryEmoji = null;
     _pendingComplete = false;
     _stopTicker();
   }
