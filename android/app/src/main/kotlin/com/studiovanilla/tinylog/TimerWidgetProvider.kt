@@ -1,5 +1,6 @@
 package com.studiovanilla.tinylog
 
+import android.app.AlarmManager
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
@@ -12,6 +13,7 @@ import android.widget.RemoteViews
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -30,6 +32,7 @@ private const val ACTION_COMPLETE = "com.studiovanilla.tinylog.WIDGET_COMPLETE"
 private const val ACTION_CANCEL   = "com.studiovanilla.tinylog.WIDGET_CANCEL"
 private const val ACTION_PREV     = "com.studiovanilla.tinylog.WIDGET_PREV"
 private const val ACTION_NEXT     = "com.studiovanilla.tinylog.WIDGET_NEXT"
+private const val ACTION_MIDNIGHT = "com.studiovanilla.tinylog.WIDGET_MIDNIGHT"
 
 private const val EXTRA_CATEGORY_INDEX = "category_index"
 private const val EXTRA_WIDGET_SIZE    = "widget_size"
@@ -75,6 +78,7 @@ abstract class BaseTimerWidget(private val size: WidgetSize) : AppWidgetProvider
         for (id in appWidgetIds) {
             updateWidget(context, appWidgetManager, id, size)
         }
+        scheduleMidnightRefresh(context)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -91,6 +95,10 @@ abstract class BaseTimerWidget(private val size: WidgetSize) : AppWidgetProvider
             ACTION_CANCEL   -> handleCancel(context)
             ACTION_PREV     -> handlePageChange(context, widgetSize, -1)
             ACTION_NEXT     -> handlePageChange(context, widgetSize, +1)
+            ACTION_MIDNIGHT -> {
+                refreshAllWidgets(context)
+                scheduleMidnightRefresh(context)
+            }
         }
     }
 }
@@ -140,6 +148,16 @@ private fun bindNormalState(
     val categoriesJson = prefs.getString(WKEY_CATEGORIES, "[]") ?: "[]"
     val categories = runCatching { JSONArray(categoriesJson) }.getOrElse { JSONArray() }
     val total = categories.length().coerceAtMost(4)
+
+    // 날짜가 바뀌었으면 todayMinutes를 0으로 표시
+    val savedDate = prefs.getString("widget_categories_date", null)
+    val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+    val isStaleDate = savedDate != null && savedDate != todayDate
+    if (isStaleDate) {
+        for (i in 0 until categories.length()) {
+            categories.optJSONObject(i)?.put("todayMinutes", 0)
+        }
+    }
 
     when (size) {
         WidgetSize.SMALL -> bindSmallNormal(context, views, appWidgetId, categories, total, prefs)
@@ -460,6 +478,24 @@ private fun handleComplete(context: Context) {
         }
     }
 
+    // 위젯 카테고리 todayMinutes 즉시 반영
+    if (timerStr != null && minutes > 0) {
+        val t2 = runCatching { JSONObject(timerStr) }.getOrElse { JSONObject() }
+        val catId = t2.optInt("categoryId", -1)
+        if (catId != -1) {
+            val catsJson = widgetPrefs.getString(WKEY_CATEGORIES, "[]") ?: "[]"
+            val cats = runCatching { JSONArray(catsJson) }.getOrElse { JSONArray() }
+            for (i in 0 until cats.length()) {
+                val c = cats.optJSONObject(i) ?: continue
+                if (c.optInt("id") == catId) {
+                    c.put("todayMinutes", c.optInt("todayMinutes", 0) + minutes)
+                    break
+                }
+            }
+            widgetPrefs.edit().putString(WKEY_CATEGORIES, cats.toString()).apply()
+        }
+    }
+
     clearTimerState(flutterPrefs, widgetPrefs)
     refreshAllWidgets(context)
 }
@@ -601,4 +637,23 @@ private fun formatElapsed(ms: Long): String {
     val s = totalSec % 60
     return if (h > 0) String.format("%d:%02d:%02d", h, m, s)
     else String.format("%d:%02d", m, s)
+}
+
+private fun scheduleMidnightRefresh(context: Context) {
+    val midnight = Calendar.getInstance().apply {
+        add(Calendar.DAY_OF_YEAR, 1)
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 5) // 자정 직후 5초
+        set(Calendar.MILLISECOND, 0)
+    }
+    val intent = Intent(context, TimerWidgetSmall::class.java).apply {
+        action = ACTION_MIDNIGHT
+    }
+    val pi = PendingIntent.getBroadcast(
+        context, 999999, intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+    val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    am.set(AlarmManager.RTC, midnight.timeInMillis, pi)
 }

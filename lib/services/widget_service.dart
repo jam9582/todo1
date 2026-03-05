@@ -52,6 +52,8 @@ class WidgetService {
   static Future<void> _syncCategoriesData() async {
     try {
       final capped = _cachedCategories.take(4).toList();
+      final now = DateTime.now();
+      final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
       final data = List.generate(capped.length, (i) => {
         'id': capped[i].id,
         'name': capped[i].name,
@@ -61,6 +63,8 @@ class WidgetService {
       });
       await HomeWidget.saveWidgetData<String>(
           'widget_categories', json.encode(data));
+      await HomeWidget.saveWidgetData<String>(
+          'widget_categories_date', todayStr);
       await _updateAllWidgets();
     } catch (e, s) { FirebaseCrashlytics.instance.recordError(e, s, fatal: false); }
   }

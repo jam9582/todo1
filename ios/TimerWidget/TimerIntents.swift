@@ -101,6 +101,35 @@ struct CompleteTimerIntent: AppIntent {
             }
         }
 
+        // 위젯 카테고리 todayMinutes 즉시 반영
+        if let json = sharedDefaults?.string(forKey: "widget_timer"),
+           let data = json.data(using: .utf8),
+           let timerDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            let catId = timerDict["categoryId"] as? Int ?? -1
+            var totalMs2 = timerDict["accumulatedMs"] as? Int ?? 0
+            if let dStr = timerDict["timerDisplayDate"] as? String,
+               let dDate = parseFlutterDate(dStr) {
+                totalMs2 = max(0, Int(-dDate.timeIntervalSinceNow * 1000))
+            }
+            let mins = totalMs2 / 60000
+            if catId != -1 && mins > 0,
+               let catsStr = sharedDefaults?.string(forKey: "widget_categories"),
+               let catsData = catsStr.data(using: .utf8),
+               var cats = try? JSONSerialization.jsonObject(with: catsData) as? [[String: Any]] {
+                for i in cats.indices {
+                    if cats[i]["id"] as? Int == catId {
+                        let current = cats[i]["todayMinutes"] as? Int ?? 0
+                        cats[i]["todayMinutes"] = current + mins
+                        break
+                    }
+                }
+                if let updatedData = try? JSONSerialization.data(withJSONObject: cats),
+                   let updatedStr = String(data: updatedData, encoding: .utf8) {
+                    sharedDefaults?.set(updatedStr, forKey: "widget_categories")
+                }
+            }
+        }
+
         sharedDefaults?.removeObject(forKey: "widget_timer")
         sharedDefaults?.set("complete", forKey: "widget_interaction_action")
         sharedDefaults?.set(true, forKey: "widget_interaction")

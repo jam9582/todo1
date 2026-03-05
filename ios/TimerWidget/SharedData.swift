@@ -50,6 +50,18 @@ struct TimerEntry: TimelineEntry {
             categories = decoded
         }
 
+        // 날짜가 바뀌었으면 todayMinutes를 0으로 표시
+        let savedDate = d?.string(forKey: "widget_categories_date")
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        let todayStr = df.string(from: date)
+        if let saved = savedDate, saved != todayStr {
+            categories = categories.map {
+                CategoryData(id: $0.id, name: $0.name, emoji: $0.emoji,
+                             colorIndex: $0.colorIndex, todayMinutes: 0)
+            }
+        }
+
         var timer: TimerWidgetData? = nil
         if let json = d?.string(forKey: "widget_timer"),
            let data = json.data(using: .utf8),
@@ -160,9 +172,20 @@ struct TimerWidgetProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<TimerEntry>) -> Void) {
-        let entry = TimerEntry.load()
-        // 1시간 후 자동 새로고침 (App Intent가 버튼 누를 때마다 즉시 reload함)
-        let next = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
-        completion(Timeline(entries: [entry], policy: .after(next)))
+        let now = Date()
+        let entry = TimerEntry.load(date: now)
+
+        // 자정 엔트리 추가: 날짜 바뀌면 todayMinutes 0으로 표시
+        var entries = [entry]
+        if let midnight = Calendar.current.nextDate(
+            after: now,
+            matching: DateComponents(hour: 0, minute: 0, second: 5),
+            matchingPolicy: .nextTime
+        ) {
+            entries.append(TimerEntry.load(date: midnight))
+        }
+
+        let refreshDate = Calendar.current.date(byAdding: .hour, value: 1, to: now) ?? now
+        completion(Timeline(entries: entries, policy: .after(refreshDate)))
     }
 }
