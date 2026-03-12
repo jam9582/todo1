@@ -179,8 +179,6 @@ private fun bindSmallNormal(
     val page = prefs.getInt(WKEY_SMALL_PAGE, 0).coerceIn(0, total - 1)
     val cat  = categories.getJSONObject(page)
 
-    val colorIndex = cat.optInt("colorIndex", 0).coerceIn(0, 3)
-    views.setInt(R.id.category_card, "setBackgroundResource", cardBgResIds[colorIndex])
     views.setTextViewText(R.id.cat_emoji, cat.optString("emoji", ""))
     views.setTextViewText(R.id.cat_name,  cat.optString("name", ""))
     views.setTextViewText(R.id.cat_time,  formatMinutes(cat.optInt("todayMinutes", 0)))
@@ -226,9 +224,7 @@ private fun bindMediumNormal(
         val catIndex = page * 2 + slot
         if (catIndex < total) {
             val cat = categories.getJSONObject(catIndex)
-            val colorIndex = cat.optInt("colorIndex", slot).coerceIn(0, 3)
             views.setViewVisibility(cardIds[slot], View.VISIBLE)
-            views.setInt(cardIds[slot], "setBackgroundResource", cardBgResIds[colorIndex])
             views.setTextViewText(emojiIds[slot], cat.optString("emoji", ""))
             views.setTextViewText(nameIds[slot],  cat.optString("name", ""))
             views.setTextViewText(timeIds[slot],  formatMinutes(cat.optInt("todayMinutes", 0)))
@@ -271,9 +267,7 @@ private fun bindLargeNormal(
     for (i in 0 until 4) {
         if (i < total) {
             val cat = categories.getJSONObject(i)
-            val colorIndex = cat.optInt("colorIndex", i).coerceIn(0, 3)
             views.setViewVisibility(cardIds[i], View.VISIBLE)
-            views.setInt(cardIds[i], "setBackgroundResource", cardBgResIds[colorIndex])
             views.setTextViewText(emojiIds[i], cat.optString("emoji", ""))
             views.setTextViewText(nameIds[i],  cat.optString("name", ""))
             views.setTextViewText(timeIds[i],  formatMinutes(cat.optInt("todayMinutes", 0)))
@@ -303,11 +297,6 @@ private fun bindMeasuringState(
     val colorIndex = timer.optInt("colorIndex", -1)
     val isPaused   = timer.optBoolean("isPaused", false) ||
                      flutterPrefs.getBoolean(KEY_IS_PAUSED, false)
-
-    // 카드 배경
-    val bgRes = if (colorIndex in 0..3) cardBgResIds[colorIndex]
-                else R.drawable.widget_card_bg_neutral
-    views.setInt(R.id.timer_card, "setBackgroundResource", bgRes)
 
     // 카드 내용
     val emoji = timer.optString("categoryEmoji", "").ifEmpty { "⏱" }
@@ -389,6 +378,9 @@ private fun handleStart(context: Context, categoryIndex: Int) {
         putLong(  "flutter.timer_accumulated_ms", 0L)
         putBoolean("flutter.timer_is_running", true)
         putBoolean("flutter.timer_is_paused",  false)
+        putInt(   "flutter.timer_category_id",    cat.optInt("id", -1))
+        putString("flutter.timer_category_name",  cat.optString("name", ""))
+        putString("flutter.timer_category_emoji", cat.optString("emoji", ""))
         putBoolean(KEY_WIDGET_INTERACTION, true)
     }.apply()
 
@@ -540,6 +532,9 @@ private fun clearTimerState(flutterPrefs: SharedPreferences, widgetPrefs: Shared
         remove("flutter.timer_accumulated_ms")
         remove("flutter.timer_is_running")
         remove("flutter.timer_is_paused")
+        remove("flutter.timer_category_id")
+        remove("flutter.timer_category_name")
+        remove("flutter.timer_category_emoji")
         putBoolean(KEY_WIDGET_INTERACTION, true)
     }.apply()
     widgetPrefs.edit().remove(WKEY_TIMER).apply()

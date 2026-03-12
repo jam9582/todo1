@@ -92,13 +92,17 @@ class CategorySection extends StatelessWidget {
             };
           }
 
+          final isActiveCategory = isTimerActive &&
+              activeCategoryId != null &&
+              activeCategoryId == category.id;
+
           return Expanded(
             child: CategoryButton(
               emoji: category.emoji,
               name: category.name,
               time: timeString,
-              isSelected: minutes > 0,
-              enabled: !isFutureDate && !isTimerActive,
+              isSelected: isActiveCategory || minutes > 0,
+              enabled: !isFutureDate && (!isTimerActive || isActiveCategory),
               isHighlighted: isHighlighted && !isFutureDate,
               isDimmed: isDimmed,
               onTap: onTap,
