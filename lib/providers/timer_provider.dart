@@ -80,6 +80,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
     if (totalElapsed.inHours >= 24) {
       _clearState();
+      LiveActivityService.endActivity();
       return;
     }
 
