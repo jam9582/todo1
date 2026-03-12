@@ -62,7 +62,11 @@ class RecordProvider extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> processWidgetPendingCompletion() async {
     final pending = await WidgetService.popPendingCompletion();
     if (pending == null) return;
-    await updateTimeRecordForToday(pending.categoryId, pending.minutes);
+    await updateTimeRecordForDate(
+      pending.categoryId,
+      pending.minutes,
+      pending.date,
+    );
   }
 
   // 날짜 선택
@@ -402,11 +406,19 @@ class RecordProvider extends ChangeNotifier with WidgetsBindingObserver {
     return (categoryId: entry.categoryId, minutes: entry.minutes);
   }
 
+  // 특정 날짜 기록에 시간 추가 (위젯 완료 시 날짜 지정용)
+  Future<void> updateTimeRecordForDate(int categoryId, int minutes, String? dateString) async {
+    final targetDate = dateString ?? _formatDate(DateTime.now());
+    return _updateTimeRecordForDateString(categoryId, minutes, targetDate);
+  }
+
   // 오늘 날짜 기록에 시간 추가 (타이머 완료 시 사용)
   Future<void> updateTimeRecordForToday(int categoryId, int minutes) async {
+    return _updateTimeRecordForDateString(categoryId, minutes, _formatDate(DateTime.now()));
+  }
+
+  Future<void> _updateTimeRecordForDateString(int categoryId, int minutes, String todayString) async {
     if (minutes <= 0) return;
-    final today = DateTime.now();
-    final todayString = _formatDate(today);
 
     try {
       final isar = await IsarService.instance;

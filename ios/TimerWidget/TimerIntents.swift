@@ -93,7 +93,10 @@ struct CompleteTimerIntent: AppIntent {
             let categoryId = timerDict["categoryId"] as? Int ?? -1
 
             if minutes > 0 {
-                let completion: [String: Any] = ["categoryId": categoryId, "minutes": minutes]
+                let df = DateFormatter()
+                df.dateFormat = "yyyy-MM-dd"
+                let todayStr = df.string(from: Date())
+                let completion: [String: Any] = ["categoryId": categoryId, "minutes": minutes, "date": todayStr]
                 if let compData = try? JSONSerialization.data(withJSONObject: completion),
                    let compJson = String(data: compData, encoding: .utf8) {
                     sharedDefaults?.set(compJson, forKey: "widget_pending_completion")

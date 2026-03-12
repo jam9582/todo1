@@ -465,6 +465,7 @@ private fun handleComplete(context: Context) {
             val pending = JSONObject().apply {
                 put("categoryId", categoryId)
                 put("minutes", minutes)
+                put("date", java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date()))
             }
             widgetPrefs.edit().putString(WKEY_PENDING, pending.toString()).apply()
         }

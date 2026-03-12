@@ -163,7 +163,7 @@ class WidgetService {
   // ─── 위젯 → 앱 완료 기록 처리 ─────────────────────────────────────────
 
   /// 위젯에서 완료된 타이머 기록을 읽고 삭제. 없으면 null 반환.
-  static Future<({int categoryId, int minutes})?> popPendingCompletion() async {
+  static Future<({int categoryId, int minutes, String? date})?> popPendingCompletion() async {
     try {
       final raw = await HomeWidget.getWidgetData<String>(
           'widget_pending_completion');
@@ -173,8 +173,9 @@ class WidgetService {
       final data = json.decode(raw) as Map<String, dynamic>;
       final categoryId = data['categoryId'] as int?;
       final minutes = data['minutes'] as int?;
+      final date = data['date'] as String?;
       if (categoryId == null || minutes == null || minutes <= 0) return null;
-      return (categoryId: categoryId, minutes: minutes);
+      return (categoryId: categoryId, minutes: minutes, date: date);
     } catch (e, s) {
       FirebaseCrashlytics.instance.recordError(e, s, fatal: false);
       return null;
