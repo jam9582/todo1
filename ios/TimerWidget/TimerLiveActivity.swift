@@ -2,22 +2,6 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
-// MARK: - Activity Attributes
-
-struct TimerActivityAttributes: ActivityAttributes {
-    /// 타이머 시작 시 고정되는 정보
-    let categoryId: Int
-    let categoryName: String
-    let categoryEmoji: String
-
-    /// 실시간 변동 상태
-    struct ContentState: Codable, Hashable {
-        let isPaused: Bool
-        let accumulatedMs: Int       // paused 시 보여줄 총 경과 ms
-        let timerStartDate: Date?    // running 시 Text(.timer) 기준 날짜
-    }
-}
-
 // MARK: - Live Activity Configuration (iOS 16.1+)
 
 @available(iOS 16.1, *)

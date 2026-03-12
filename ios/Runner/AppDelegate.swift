@@ -2,19 +2,6 @@ import Flutter
 import UIKit
 import ActivityKit
 
-// Runner 타겟용 ActivityAttributes 정의 (TimerWidget 타겟과 동일 구조)
-struct TimerActivityAttributes: ActivityAttributes {
-    let categoryId: Int
-    let categoryName: String
-    let categoryEmoji: String
-
-    struct ContentState: Codable, Hashable {
-        let isPaused: Bool
-        let accumulatedMs: Int
-        let timerStartDate: Date?
-    }
-}
-
 @main
 @objc class AppDelegate: FlutterAppDelegate {
   private static let appGroupId = "group.com.studiovanilla.tinylog"
@@ -38,6 +25,9 @@ struct TimerActivityAttributes: ActivityAttributes {
     )
     liveActivityChannel.setMethodCallHandler(handleLiveActivity)
 
+    // Darwin notification 수신: 인텐트가 격리 프로세스에서 실행될 때의 폴백
+    registerLiveActivitySyncObserver()
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
@@ -57,6 +47,74 @@ struct TimerActivityAttributes: ActivityAttributes {
   private func saveWidgetLaunchUrl(_ url: URL) {
     UserDefaults(suiteName: AppDelegate.appGroupId)?
       .set(url.absoluteString, forKey: AppDelegate.widgetLaunchUrlKey)
+  }
+
+  // MARK: - Darwin Notification (Intent 폴백)
+
+  private func registerLiveActivitySyncObserver() {
+    let name = "com.studiovanilla.tinylog.liveActivitySync" as CFString
+    CFNotificationCenterAddObserver(
+      CFNotificationCenterGetDarwinNotifyCenter(),
+      Unmanaged.passUnretained(self).toOpaque(),
+      { _, observer, _, _, _ in
+        guard let observer = observer else { return }
+        let appDelegate = Unmanaged<AppDelegate>.fromOpaque(observer).takeUnretainedValue()
+        appDelegate.handleLiveActivitySync()
+      },
+      name,
+      nil,
+      .deliverImmediately
+    )
+  }
+
+  private func handleLiveActivitySync() {
+    guard #available(iOS 16.2, *) else { return }
+    let defaults = UserDefaults(suiteName: AppDelegate.appGroupId)
+    let action = defaults?.string(forKey: "widget_interaction_action")
+
+    switch action {
+    case "complete", "cancel":
+      Task {
+        for activity in Activity<TimerActivityAttributes>.activities {
+          await activity.end(nil, dismissalPolicy: .immediate)
+        }
+      }
+    case "pause":
+      if let json = defaults?.string(forKey: "widget_timer"),
+         let data = json.data(using: .utf8),
+         let timerDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+        let accumulatedMs = timerDict["accumulatedMs"] as? Int ?? 0
+        let state = TimerActivityAttributes.ContentState(
+          isPaused: true,
+          accumulatedMs: accumulatedMs,
+          timerStartDate: nil
+        )
+        Task {
+          for activity in Activity<TimerActivityAttributes>.activities {
+            await activity.update(.init(state: state, staleDate: nil))
+          }
+        }
+      }
+    case "resume":
+      if let json = defaults?.string(forKey: "widget_timer"),
+         let data = json.data(using: .utf8),
+         let timerDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+        let accumulatedMs = timerDict["accumulatedMs"] as? Int ?? 0
+        let displayDate = Date().addingTimeInterval(-Double(accumulatedMs) / 1000.0)
+        let state = TimerActivityAttributes.ContentState(
+          isPaused: false,
+          accumulatedMs: accumulatedMs,
+          timerStartDate: displayDate
+        )
+        Task {
+          for activity in Activity<TimerActivityAttributes>.activities {
+            await activity.update(.init(state: state, staleDate: nil))
+          }
+        }
+      }
+    default:
+      break
+    }
   }
 
   // MARK: - Live Activity MethodChannel Handler

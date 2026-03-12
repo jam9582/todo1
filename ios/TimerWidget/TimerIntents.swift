@@ -6,7 +6,7 @@ import Foundation
 // MARK: - Pause Intent
 
 @available(iOS 17.0, *)
-struct PauseTimerIntent: AppIntent {
+struct PauseTimerIntent: LiveActivityIntent {
     static var title: LocalizedStringResource = "Pause Timer"
     static var description = IntentDescription("Pauses the running timer")
 
@@ -36,9 +36,17 @@ struct PauseTimerIntent: AppIntent {
         sharedDefaults?.set(true, forKey: "widget_interaction")
         WidgetCenter.shared.reloadAllTimelines()
 
-        if #available(iOS 16.2, *) {
-            updateLiveActivityState(isPaused: true, accumulatedMs: totalMs)
+        // 직접 제어 시도 + Darwin notification 폴백
+        let state = TimerActivityAttributes.ContentState(
+            isPaused: true,
+            accumulatedMs: totalMs,
+            timerStartDate: nil
+        )
+        for activity in Activity<TimerActivityAttributes>.activities {
+            await activity.update(.init(state: state, staleDate: nil))
         }
+        notifyAppToSyncLiveActivity()
+
         return .result()
     }
 }
@@ -46,7 +54,7 @@ struct PauseTimerIntent: AppIntent {
 // MARK: - Resume Intent
 
 @available(iOS 17.0, *)
-struct ResumeTimerIntent: AppIntent {
+struct ResumeTimerIntent: LiveActivityIntent {
     static var title: LocalizedStringResource = "Resume Timer"
     static var description = IntentDescription("Resumes the paused timer")
 
@@ -74,9 +82,17 @@ struct ResumeTimerIntent: AppIntent {
         sharedDefaults?.set(true, forKey: "widget_interaction")
         WidgetCenter.shared.reloadAllTimelines()
 
-        if #available(iOS 16.2, *) {
-            updateLiveActivityState(isPaused: false, accumulatedMs: accumulatedMs)
+        // 직접 제어 시도 + Darwin notification 폴백
+        let state = TimerActivityAttributes.ContentState(
+            isPaused: false,
+            accumulatedMs: accumulatedMs,
+            timerStartDate: displayDate
+        )
+        for activity in Activity<TimerActivityAttributes>.activities {
+            await activity.update(.init(state: state, staleDate: nil))
         }
+        notifyAppToSyncLiveActivity()
+
         return .result()
     }
 }
@@ -84,7 +100,7 @@ struct ResumeTimerIntent: AppIntent {
 // MARK: - Complete Intent
 
 @available(iOS 17.0, *)
-struct CompleteTimerIntent: AppIntent {
+struct CompleteTimerIntent: LiveActivityIntent {
     static var title: LocalizedStringResource = "Complete Timer"
     static var description = IntentDescription("Completes the timer and saves the record")
 
@@ -147,9 +163,12 @@ struct CompleteTimerIntent: AppIntent {
         sharedDefaults?.set(true, forKey: "widget_interaction")
         WidgetCenter.shared.reloadAllTimelines()
 
-        if #available(iOS 16.2, *) {
-            endAllLiveActivities()
+        // 직접 종료 시도 + Darwin notification 폴백
+        for activity in Activity<TimerActivityAttributes>.activities {
+            await activity.end(nil, dismissalPolicy: .immediate)
         }
+        notifyAppToSyncLiveActivity()
+
         return .result()
     }
 }
@@ -157,7 +176,7 @@ struct CompleteTimerIntent: AppIntent {
 // MARK: - Cancel Intent
 
 @available(iOS 17.0, *)
-struct CancelTimerIntent: AppIntent {
+struct CancelTimerIntent: LiveActivityIntent {
     static var title: LocalizedStringResource = "Cancel Timer"
     static var description = IntentDescription("Cancels the timer without saving")
 
@@ -167,9 +186,12 @@ struct CancelTimerIntent: AppIntent {
         sharedDefaults?.set(true, forKey: "widget_interaction")
         WidgetCenter.shared.reloadAllTimelines()
 
-        if #available(iOS 16.2, *) {
-            endAllLiveActivities()
+        // 직접 종료 시도 + Darwin notification 폴백
+        for activity in Activity<TimerActivityAttributes>.activities {
+            await activity.end(nil, dismissalPolicy: .immediate)
         }
+        notifyAppToSyncLiveActivity()
+
         return .result()
     }
 }
@@ -234,30 +256,16 @@ struct NextPageMediumIntent: AppIntent {
     }
 }
 
-// MARK: - Live Activity Helpers
+// MARK: - Darwin Notification (Fallback)
 
-@available(iOS 16.2, *)
-func updateLiveActivityState(isPaused: Bool, accumulatedMs: Int) {
-    let timerStartDate: Date? = isPaused ? nil : Date().addingTimeInterval(-Double(accumulatedMs) / 1000.0)
-    let state = TimerActivityAttributes.ContentState(
-        isPaused: isPaused,
-        accumulatedMs: accumulatedMs,
-        timerStartDate: timerStartDate
+/// LiveActivityIntent가 격리 프로세스에서 실행될 경우를 대비한 폴백.
+/// 앱 프로세스의 Darwin observer가 수신하여 Live Activity를 제어.
+private func notifyAppToSyncLiveActivity() {
+    CFNotificationCenterPostNotification(
+        CFNotificationCenterGetDarwinNotifyCenter(),
+        CFNotificationName("com.studiovanilla.tinylog.liveActivitySync" as CFString),
+        nil, nil, true
     )
-    Task {
-        for activity in Activity<TimerActivityAttributes>.activities {
-            await activity.update(.init(state: state, staleDate: nil))
-        }
-    }
-}
-
-@available(iOS 16.2, *)
-func endAllLiveActivities() {
-    Task {
-        for activity in Activity<TimerActivityAttributes>.activities {
-            await activity.end(nil, dismissalPolicy: .immediate)
-        }
-    }
 }
 
 // MARK: - Private Helpers

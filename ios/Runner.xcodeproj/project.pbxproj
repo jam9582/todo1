@@ -12,6 +12,8 @@
 		1A39165A9E74E8353CA55EA5 /* TimerIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB7F45B1860B8CB8976FC59 /* TimerIntents.swift */; };
 		A1B2C3D4E5F60718A9B0C1D2 /* ActivityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C60718D9E0F1A2 /* ActivityKit.framework */; };
 		B2C3D4E5F6A70819BAC1D2E3 /* TimerLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F4A5B6C7D80920CBE2F3A4 /* TimerLiveActivity.swift */; };
+		AA111111111111111111AAA1 /* TimerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA222222222222222222AAA2 /* TimerActivityAttributes.swift */; };
+		AA333333333333333333AAA3 /* TimerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA222222222222222222AAA2 /* TimerActivityAttributes.swift */; };
 		2579604C8DD112429D04EB9B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A782429B53C0EE80C1055ADB /* SwiftUI.framework */; };
 		2718DB3D78E5D6B80C752BDB /* Pods_TimerWidget.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD07EBF720E0EC007ECEB7C /* Pods_TimerWidget.framework */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
@@ -112,6 +114,7 @@
 		C0493A8A80999DB3E72E8D40 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D5CB5890DD9411933328049D /* TimerWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimerWidget.swift; sourceTree = "<group>"; };
 		E3F4A5B6C7D80920CBE2F3A4 /* TimerLiveActivity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimerLiveActivity.swift; sourceTree = "<group>"; };
+		AA222222222222222222AAA2 /* TimerActivityAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimerActivityAttributes.swift; sourceTree = "<group>"; };
 		D869C80AEF3EC8576F5DF7CB /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		F4B65A5C3AFBE916D49B4BA2 /* Pods-TimerWidget.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TimerWidget.profile.xcconfig"; path = "Target Support Files/Pods-TimerWidget/Pods-TimerWidget.profile.xcconfig"; sourceTree = "<group>"; };
 		F961702FBD6AE06E691F44BD /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
@@ -258,6 +261,7 @@
 				AB32BF84F63709EE3970A9B3 /* TimerWidgetMedium.swift */,
 				9070E8BCA74C4507564DA7B7 /* TimerWidgetSmall.swift */,
 				E3F4A5B6C7D80920CBE2F3A4 /* TimerLiveActivity.swift */,
+				AA222222222222222222AAA2 /* TimerActivityAttributes.swift */,
 				C0493A8A80999DB3E72E8D40 /* Info.plist */,
 				380AD4FE453932961C7AC5F2 /* TimerWidget.entitlements */,
 			);
@@ -534,6 +538,7 @@
 				F2B6DBE37B2E34528DA97622 /* TimerWidgetMedium.swift in Sources */,
 				B1354EA045613B0A6FC4A123 /* TimerWidgetSmall.swift in Sources */,
 				B2C3D4E5F6A70819BAC1D2E3 /* TimerLiveActivity.swift in Sources */,
+				AA111111111111111111AAA1 /* TimerActivityAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -543,6 +548,7 @@
 			files = (
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+				AA333333333333333333AAA3 /* TimerActivityAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
