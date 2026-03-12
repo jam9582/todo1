@@ -208,17 +208,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-        child: Icon(icon, size: 20, color: AppColors.textPrimary),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        child: Icon(icon, size: 18, color: AppColors.textPrimary),
       ),
     );
   }
 
   String _formatElapsed(Duration d) {
-    final h = d.inHours.toString().padLeft(2, '0');
+    final h = d.inHours;
     final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
     final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$h:$m:$s';
+    if (h > 0) return '$h:$m:$s';
+    return '$m:$s';
   }
 
   void _handleHeaderComplete(BuildContext context, TimerProvider timerProvider) {
@@ -289,7 +290,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                   ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
                       _buildMiniTimerButton(
                         icon: timerProvider.isRunning
@@ -298,6 +298,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         onTap: () {
                           if (timerProvider.isRunning) {
                             timerProvider.pause();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('시간 측정이 일시정지 되었습니다'),
+                                backgroundColor: AppColors.snackbar,
+                                behavior: SnackBarBehavior.floating,
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
                           } else {
                             timerProvider.resume();
                           }
@@ -305,7 +313,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       ),
                       _buildMiniTimerButton(
                         icon: Icons.close_rounded,
-                        onTap: () => timerProvider.cancel(),
+                        onTap: () {
+                          timerProvider.cancel();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('시간 측정이 취소되었습니다'),
+                              backgroundColor: AppColors.snackbar,
+                              behavior: SnackBarBehavior.floating,
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
                       ),
                       _buildMiniTimerButton(
                         icon: Icons.check_rounded,
@@ -315,20 +333,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       if (timerProvider.categoryEmoji != null) ...[
                         Text(
                           timerProvider.categoryEmoji!,
-                          style: const TextStyle(fontSize: 13),
+                          style: const TextStyle(fontSize: 12),
                         ),
-                        const SizedBox(width: 3),
+                        const SizedBox(width: 2),
                       ],
-                      Text(
-                        _formatElapsed(timerProvider.elapsed),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                          fontFeatures: [FontFeature.tabularFigures()],
+                      Flexible(
+                        child: Text(
+                          _formatElapsed(timerProvider.elapsed),
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
+                            fontFeatures: [FontFeature.tabularFigures()],
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 2),
                     ],
                   ),
                 ),
