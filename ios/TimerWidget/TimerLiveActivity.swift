@@ -103,9 +103,8 @@ struct TimerLiveActivity: Widget {
             } compactTrailing: {
                 // Compact Trailing: 경과 시간
                 timerText(state: context.state)
-                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
                     .foregroundColor(.primary)
-                    .frame(minWidth: 0)
             } minimal: {
                 // Minimal: 타이머 아이콘만
                 Image(systemName: "timer")
