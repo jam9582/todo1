@@ -27,15 +27,34 @@ class RecordProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   RecordProvider() {
     WidgetsBinding.instance.addObserver(this);
-    loadRecord(_selectedDate);
+    _initAsync();
+  }
+
+  Future<void> _initAsync() async {
+    await loadRecord(_selectedDate);
     loadMonthRecords(_selectedDate);
+    _syncTodayMinutesToWidget();
     processWidgetPendingCompletion();
+  }
+
+  /// 앱 시작 시 오늘 활동시간을 위젯에 동기화
+  void _syncTodayMinutesToWidget() {
+    final today = _formatDate(DateTime.now());
+    final record = _currentRecord;
+    if (record != null && record.date == today) {
+      final todayMinutes = {
+        for (final e in record.timeRecords ?? <TimeEntry>[])
+          e.categoryId: e.minutes,
+      };
+      WidgetService.updateTodayMinutes(todayMinutes);
+    }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       processWidgetPendingCompletion();
+      _syncTodayMinutesToWidget();
     }
   }
 
