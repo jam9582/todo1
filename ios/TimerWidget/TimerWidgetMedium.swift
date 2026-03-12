@@ -86,49 +86,54 @@ private struct MediumNormalView: View {
                     }
                     .padding(.horizontal, 12)
                     .padding(.top, 12)
-                    .padding(.bottom, 6)
+                    .padding(.bottom, 2)
 
                     // 하단 네비게이션
                     if totalPages > 1 {
-                        HStack(spacing: 10) {
+                        HStack(spacing: 14) {
                             if #available(iOS 17.0, *) {
                                 Button(intent: PrevPageMediumIntent()) {
                                     Image(systemName: "chevron.left")
-                                        .font(.system(size: 12, weight: .semibold))
+                                        .font(.system(size: 14, weight: .bold))
                                         .foregroundColor(.secondary)
+                                        .frame(width: 36, height: 28)
+                                        .background(Color.secondary.opacity(0.1))
+                                        .cornerRadius(6)
                                 }
                                 .buttonStyle(.plain)
                             } else {
                                 Image(systemName: "chevron.left")
-                                    .font(.system(size: 12, weight: .semibold))
+                                    .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(.secondary.opacity(0.3))
                             }
 
-                            HStack(spacing: 5) {
+                            HStack(spacing: 6) {
                                 ForEach(0..<totalPages, id: \.self) { i in
-                                    let cat = visibleCategories.first
                                     Circle()
                                         .fill(i == entry.mediumPage
-                                              ? colorForIndex(cat?.colorIndex ?? 0)
+                                              ? Color.primary.opacity(0.6)
                                               : Color.secondary.opacity(0.25))
-                                        .frame(width: 5, height: 5)
+                                        .frame(width: 6, height: 6)
                                 }
                             }
 
                             if #available(iOS 17.0, *) {
                                 Button(intent: NextPageMediumIntent()) {
                                     Image(systemName: "chevron.right")
-                                        .font(.system(size: 12, weight: .semibold))
+                                        .font(.system(size: 14, weight: .bold))
                                         .foregroundColor(.secondary)
+                                        .frame(width: 36, height: 28)
+                                        .background(Color.secondary.opacity(0.1))
+                                        .cornerRadius(6)
                                 }
                                 .buttonStyle(.plain)
                             } else {
                                 Image(systemName: "chevron.right")
-                                    .font(.system(size: 12, weight: .semibold))
+                                    .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(.secondary.opacity(0.3))
                             }
                         }
-                        .padding(.bottom, 10)
+                        .padding(.bottom, 6)
                     }
                 }
             }
@@ -140,23 +145,22 @@ private struct MediumCategoryCard: View {
     let category: CategoryData
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 12)
-            .fill(colorForIndex(category.colorIndex))
-            .frame(maxWidth: .infinity)
-            .aspectRatio(1, contentMode: .fit)
-            .overlay(
-                VStack(spacing: 5) {
-                    Text(category.emoji)
-                        .font(.system(size: 28))
-                    Text(category.name)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.black.opacity(0.75))
-                        .lineLimit(1)
-                    Text(formatMinutes(category.todayMinutes))
-                        .font(.system(size: 11))
-                        .foregroundColor(.black.opacity(0.55))
-                }
-            )
+        VStack(spacing: 5) {
+            Text(category.emoji)
+                .font(.system(size: 28))
+            Text(category.name)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.primary.opacity(0.75))
+                .lineLimit(1)
+            Text(formatMinutes(category.todayMinutes))
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.secondary.opacity(0.06))
+        )
     }
 }
 
@@ -165,7 +169,6 @@ private struct MediumCategoryCard: View {
 private struct MediumMeasuringView: View {
     let timer: TimerWidgetData
 
-    private var cardColor: Color { colorForIndex(timer.colorIndex) }
     private var hasCategory: Bool { timer.categoryId > 0 }
 
     var body: some View {
@@ -173,35 +176,34 @@ private struct MediumMeasuringView: View {
             Color.widgetBg
 
             HStack(spacing: 12) {
-                // 왼쪽: 타이머 카드
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(cardColor)
-                    .overlay(
-                        VStack(spacing: 6) {
-                            if hasCategory {
-                                Text(timer.categoryEmoji)
-                                    .font(.system(size: 28))
-                                Text(timer.categoryName)
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .foregroundColor(.black.opacity(0.7))
-                                    .lineLimit(1)
-                            } else {
-                                Image(systemName: "timer")
-                                    .font(.system(size: 26))
-                                    .foregroundColor(.black.opacity(0.6))
-                            }
+                // 왼쪽: 타이머 정보
+                VStack(spacing: 6) {
+                    if hasCategory {
+                        Text(timer.categoryEmoji)
+                            .font(.system(size: 28))
+                        Text(timer.categoryName)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.primary.opacity(0.7))
+                            .lineLimit(1)
+                    } else {
+                        Image(systemName: "timer")
+                            .font(.system(size: 26))
+                            .foregroundColor(.secondary)
+                    }
 
-                            if timer.isPaused {
-                                Text(formatMs(timer.accumulatedMs))
-                                    .font(.system(size: 18, weight: .bold, design: .monospaced))
-                                    .foregroundColor(.black.opacity(0.8))
-                            } else if let refDate = timerReferenceDate(from: timer) {
-                                Text(refDate, style: .timer)
-                                    .font(.system(size: 18, weight: .bold, design: .monospaced))
-                                    .foregroundColor(.black.opacity(0.8))
-                            }
-                        }
-                    )
+                    if timer.isPaused {
+                        Text(formatMs(timer.accumulatedMs))
+                            .font(.system(size: 18, weight: .bold, design: .monospaced))
+                            .foregroundColor(.primary.opacity(0.8))
+                    } else if let refDate = timerReferenceDate(from: timer) {
+                        Text(refDate, style: .timer)
+                            .font(.system(size: 18, weight: .bold, design: .monospaced))
+                            .foregroundColor(.primary.opacity(0.8))
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 // 오른쪽: 버튼 컬럼
                 VStack(spacing: 10) {

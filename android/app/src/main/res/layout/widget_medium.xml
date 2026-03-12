@@ -23,11 +23,11 @@
 
             <TextView
                 android:id="@+id/btn_prev"
-                android:layout_width="20dp"
+                android:layout_width="28dp"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:text="‹"
-                android:textSize="20sp"
+                android:textSize="24sp"
                 android:textColor="#8A8580"
                 android:includeFontPadding="false"/>
 
@@ -39,11 +39,10 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:background="@drawable/widget_card_bg_0"
-                android:padding="8dp">
+                                android:padding="8dp">
 
                 <TextView android:id="@+id/cat_emoji_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📚" android:textSize="22sp" android:includeFontPadding="false"/>
-                <TextView android:id="@+id/cat_name_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="카테고리" android:textSize="12sp" android:textColor="#2D2926" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+                <TextView android:id="@+id/cat_name_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="카테고리" android:textSize="12sp" android:textColor="#5C5652" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
                 <TextView android:id="@+id/cat_time_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="0m" android:textSize="11sp" android:textColor="#5C5652" android:includeFontPadding="false"/>
 
             </LinearLayout>
@@ -58,22 +57,21 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:background="@drawable/widget_card_bg_1"
-                android:padding="8dp">
+                                android:padding="8dp">
 
                 <TextView android:id="@+id/cat_emoji_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🏃" android:textSize="22sp" android:includeFontPadding="false"/>
-                <TextView android:id="@+id/cat_name_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="카테고리" android:textSize="12sp" android:textColor="#2D2926" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+                <TextView android:id="@+id/cat_name_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="카테고리" android:textSize="12sp" android:textColor="#5C5652" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
                 <TextView android:id="@+id/cat_time_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="0m" android:textSize="11sp" android:textColor="#5C5652" android:includeFontPadding="false"/>
 
             </LinearLayout>
 
             <TextView
                 android:id="@+id/btn_next"
-                android:layout_width="20dp"
+                android:layout_width="28dp"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:text="›"
-                android:textSize="20sp"
+                android:textSize="24sp"
                 android:textColor="#8A8580"
                 android:includeFontPadding="false"/>
 
@@ -111,11 +109,10 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="@drawable/widget_card_bg_0"
-            android:padding="10dp">
+                        android:padding="10dp">
 
             <TextView android:id="@+id/timer_emoji" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⏱" android:textSize="22sp" android:includeFontPadding="false"/>
-            <TextView android:id="@+id/timer_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="측정 중" android:textSize="13sp" android:textColor="#2D2926" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+            <TextView android:id="@+id/timer_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="측정 중" android:textSize="13sp" android:textColor="#5C5652" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
             <Chronometer android:id="@+id/timer_chronometer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:textSize="12sp" android:textColor="#5C5652" android:includeFontPadding="false"/>
             <TextView android:id="@+id/timer_paused_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="" android:textSize="12sp" android:textColor="#5C5652" android:visibility="gone" android:includeFontPadding="false"/>
 
@@ -129,8 +126,8 @@
             android:gravity="center"
             android:layout_marginStart="8dp">
 
-            <TextView android:id="@+id/btn_pause_resume" android:layout_width="match_parent" android:layout_height="32dp" android:layout_marginBottom="4dp" android:gravity="center" android:background="@drawable/widget_btn_bg" android:text="||" android:textSize="14sp" android:textColor="#2D2926"/>
-            <TextView android:id="@+id/btn_complete" android:layout_width="match_parent" android:layout_height="32dp" android:layout_marginBottom="4dp" android:gravity="center" android:background="@drawable/widget_btn_bg" android:text="✔" android:textSize="14sp" android:textColor="#2D2926"/>
+            <TextView android:id="@+id/btn_pause_resume" android:layout_width="match_parent" android:layout_height="32dp" android:layout_marginBottom="4dp" android:gravity="center" android:background="@drawable/widget_btn_bg" android:text="||" android:textSize="14sp" android:textColor="#5C5652"/>
+            <TextView android:id="@+id/btn_complete" android:layout_width="match_parent" android:layout_height="32dp" android:layout_marginBottom="4dp" android:gravity="center" android:background="@drawable/widget_btn_bg" android:text="✔" android:textSize="14sp" android:textColor="#5C5652"/>
             <TextView android:id="@+id/btn_cancel" android:layout_width="match_parent" android:layout_height="32dp" android:gravity="center" android:background="@drawable/widget_btn_cancel_bg" android:text="✕" android:textSize="14sp" android:textColor="#8A8580"/>
 
         </LinearLayout>

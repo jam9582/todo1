@@ -58,45 +58,51 @@ private struct SmallNormalView: View {
 
                     // 하단 네비게이션 (◀ 인디케이터 ▶)
                     if totalCategories > 1 {
-                        HStack(spacing: 6) {
+                        HStack(spacing: 12) {
                             if #available(iOS 17.0, *) {
                                 Button(intent: PrevPageSmallIntent()) {
                                     Image(systemName: "chevron.left")
-                                        .font(.system(size: 11, weight: .semibold))
+                                        .font(.system(size: 14, weight: .bold))
                                         .foregroundColor(.secondary)
+                                        .frame(width: 32, height: 28)
+                                        .background(Color.secondary.opacity(0.1))
+                                        .cornerRadius(6)
                                 }
                                 .buttonStyle(.plain)
                             } else {
                                 Image(systemName: "chevron.left")
-                                    .font(.system(size: 11, weight: .semibold))
+                                    .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(.secondary.opacity(0.3))
                             }
 
                             // 점 인디케이터
-                            HStack(spacing: 4) {
+                            HStack(spacing: 5) {
                                 ForEach(0..<totalCategories, id: \.self) { i in
                                     Circle()
                                         .fill(i == entry.smallPage
-                                              ? colorForIndex(cat.colorIndex)
+                                              ? Color.primary.opacity(0.6)
                                               : Color.secondary.opacity(0.25))
-                                        .frame(width: 5, height: 5)
+                                        .frame(width: 6, height: 6)
                                 }
                             }
 
                             if #available(iOS 17.0, *) {
                                 Button(intent: NextPageSmallIntent()) {
                                     Image(systemName: "chevron.right")
-                                        .font(.system(size: 11, weight: .semibold))
+                                        .font(.system(size: 14, weight: .bold))
                                         .foregroundColor(.secondary)
+                                        .frame(width: 32, height: 28)
+                                        .background(Color.secondary.opacity(0.1))
+                                        .cornerRadius(6)
                                 }
                                 .buttonStyle(.plain)
                             } else {
                                 Image(systemName: "chevron.right")
-                                    .font(.system(size: 11, weight: .semibold))
+                                    .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(.secondary.opacity(0.3))
                             }
                         }
-                        .padding(.bottom, 8)
+                        .padding(.bottom, 4)
                     }
                 }
             } else {
@@ -118,25 +124,25 @@ private struct CategoryCardSmall: View {
     let category: CategoryData
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 12)
-            .fill(colorForIndex(category.colorIndex))
-            .padding(.horizontal, 8)
-            .padding(.top, 8)
-            .padding(.bottom, 4)
-            .overlay(
-                VStack(spacing: 4) {
-                    Text(category.emoji)
-                        .font(.system(size: 28))
-                    Text(category.name)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.black.opacity(0.75))
-                        .lineLimit(1)
-                    Text(formatMinutes(category.todayMinutes))
-                        .font(.system(size: 11))
-                        .foregroundColor(.black.opacity(0.55))
-                }
-                .padding(.top, 12)
-            )
+        VStack(spacing: 4) {
+            Text(category.emoji)
+                .font(.system(size: 28))
+            Text(category.name)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.primary.opacity(0.75))
+                .lineLimit(1)
+            Text(formatMinutes(category.todayMinutes))
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.secondary.opacity(0.06))
+        )
+        .padding(.horizontal, 8)
+        .padding(.top, 8)
+        .padding(.bottom, 2)
     }
 }
 
@@ -145,7 +151,6 @@ private struct CategoryCardSmall: View {
 private struct SmallMeasuringView: View {
     let timer: TimerWidgetData
 
-    private var cardColor: Color { colorForIndex(timer.colorIndex) }
     private var hasCategory: Bool { timer.categoryId > 0 }
 
     var body: some View {
@@ -154,39 +159,35 @@ private struct SmallMeasuringView: View {
 
             VStack(spacing: 0) {
                 // 타이머 카드
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(cardColor)
-                    .padding(.horizontal, 8)
-                    .padding(.top, 8)
-                    .padding(.bottom, 4)
-                    .overlay(
-                        VStack(spacing: 3) {
-                            if hasCategory {
-                                Text(timer.categoryEmoji)
-                                    .font(.system(size: 20))
-                                Text(timer.categoryName)
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .foregroundColor(.black.opacity(0.7))
-                                    .lineLimit(1)
-                            } else {
-                                Image(systemName: "timer")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(.black.opacity(0.6))
-                            }
+                VStack(spacing: 3) {
+                    if hasCategory {
+                        Text(timer.categoryEmoji)
+                            .font(.system(size: 20))
+                        Text(timer.categoryName)
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(.primary.opacity(0.7))
+                            .lineLimit(1)
+                    } else {
+                        Image(systemName: "timer")
+                            .font(.system(size: 20))
+                            .foregroundColor(.secondary)
+                    }
 
-                            // 타이머 표시
-                            if timer.isPaused {
-                                Text(formatMs(timer.accumulatedMs))
-                                    .font(.system(size: 16, weight: .bold, design: .monospaced))
-                                    .foregroundColor(.black.opacity(0.8))
-                            } else if let refDate = timerReferenceDate(from: timer) {
-                                Text(refDate, style: .timer)
-                                    .font(.system(size: 16, weight: .bold, design: .monospaced))
-                                    .foregroundColor(.black.opacity(0.8))
-                            }
-                        }
-                        .padding(.top, 12)
-                    )
+                    // 타이머 표시
+                    if timer.isPaused {
+                        Text(formatMs(timer.accumulatedMs))
+                            .font(.system(size: 16, weight: .bold, design: .monospaced))
+                            .foregroundColor(.primary.opacity(0.8))
+                    } else if let refDate = timerReferenceDate(from: timer) {
+                        Text(refDate, style: .timer)
+                            .font(.system(size: 16, weight: .bold, design: .monospaced))
+                            .foregroundColor(.primary.opacity(0.8))
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.top, 12)
 
                 // 액션 버튼
                 HStack(spacing: 8) {

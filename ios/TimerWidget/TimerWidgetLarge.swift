@@ -84,22 +84,22 @@ private struct LargeCategoryCard: View {
     let category: CategoryData
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 14)
-            .fill(colorForIndex(category.colorIndex))
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .overlay(
-                VStack(spacing: 8) {
-                    Text(category.emoji)
-                        .font(.system(size: 36))
-                    Text(category.name)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.black.opacity(0.75))
-                        .lineLimit(1)
-                    Text(formatMinutes(category.todayMinutes))
-                        .font(.system(size: 13))
-                        .foregroundColor(.black.opacity(0.55))
-                }
-            )
+        VStack(spacing: 8) {
+            Text(category.emoji)
+                .font(.system(size: 36))
+            Text(category.name)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.primary.opacity(0.75))
+                .lineLimit(1)
+            Text(formatMinutes(category.todayMinutes))
+                .font(.system(size: 13))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.secondary.opacity(0.08))
+        )
     }
 }
 
@@ -108,53 +108,53 @@ private struct LargeCategoryCard: View {
 private struct LargeMeasuringView: View {
     let timer: TimerWidgetData
 
-    private var cardColor: Color { colorForIndex(timer.colorIndex) }
     private var hasCategory: Bool { timer.categoryId > 0 }
 
     var body: some View {
         ZStack {
             Color.widgetBg
 
-            VStack(spacing: 14) {
-                // 타이머 카드 (큰 영역)
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(cardColor)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .overlay(
-                        VStack(spacing: 10) {
-                            if hasCategory {
-                                Text(timer.categoryEmoji)
-                                    .font(.system(size: 44))
-                                Text(timer.categoryName)
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(.black.opacity(0.75))
-                                    .lineLimit(1)
-                            } else {
-                                Image(systemName: "timer")
-                                    .font(.system(size: 44))
-                                    .foregroundColor(.black.opacity(0.6))
-                            }
+            VStack(spacing: 10) {
+                // 타이머 영역
+                VStack(spacing: 6) {
+                    if hasCategory {
+                        Text(timer.categoryEmoji)
+                            .font(.system(size: 36))
+                        Text(timer.categoryName)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.primary.opacity(0.75))
+                            .lineLimit(1)
+                    } else {
+                        Image(systemName: "timer")
+                            .font(.system(size: 36))
+                            .foregroundColor(.secondary)
+                    }
 
-                            if timer.isPaused {
-                                Text(formatMs(timer.accumulatedMs))
-                                    .font(.system(size: 32, weight: .bold, design: .monospaced))
-                                    .foregroundColor(.black.opacity(0.8))
-                                Text("일시정지")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.black.opacity(0.5))
-                            } else if let refDate = timerReferenceDate(from: timer) {
-                                Text(refDate, style: .timer)
-                                    .font(.system(size: 32, weight: .bold, design: .monospaced))
-                                    .foregroundColor(.black.opacity(0.8))
-                                Text("측정 중")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.black.opacity(0.5))
-                            }
-                        }
-                    )
+                    if timer.isPaused {
+                        Text(formatMs(timer.accumulatedMs))
+                            .font(.system(size: 28, weight: .bold, design: .monospaced))
+                            .foregroundColor(.primary.opacity(0.8))
+                            .minimumScaleFactor(0.7)
+                        Text("일시정지")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    } else if let refDate = timerReferenceDate(from: timer) {
+                        Text(refDate, style: .timer)
+                            .font(.system(size: 28, weight: .bold, design: .monospaced))
+                            .foregroundColor(.primary.opacity(0.8))
+                            .minimumScaleFactor(0.7)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                        Text("측정 중")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.horizontal, 8)
 
                 // 하단 버튼 행
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     if #available(iOS 17.0, *) {
                         if timer.isPaused {
                             Button(intent: ResumeTimerIntent()) {
@@ -181,23 +181,23 @@ private struct LargeMeasuringView: View {
                         largeActionButton("xmark", "취소").opacity(0.3)
                     }
                 }
-                .frame(height: 52)
+                .frame(height: 44)
             }
-            .padding(14)
+            .padding(12)
         }
     }
 
     @ViewBuilder
     private func largeActionButton(_ icon: String, _ label: String) -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 5) {
             Image(systemName: icon)
-                .font(.system(size: 16, weight: .semibold))
+                .font(.system(size: 14, weight: .semibold))
             Text(label)
-                .font(.system(size: 14, weight: .medium))
+                .font(.system(size: 12, weight: .medium))
         }
         .foregroundColor(.secondary)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
+        .padding(.vertical, 10)
         .background(Color.secondary.opacity(0.1))
         .cornerRadius(10)
     }
