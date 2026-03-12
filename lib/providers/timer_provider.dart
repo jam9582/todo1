@@ -60,7 +60,11 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   void _restore() {
     final isRunning = _prefs?.getBool(_keyIsRunning) ?? false;
     final isPaused = _prefs?.getBool(_keyIsPaused) ?? false;
-    if (!isRunning && !isPaused) return;
+    if (!isRunning && !isPaused) {
+      // 타이머 상태가 없는데 Live Activity가 남아있을 수 있음 (앱 크래시/강제 종료)
+      LiveActivityService.endActivity();
+      return;
+    }
 
     final accumulatedMs = _prefs?.getInt(_keyAccumulatedMs) ?? 0;
     final accumulated = Duration(milliseconds: accumulatedMs);
