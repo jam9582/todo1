@@ -7,5 +7,8 @@ struct TimerWidgetBundle: WidgetBundle {
         TimerWidgetSmall()
         TimerWidgetMedium()
         TimerWidgetLarge()
+        if #available(iOS 16.1, *) {
+            TimerLiveActivity()
+        }
     }
 }

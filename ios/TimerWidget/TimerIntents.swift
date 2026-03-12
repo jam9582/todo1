@@ -1,4 +1,5 @@
 import AppIntents
+import ActivityKit
 import WidgetKit
 import Foundation
 
@@ -34,6 +35,10 @@ struct PauseTimerIntent: AppIntent {
         sharedDefaults?.set("pause", forKey: "widget_interaction_action")
         sharedDefaults?.set(true, forKey: "widget_interaction")
         WidgetCenter.shared.reloadAllTimelines()
+
+        if #available(iOS 16.2, *) {
+            updateLiveActivityState(isPaused: true, accumulatedMs: totalMs)
+        }
         return .result()
     }
 }
@@ -68,6 +73,10 @@ struct ResumeTimerIntent: AppIntent {
         sharedDefaults?.set("resume", forKey: "widget_interaction_action")
         sharedDefaults?.set(true, forKey: "widget_interaction")
         WidgetCenter.shared.reloadAllTimelines()
+
+        if #available(iOS 16.2, *) {
+            updateLiveActivityState(isPaused: false, accumulatedMs: accumulatedMs)
+        }
         return .result()
     }
 }
@@ -137,6 +146,10 @@ struct CompleteTimerIntent: AppIntent {
         sharedDefaults?.set("complete", forKey: "widget_interaction_action")
         sharedDefaults?.set(true, forKey: "widget_interaction")
         WidgetCenter.shared.reloadAllTimelines()
+
+        if #available(iOS 16.2, *) {
+            endAllLiveActivities()
+        }
         return .result()
     }
 }
@@ -153,6 +166,10 @@ struct CancelTimerIntent: AppIntent {
         sharedDefaults?.set("cancel", forKey: "widget_interaction_action")
         sharedDefaults?.set(true, forKey: "widget_interaction")
         WidgetCenter.shared.reloadAllTimelines()
+
+        if #available(iOS 16.2, *) {
+            endAllLiveActivities()
+        }
         return .result()
     }
 }
@@ -214,6 +231,32 @@ struct NextPageMediumIntent: AppIntent {
         sharedDefaults?.set((current + 1) % pages, forKey: "widget_medium_page")
         WidgetCenter.shared.reloadTimelines(ofKind: "TimerWidgetMedium")
         return .result()
+    }
+}
+
+// MARK: - Live Activity Helpers
+
+@available(iOS 16.2, *)
+func updateLiveActivityState(isPaused: Bool, accumulatedMs: Int) {
+    let timerStartDate: Date? = isPaused ? nil : Date().addingTimeInterval(-Double(accumulatedMs) / 1000.0)
+    let state = TimerActivityAttributes.ContentState(
+        isPaused: isPaused,
+        accumulatedMs: accumulatedMs,
+        timerStartDate: timerStartDate
+    )
+    Task {
+        for activity in Activity<TimerActivityAttributes>.activities {
+            await activity.update(.init(state: state, staleDate: nil))
+        }
+    }
+}
+
+@available(iOS 16.2, *)
+func endAllLiveActivities() {
+    Task {
+        for activity in Activity<TimerActivityAttributes>.activities {
+            await activity.end(nil, dismissalPolicy: .immediate)
+        }
     }
 }
 

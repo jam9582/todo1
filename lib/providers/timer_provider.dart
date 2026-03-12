@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/notification_service.dart';
 import '../services/widget_service.dart';
+import '../services/live_activity_service.dart';
 
 class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   static const _keyStartTime = 'timer_start_time';
@@ -106,7 +107,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  /// 앱 재시작 후 타이머가 활성 상태이면 알림 복원
+  /// 앱 재시작 후 타이머가 활성 상태이면 알림 + Live Activity 복원
   void _restoreNotification() {
     final originalStartTime = _originalStartTime;
     if (originalStartTime == null) return;
@@ -115,10 +116,28 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
         originalStartTime: originalStartTime,
         accumulated: _accumulated,
       );
+      // Live Activity도 복원
+      LiveActivityService.startActivity(
+        categoryId: _categoryId ?? -1,
+        categoryName: _categoryName ?? '',
+        categoryEmoji: _categoryEmoji ?? '',
+        startTime: originalStartTime,
+      );
+      // running 상태: accumulated가 있으면 displayDate 업데이트
+      if (_accumulated > Duration.zero) {
+        LiveActivityService.updateResumed(accumulated: _accumulated);
+      }
     } else if (_isPaused) {
       NotificationService.showTimerPaused(
         originalStartTime: originalStartTime,
       );
+      LiveActivityService.startActivity(
+        categoryId: _categoryId ?? -1,
+        categoryName: _categoryName ?? '',
+        categoryEmoji: _categoryEmoji ?? '',
+        startTime: originalStartTime,
+      );
+      LiveActivityService.updatePaused(accumulated: _accumulated);
     }
   }
 
@@ -301,6 +320,12 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _saveState();
     NotificationService.showTimerRunning(originalStartTime: now);
     WidgetService.syncTimerStartedNoCategory(originalStartTime: now);
+    LiveActivityService.startActivity(
+      categoryId: -1,
+      categoryName: '',
+      categoryEmoji: '',
+      startTime: now,
+    );
     notifyListeners();
   }
 
@@ -331,6 +356,12 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
       colorIndex: colorIndex,
       originalStartTime: now,
     );
+    LiveActivityService.startActivity(
+      categoryId: categoryId,
+      categoryName: categoryName,
+      categoryEmoji: categoryEmoji,
+      startTime: now,
+    );
     notifyListeners();
   }
 
@@ -348,6 +379,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
       );
     }
     WidgetService.syncTimerPaused(elapsed: _accumulated);
+    LiveActivityService.updatePaused(accumulated: _accumulated);
     notifyListeners();
   }
 
@@ -365,6 +397,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
       );
     }
     WidgetService.syncTimerResumed(accumulated: _accumulated);
+    LiveActivityService.updateResumed(accumulated: _accumulated);
     notifyListeners();
   }
 
@@ -373,6 +406,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _clearState();
     NotificationService.cancelTimerNotification();
     WidgetService.syncTimerCleared();
+    LiveActivityService.endActivity();
     notifyListeners();
   }
 
@@ -385,6 +419,7 @@ class TimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _clearState();
     NotificationService.cancelTimerNotification();
     WidgetService.syncTimerCleared();
+    LiveActivityService.endActivity();
     notifyListeners();
     return (minutes: minutes, categoryId: categoryId, categoryName: categoryName);
   }
