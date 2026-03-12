@@ -10,7 +10,9 @@ class WidgetService {
   static const _androidWidgetSmall = 'TimerWidgetSmall';
   static const _androidWidgetMedium = 'TimerWidgetMedium';
   static const _androidWidgetLarge = 'TimerWidgetLarge';
-  static const _iosWidgetName = 'TimerWidget'; // WidgetBundle 이름
+  static const _iosWidgetSmall = 'TimerWidgetSmall';
+  static const _iosWidgetMedium = 'TimerWidgetMedium';
+  static const _iosWidgetLarge = 'TimerWidgetLarge';
   static const _appGroupId = 'group.com.studiovanilla.tinylog';
 
   // 앱의 카테고리 색상 팔레트 (통계 화면과 동일)
@@ -250,7 +252,9 @@ class WidgetService {
         await HomeWidget.updateWidget(androidName: _androidWidgetMedium);
         await HomeWidget.updateWidget(androidName: _androidWidgetLarge);
       } else if (Platform.isIOS) {
-        await HomeWidget.updateWidget(iOSName: _iosWidgetName);
+        await HomeWidget.updateWidget(iOSName: _iosWidgetSmall);
+        await HomeWidget.updateWidget(iOSName: _iosWidgetMedium);
+        await HomeWidget.updateWidget(iOSName: _iosWidgetLarge);
       }
     } catch (e, s) { FirebaseCrashlytics.instance.recordError(e, s, fatal: false); }
   }
