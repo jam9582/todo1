@@ -160,12 +160,13 @@ class _PulsingBorderState extends State<_PulsingBorder>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _opacity,
-      builder: (_, child) => DecoratedBox(
+      builder: (_, child) => Container(
+        padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppTheme.radiusMd + 3),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd + 4),
           border: Border.all(
             color: AppColors.accent.withValues(alpha: _opacity.value),
-            width: 2,
+            width: 2.5,
           ),
         ),
         child: child,
